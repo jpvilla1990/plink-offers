@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('offer', {
+    return queryInterface.createTable('offers', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -29,7 +29,8 @@ module.exports = {
       },
       type: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: { model: 'typeOferr', key: 'id' }
       },
       min_age: {
         type: Sequelize.INTEGER
@@ -70,6 +71,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('offer');
+    return queryInterface.dropTable('offers');
   }
 };
