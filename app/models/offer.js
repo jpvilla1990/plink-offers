@@ -2,7 +2,7 @@
 
 module.exports = (sequelize, DataTypes) => {
   const oferta = sequelize.define(
-    'oferta',
+    'oferr',
     {
       title: {
         type: DataTypes.STRING
