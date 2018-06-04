@@ -24,13 +24,6 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false
       },
-      category: {
-        type: Sequelize.INTEGER
-      },
-      type: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      },
       min_age: {
         type: Sequelize.INTEGER
       },
