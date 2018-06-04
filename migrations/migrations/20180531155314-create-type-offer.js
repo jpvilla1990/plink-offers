@@ -3,19 +3,18 @@
 module.exports = {
   up: (queryInterface, Sequelize) =>
     queryInterface
-      .createTable('categories', {
+      .createTable('type_offers', {
         id: {
           allowNull: false,
           autoIncrement: true,
           primaryKey: true,
           type: Sequelize.INTEGER
         },
-        name: {
-          type: Sequelize.STRING,
-          allowNull: false
-        },
-        description: {
+        title: {
           type: Sequelize.STRING
+        },
+        count: {
+          type: Sequelize.INTEGER
         },
         createdAt: {
           allowNull: false,
@@ -30,12 +29,15 @@ module.exports = {
         }
       })
       .then(() =>
-        queryInterface.addColumn('offers', 'category', {
+        queryInterface.addColumn('offers', 'type', {
           type: Sequelize.INTEGER,
           allowNull: false,
-          references: { model: 'categories', key: 'id' }
+          references: {
+            model: 'type_offers',
+            field: 'id'
+          }
         })
       ),
   down: (queryInterface, Sequelize) =>
-    queryInterface.dropTable('categories').then(() => queryInterface.removeColumn('offers', 'category'))
+    queryInterface.dropTable('type_offers').then(() => queryInterface.removeColumn('offers', 'type'))
 };
