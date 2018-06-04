@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-  const oferta = sequelize.define(
+  const oferr = sequelize.define(
     'oferr',
     {
       title: {
@@ -56,8 +56,8 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true
     }
   );
-  oferta.associate = function(models) {
+  oferr.associate = function(models) {
     // associations can be defined here
   };
-  return oferta;
+  return oferr;
 };
