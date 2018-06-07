@@ -43,11 +43,19 @@ const config = {
     },
     session: {
       header_name: 'authorization',
-      secret: process.env.NODE_API_SESSION_SECRET
+      secret: process.env.NODE_API_SESSION_SECRET,
+      algorithm: 'RSA256'
     },
     rollbar: {
       accessToken: process.env.ROLLBAR_ACCESS_TOKEN,
       environment: process.env.ROLLBAR_ENV
+    },
+    aws: {
+      key: process.env.KEY_AWS,
+      secret: process.env.SECRET_AWS,
+      region: process.env.REGION_AWS,
+      bucket: process.env.BUCKET_AWS,
+      expiration: process.env.EXPIRATION_AWS || 180
     }
   }
 };

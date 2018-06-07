@@ -1,13 +1,13 @@
-'use strict';
+const errors = require('../errors'),
+  logger = require('../logger');
+
+('use strict');
 
 module.exports = (sequelize, DataTypes) => {
   const offer = sequelize.define(
     'offer',
     {
-      title: {
-        type: DataTypes.STRING
-      },
-      detail: {
+      product: {
         type: DataTypes.STRING
       },
       begin: {
@@ -16,39 +16,30 @@ module.exports = (sequelize, DataTypes) => {
       expiration: {
         type: DataTypes.DATE
       },
-      category: {
+      strategy: {
         type: DataTypes.INTEGER
-      },
-      type: {
-        type: DataTypes.INTEGER
-      },
-      minAge: {
-        type: DataTypes.INTEGER,
-        field: 'min_age'
-      },
-      maxAge: {
-        type: DataTypes.INTEGER,
-        field: 'max_age'
-      },
-      gender: {
-        type: DataTypes.STRING
       },
       maxRedemptions: {
         type: DataTypes.INTEGER,
         field: 'max_redemptions'
       },
-      terms: {
-        type: DataTypes.STRING
-      },
-      post: {
+      retail: {
         type: DataTypes.INTEGER,
         unique: true
       },
       purpose: {
         type: DataTypes.STRING
       },
-      img: {
-        type: DataTypes.STRING
+      imgExtension: {
+        type: DataTypes.STRING,
+        field: 'img_extension'
+      },
+      valueStrategy: {
+        type: DataTypes.STRING,
+        field: 'value_type_offer'
+      },
+      category: {
+        type: DataTypes.INTEGER
       }
     },
     {
@@ -56,6 +47,16 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true
     }
   );
+  offer.createModel = off => {
+    return offer.create(off).catch(err => {
+      throw errors.databaseError(err.message);
+    });
+  };
+  offer.getBy = filter => {
+    return offer.findOne({ where: filter }).catch(err => {
+      throw errors.databaseError(err.message);
+    });
+  };
   offer.associate = function(models) {
     // associations can be defined here
   };

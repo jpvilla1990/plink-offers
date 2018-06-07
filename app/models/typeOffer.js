@@ -1,19 +1,18 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-  const typeOferr = sequelize.define(
-    'typeOferr',
+  const typeOffer = sequelize.define(
+    'type_offer',
     {
-      title: DataTypes.STRING,
-      count: DataTypes.STRING
+      description: DataTypes.STRING
     },
     {
       paranoid: true,
       underscored: true
     }
   );
-  typeOferr.associate = function(models) {
+  typeOffer.associate = function(models) {
     // associations can be defined here
   };
-  return typeOferr;
+  return typeOffer;
 };
