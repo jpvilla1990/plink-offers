@@ -57,6 +57,13 @@ module.exports = (sequelize, DataTypes) => {
       throw errors.databaseError(err.message);
     });
   };
+  offer.getAllBy = filter => {
+    return offer
+      .findAndCountAll({ offset: filter.offset, where: { retail: filter.retail }, limit: filter.limit })
+      .catch(err => {
+        throw errors.databaseError(err.message);
+      });
+  };
   offer.associate = function(models) {
     // associations can be defined here
   };

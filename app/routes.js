@@ -1,7 +1,12 @@
 const Offer = require('./controllers/offer'),
   auth = require('./middlewares/auth'),
-  { checkAll, validate } = require('./middlewares/validator');
+  validator = require('./middlewares/validator');
 
 exports.init = app => {
-  app.post('/retail/:id/offers', [auth.requireToken, checkAll, validate], Offer.create);
+  app.post('/retail/:id/offers', [auth.requireToken, validator.checkAll, validator.validate], Offer.create);
+  app.get(
+    '/retail/:id/offers',
+    [auth.requireToken, validator.checkQuery, validator.validateQuery],
+    Offer.getAll
+  );
 };

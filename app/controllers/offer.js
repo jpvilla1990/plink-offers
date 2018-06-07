@@ -25,3 +25,14 @@ exports.create = (req, res, next) => {
     })
     .catch(err => next(err));
 };
+exports.getAll = (req, res, next) => {
+  const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10;
+  const offsetQuery = req.query.page === 0 ? 0 : req.query.page * limitQuery;
+  return Offer.getAllBy({ retail: req.params.id, offset: offsetQuery, limit: limitQuery })
+    .then(list => {
+      res.status(200);
+      res.send({ count: list.count, offers: list.rows });
+      res.end();
+    })
+    .catch(err => next(err));
+};
