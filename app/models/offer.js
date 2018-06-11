@@ -60,6 +60,12 @@ module.exports = (sequelize, DataTypes) => {
   offer.getAllBy = filter => {
     return offer
       .findAndCountAll({ offset: filter.offset, where: { retail: filter.retail }, limit: filter.limit })
+      .then(result => {
+        result.url = 'asj';
+        return new Promise((resolve, reject) => {
+          resolve(result);
+        });
+      })
       .catch(err => {
         throw errors.databaseError(err.message);
       });

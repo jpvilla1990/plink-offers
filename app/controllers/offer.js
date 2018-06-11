@@ -17,7 +17,7 @@ exports.create = (req, res, next) => {
   off.retail = req.retail;
   return Offer.createModel(off)
     .then(rv => {
-      return serviceS3.getUrl(rv.id, off.imgExtension).then(result => {
+      return serviceS3.obtainUrl(rv.id, off.imgExtension).then(result => {
         res.status(200);
         res.send({ urlBucket: result });
         res.end();
@@ -30,8 +30,12 @@ exports.getAll = (req, res, next) => {
   const offsetQuery = req.query.page === 0 ? 0 : req.query.page * limitQuery;
   return Offer.getAllBy({ retail: req.params.id, offset: offsetQuery, limit: limitQuery })
     .then(list => {
+      list.kaka = 22;
+      const newList = list.rows.map(value => {
+        return { offer: value, url: 22 };
+      });
       res.status(200);
-      res.send({ count: list.count, offers: list.rows });
+      res.send({ offers: newList });
       res.end();
     })
     .catch(err => next(err));
