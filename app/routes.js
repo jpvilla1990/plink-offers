@@ -1,7 +1,7 @@
-// const controller = require('./controllers/controller');
+const Offer = require('./controllers/offer'),
+  auth = require('./middlewares/auth'),
+  { checkAll, validate } = require('./middlewares/validator');
 
 exports.init = app => {
-  // app.get('/endpoint/get/path', [], controller.methodGET);
-  // app.put('/endpoint/put/path', [], controller.methodPUT);
-  // app.post('/endpoint/post/path', [], controller.methodPOST);
+  app.post('/retail/:id/offers', [auth.requireToken, checkAll, validate], Offer.create);
 };

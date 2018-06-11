@@ -10,17 +10,15 @@ module.exports = {
           primaryKey: true,
           type: Sequelize.INTEGER
         },
-        title: {
-          type: Sequelize.STRING
+        description: {
+          type: Sequelize.STRING,
+          allowNull: false
         },
-        count: {
-          type: Sequelize.INTEGER
-        },
-        createdAt: {
+        created_at: {
           allowNull: false,
           type: Sequelize.DATE
         },
-        updatedAt: {
+        updated_at: {
           allowNull: false,
           type: Sequelize.DATE
         },
@@ -29,7 +27,7 @@ module.exports = {
         }
       })
       .then(() =>
-        queryInterface.addColumn('offers', 'type', {
+        queryInterface.addColumn('offers', 'strategy', {
           type: Sequelize.INTEGER,
           allowNull: false,
           references: {
@@ -39,5 +37,5 @@ module.exports = {
         })
       ),
   down: (queryInterface, Sequelize) =>
-    queryInterface.dropTable('type_offers').then(() => queryInterface.removeColumn('offers', 'type'))
+    queryInterface.dropTable('type_offers').then(() => queryInterface.removeColumn('offers', 'strategy'))
 };

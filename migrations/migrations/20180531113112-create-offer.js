@@ -9,12 +9,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      title: {
+      product: {
         type: Sequelize.STRING,
         allowNull: false
-      },
-      detail: {
-        type: Sequelize.STRING
       },
       begin: {
         type: Sequelize.DATE,
@@ -24,36 +21,30 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false
       },
-      min_age: {
-        type: Sequelize.INTEGER
-      },
-      max_age: {
-        type: Sequelize.INTEGER
-      },
-      gender: {
-        type: Sequelize.STRING
-      },
       max_redemptions: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        allowNull: false
       },
-      terms: {
-        type: Sequelize.STRING
+      value_type_offer: {
+        type: Sequelize.STRING,
+        allowNull: false
       },
-      post: {
+      retail: {
         type: Sequelize.INTEGER,
         allowNull: false
       },
       purpose: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      img_extension: {
         type: Sequelize.STRING
       },
-      img: {
-        type: Sequelize.STRING
-      },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       },

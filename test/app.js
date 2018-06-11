@@ -5,27 +5,33 @@ const fs = require('fs'),
   chai = require('chai'),
   chaiHttp = require('chai-http'),
   models = require('../app/models'),
-  dataCreation = require('../scripts/dataCreation');
+  dataCreation = require('../scripts/dataCreation'),
+  db = require('../app/models');
 
 chai.use(chaiHttp);
 
 const getTablesQuery = `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE';`;
 
-// THIS WORKS ONLY WITH POSTGRESQL
-beforeEach('drop tables, re-create them and populate sample data', done => {
-  models.sequelize.query(getTablesQuery).then(tables => {
-    const tableExpression = tables
-      .map(table => {
-        return `"public"."${table[0]}"`;
-      })
-      .join(', ');
-    return models.sequelize
-      .query(`TRUNCATE TABLE ${tableExpression} RESTART IDENTITY`)
-      .then(() => {
-        return dataCreation.execute();
-      })
-      .then(() => done());
+const destroyTableOrder = ['category', 'type_offer', 'offer'];
+
+beforeEach('drop tables', done => {
+  const destroys = [];
+  destroyTableOrder.forEach(tableName => {
+    destroys.push(
+      db.sequelize.transaction(transaction =>
+        db.sequelize
+          .query('SET FOREIGN_KEY_CHECKS = 0', { transaction })
+          .then(() => {
+            return db.sequelize.models[tableName].truncate({
+              restartIdentity: true,
+              transaction
+            });
+          })
+          .then(() => db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', { transaction }))
+      )
+    );
   });
+  Promise.all(destroys).then(() => done());
 });
 
 // including all test files
