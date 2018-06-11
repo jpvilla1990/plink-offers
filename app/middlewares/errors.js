@@ -4,7 +4,6 @@ const errors = require('../errors'),
 const DEFAULT_STATUS_CODE = 500;
 
 const statusCodes = {
-  [errors.BAD_TOKEN]: 400,
   [errors.BAD_REQUEST]: 400,
   [errors.BOOK_NOT_FOUND]: 404,
   [errors.SAVING_ERROR]: 400,
