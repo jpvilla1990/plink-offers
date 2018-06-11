@@ -12,24 +12,47 @@ const chai = require('chai'),
   Offer = require('../app/models').offer;
 
 describe('/retail/:id/offers POST', () => {
+  const offerExample = {
+      product: '2x1 en McDuo',
+      begin: '2017-02-13',
+      expiration: '2017-05-24',
+      category: 1,
+      strategy: 1,
+      valueStrategy: '30%',
+      maxRedemptions: 1200,
+      purpose: 'Atraer clientes',
+      extension: 'jpg'
+    },
+    offerWithoutProduct = {
+      begin: '2017-02-13',
+      expiration: '2017-05-24',
+      category: 1,
+      strategy: 1,
+      valueStrategy: '30%',
+      maxRedemptions: 1200,
+      purpose: 'Atraer clientes',
+      extension: 'jpg'
+    },
+    offerWithCategoryWrong = {
+      product: '2x1 en McDuo',
+      begin: '2017-02-13',
+      expiration: '2017-05-24',
+      category: 'travel',
+      strategy: 1,
+      valueStrategy: '30%',
+      maxRedemptions: 1200,
+      purpose: 'Atraer clientes',
+      extension: 'jpg'
+    },
+    tokenExample = `test ${token.generate({ points: '1222,1444,1333' })}`;
   it('should be successful', done => {
     factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
         chai
           .request(server)
           .post('/retail/1222/offers')
-          .set(headerName, `test ${token.generate({ points: '1222,1444,1333' })}`)
-          .send({
-            product: '2x1 en McDuo',
-            begin: '2017-02-13',
-            expiration: '2017-05-24',
-            category: 1,
-            strategy: 1,
-            valueStrategy: '30%',
-            maxRedemptions: 1200,
-            purpose: 'Atraer clientes',
-            extension: 'jpg'
-          })
+          .set(headerName, tokenExample)
+          .send(offerExample)
           .then(json => {
             json.should.have.status(200);
             json.should.be.json;
@@ -47,18 +70,8 @@ describe('/retail/:id/offers POST', () => {
     chai
       .request(server)
       .post('/retail/1222/offers')
-      .set(headerName, `test ${token.generate({ points: '1222,1444,1333' })}`)
-      .send({
-        product: '2x1 en McDuo',
-        begin: '2017-02-13',
-        expiration: '2017-05-24',
-        category: 'travel',
-        strategy: 1,
-        valueStrategy: '30%',
-        maxRedemptions: 1200,
-        purpose: 'Atraer clientes',
-        extension: 'jpg'
-      })
+      .set(headerName, tokenExample)
+      .send(offerWithCategoryWrong)
       .catch(err => {
         err.should.have.status(400);
         err.body.should.be.json;
@@ -71,17 +84,8 @@ describe('/retail/:id/offers POST', () => {
     chai
       .request(server)
       .post('/retail/1222/offers')
-      .set(headerName, `test ${token.generate({ points: '1222,1444,1333' })}`)
-      .send({
-        begin: '2017-02-13',
-        expiration: '2017-05-24',
-        category: 1,
-        strategy: 1,
-        valueStrategy: '30%',
-        maxRedemptions: 1200,
-        purpose: 'Atraer clientes',
-        extension: 'jpg'
-      })
+      .set(headerName, tokenExample)
+      .send(offerWithoutProduct)
       .catch(err => {
         err.should.have.status(400);
         err.body.should.be.json;
