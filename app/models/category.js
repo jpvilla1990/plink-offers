@@ -1,5 +1,7 @@
 'use strict';
 
+const errors = require('../errors');
+
 module.exports = (sequelize, DataTypes) => {
   const category = sequelize.define(
     'category',
@@ -12,8 +14,12 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true
     }
   );
-  category.associate = function(models) {
-    // associations can be defined here
+
+  category.findAllCategories = () => {
+    return category.findAll().catch(err => {
+      throw errors.databaseError(err.message);
+    });
   };
+
   return category;
 };
