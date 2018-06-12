@@ -9,6 +9,14 @@ module.exports = {
     dialect: 'mysql',
     logging: true
   },
+  staging: {
+    username: config.username,
+    password: config.password,
+    database: config.name,
+    host: config.host,
+    dialect: 'mysql',
+    logging: false
+  },
   testing: {
     username: config.username,
     password: config.password,
