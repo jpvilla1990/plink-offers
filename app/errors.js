@@ -2,6 +2,7 @@ const internalError = (message, internalCode) => ({
   message,
   internalCode
 });
+
 exports.USER_UNAUTHORIZED = 'user_unauthorized';
 exports.DEFAULT_ERROR = 'default_error';
 exports.BAD_REQUEST = 'bad_request';
