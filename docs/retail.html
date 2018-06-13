@@ -1,0 +1,58 @@
+<html><head><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" /><script src="https://code.jquery.com/jquery-1.12.2.min.js"></script><script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script><style> pre { width: 95%; } </style></head><body><div class="container"><div class="jumbotron"><h1>Retail</h1></div><div class="panel panel-default"><div class="panel-heading" role="tab" id="heading-retail-1222-offers-POST"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#accordion" aria-expanded="true" aria-controls="collapse-retail-1222-offers-POST" href="#collapse-retail-1222-offers-POST">POST /retail/1222/offers</a></h4></div><div id="collapse-retail-1222-offers-POST" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-retail-1222-offers-POST"><div class="panel-body"><h4>Request Data</h4><div class="container"><h5>Headers</h5><pre>{
+  "authorization": "test eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwb2ludHMiOiIxMjIyLDE0NDQsMTMzMyJ9.H-GLEhZ90jPEzmhHa9VABp1ha256zDXi2PKhYSbpmBM",
+  "content-type": "application/json",
+  "content-length": 203
+}</pre><h5>Body</h5><pre>{
+  "product": "2x1 en McDuo",
+  "begin": "2017-02-13",
+  "expiration": "2017-05-24",
+  "category": 1,
+  "strategy": 1,
+  "valueStrategy": "30%",
+  "maxRedemptions": 1200,
+  "purpose": "Atraer clientes",
+  "extension": "jpg",
+  "retail": 1222
+}</pre></div></div><div class="panel-body"><h4>Response Data</h4><div class="container"><h5>Status: 200</h5><h5>Headers</h5><pre>{
+  "authorization": "test eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwb2ludHMiOiIxMjIyLDE0NDQsMTMzMyJ9.H-GLEhZ90jPEzmhHa9VABp1ha256zDXi2PKhYSbpmBM",
+  "content-type": "application/json",
+  "content-length": 203
+}</pre><h5>Body</h5><pre>{
+  "urlBucket": "https://plink-offers-images-development.s3.amazonaws.com/offer-23.jpg?AWSAccessKeyId=AKIAICLUEWJNTCR3DOCA&Expires=1528904715&Signature=gBI%2F2MpZwQjiswxGe2emEaIiEGI%3D"
+}</pre></div></div></div></div><div class="panel panel-default"><div class="panel-heading" role="tab" id="heading-retail-1222-offers-GET"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#accordion" aria-expanded="true" aria-controls="collapse-retail-1222-offers-GET" href="#collapse-retail-1222-offers-GET">GET /retail/1222/offers?page=0</a></h4></div><div id="collapse-retail-1222-offers-GET" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-retail-1222-offers-GET"><div class="panel-body"><h4>Request Data</h4><div class="container"><h5>Headers</h5><pre>{
+  "authorization": "test eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwb2ludHMiOiIxMjIyLDE0NDQsMTMzMyJ9.H-GLEhZ90jPEzmhHa9VABp1ha256zDXi2PKhYSbpmBM"
+}</pre></div></div><div class="panel-body"><h4>Response Data</h4><div class="container"><h5>Status: 200</h5><h5>Headers</h5><pre>{
+  "authorization": "test eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwb2ludHMiOiIxMjIyLDE0NDQsMTMzMyJ9.H-GLEhZ90jPEzmhHa9VABp1ha256zDXi2PKhYSbpmBM"
+}</pre><h5>Body</h5><pre>{
+  "count": 1,
+  "offers": [
+    {
+      "product": "2x1 en McDuo",
+      "begin": "2017-02-13",
+      "expires": "2017-05-24",
+      "maxRedemptions": 1200,
+      "codes": 0,
+      "redemptions": 0,
+      "status": "inactive",
+      "image": "https://plink-offers-images-development.s3.amazonaws.com/offer-24.null?AWSAccessKeyId=AKIAICLUEWJNTCR3DOCA&Expires=1528904715&Signature=CY8DaRBRQE4e%2FxQyZLIWO7jQKVw%3D"
+    }
+  ]
+}</pre></div></div></div></div><div class="panel panel-default"><div class="panel-heading" role="tab" id="heading-retail-1222-offers-GET"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#accordion" aria-expanded="true" aria-controls="collapse-retail-1222-offers-GET" href="#collapse-retail-1222-offers-GET">GET /retail/1222/offers?page=0</a></h4></div><div id="collapse-retail-1222-offers-GET" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-retail-1222-offers-GET"><div class="panel-body"><h4>Request Data</h4><div class="container"><h5>Headers</h5><pre>{
+  "authorization": "test eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwb2ludHMiOiIxMjIyLDE0NDQsMTMzMyJ9.H-GLEhZ90jPEzmhHa9VABp1ha256zDXi2PKhYSbpmBM"
+}</pre></div></div><div class="panel-body"><h4>Response Data</h4><div class="container"><h5>Status: 200</h5><h5>Headers</h5><pre>{
+  "authorization": "test eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwb2ludHMiOiIxMjIyLDE0NDQsMTMzMyJ9.H-GLEhZ90jPEzmhHa9VABp1ha256zDXi2PKhYSbpmBM"
+}</pre><h5>Body</h5><pre>{
+  "count": 1,
+  "offers": [
+    {
+      "product": "2x1 en McDuo",
+      "begin": "2017-02-13",
+      "expires": "2017-05-24",
+      "maxRedemptions": 1200,
+      "codes": 0,
+      "redemptions": 0,
+      "status": "inactive",
+      "image": "https://plink-offers-images-development.s3.amazonaws.com/offer-25.null?AWSAccessKeyId=AKIAICLUEWJNTCR3DOCA&Expires=1528904715&Signature=KILb0m%2FGlNmcOJ8BUoD4S2qazCQ%3D"
+    }
+  ]
+}</pre></div></div></div></div></div></body></html>

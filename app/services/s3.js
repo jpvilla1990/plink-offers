@@ -9,14 +9,28 @@ const AWS = require('aws-sdk'),
     })
   );
 
-exports.getUrl = (id, extension) => {
+exports.obtainUrl = (id, extension) => {
   const s3Params = {
     Bucket: config.common.aws.bucket,
-    Key: `offer-${id}.${extension}`,
-    Expires: config.common.aws.expiration
+    Key: `offer-${id}.${extension}`
   };
   return new Promise((resolve, reject) => {
     s3.getSignedUrl('putObject', s3Params, (error, data) => {
+      if (error) {
+        reject(error);
+      }
+      resolve(data);
+    });
+  });
+};
+
+exports.getUrl = (id, extension) => {
+  const s3Params = {
+    Bucket: config.common.aws.bucket,
+    Key: `offer-${id}.${extension}`
+  };
+  return new Promise((resolve, reject) => {
+    s3.getSignedUrl('getObject', s3Params, (error, data) => {
       if (error) {
         reject(error);
       }

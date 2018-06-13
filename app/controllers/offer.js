@@ -1,6 +1,7 @@
 const Offer = require('../models').offer,
   logger = require('../logger'),
-  serviceS3 = require('../services/s3');
+  serviceS3 = require('../services/s3'),
+  utils = require('../utils');
 
 exports.create = (req, res, next) => {
   const off = {
@@ -15,11 +16,40 @@ exports.create = (req, res, next) => {
     imgExtension: req.body.extension
   };
   off.retail = req.retail;
+  off.redemptions = off.maxRedemptions;
   return Offer.createModel(off)
     .then(rv => {
-      return serviceS3.getUrl(rv.id, off.imgExtension).then(result => {
+      return serviceS3.obtainUrl(rv.id, off.imgExtension).then(result => {
         res.status(200);
         res.send({ urlBucket: result });
+        res.end();
+      });
+    })
+    .catch(err => next(err));
+};
+exports.getAll = (req, res, next) => {
+  const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10;
+  const offsetQuery = req.query.page === 0 ? 0 : req.query.page * limitQuery;
+  return Offer.getAllBy({ retail: req.params.id, offset: offsetQuery, limit: limitQuery })
+    .then(list => {
+      const listPromise = list.rows.map(value => {
+        const offerWithUrl = {
+          product: value.dataValues.product,
+          begin: value.dataValues.begin,
+          expires: value.dataValues.expiration,
+          maxRedemptions: value.dataValues.maxRedemptions
+        };
+        offerWithUrl.codes = value.dataValues.codes ? value.dataValues.codes : 0;
+        offerWithUrl.redemptions = value.dataValues.redemptions ? value.dataValues.redemptions : 0;
+        offerWithUrl.status = utils.getStatus(offerWithUrl) ? 'active' : 'inactive';
+        return serviceS3.getUrl(value.dataValues.id, value.dataValues.imgExtension).then(url => {
+          offerWithUrl.image = url;
+          return offerWithUrl;
+        });
+      });
+      return Promise.all(listPromise).then(offs => {
+        res.status(200);
+        res.send({ count: list.count, offers: offs });
         res.end();
       });
     })

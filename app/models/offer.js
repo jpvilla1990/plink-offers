@@ -11,10 +11,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING
       },
       begin: {
-        type: DataTypes.DATE
+        type: DataTypes.DATEONLY
       },
       expiration: {
-        type: DataTypes.DATE
+        type: DataTypes.DATEONLY
       },
       strategy: {
         type: DataTypes.INTEGER
@@ -40,6 +40,12 @@ module.exports = (sequelize, DataTypes) => {
       },
       category: {
         type: DataTypes.INTEGER
+      },
+      codes: {
+        type: DataTypes.INTEGER
+      },
+      redemptions: {
+        type: DataTypes.INTEGER
       }
     },
     {
@@ -57,8 +63,12 @@ module.exports = (sequelize, DataTypes) => {
       throw errors.databaseError(err.message);
     });
   };
-  offer.associate = function(models) {
-    // associations can be defined here
+  offer.getAllBy = filter => {
+    return offer
+      .findAndCountAll({ offset: filter.offset, where: { retail: filter.retail }, limit: filter.limit })
+      .catch(err => {
+        throw errors.databaseError(err.message);
+      });
   };
   return offer;
 };

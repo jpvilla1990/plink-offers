@@ -35,7 +35,8 @@ const config = {
       port: process.env.DB_PORT,
       name: process.env.DB_NAME,
       username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD
+      password: process.env.DB_PASSWORD,
+      timezone: process.env.TIME_ZONE
     },
     api: {
       bodySizeLimit: process.env.API_BODY_SIZE_LIMIT,
@@ -55,7 +56,7 @@ const config = {
       secret: process.env.SECRET_AWS,
       region: process.env.REGION_AWS,
       bucket: process.env.BUCKET_AWS,
-      expiration: process.env.EXPIRATION_AWS || 180
+      expiration: process.env.EXPIRATION_AWS
     }
   }
 };

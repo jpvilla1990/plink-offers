@@ -9,7 +9,10 @@ module.exports = (sequelize, DataTypes) => {
       offer: DataTypes.INTEGER,
       dateRedemption: DataTypes.DATE
     },
-    {}
+    {
+      paranoid: true,
+      underscored: true
+    }
   );
   return code;
 };
