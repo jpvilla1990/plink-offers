@@ -55,6 +55,7 @@
     "rollbar": "^2.3.9",
     "sequelize": "^4.37.10",
     "umzug": "^2.1.0",
+    "uuid": "^3.2.1",
     "validator": "^10.3.0",
     "winston": "^2.4.0",
     "winston-daily-rotate-file": "^1.7.2"
