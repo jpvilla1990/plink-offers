@@ -1,0 +1,26 @@
+image: node:8.9.4
+
+pipelines:
+  default:
+    - step:
+        caches:
+          - node
+        script:
+          - export NODE_ENV=testing DB_NAME_TEST=plink-offers-test
+          - export DB_HOST_TEST=127.0.0.1 DB_PORT_TEST=3306 
+          - export DB_USERNAME_TEST=root DB_PASSWORD_TEST=plink
+          - export KEY_AWS=11112 SECRET_AWS=21333 BUCKET_AWS=bucket-test REGION_AWS=us-east-1
+          - npm install
+          - npm run migrations
+          - npm test
+
+        services: 
+          - mysql
+
+definitions: 
+  services: 
+    mysql: 
+      image: mysql:5.7
+      environment: 
+        MYSQL_DATABASE: 'plink-offers-test' 
+        MYSQL_ROOT_PASSWORD: 'plink'

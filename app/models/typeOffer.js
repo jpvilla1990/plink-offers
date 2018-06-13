@@ -1,5 +1,7 @@
 'use strict';
 
+const errors = require('../errors');
+
 module.exports = (sequelize, DataTypes) => {
   const typeOffer = sequelize.define(
     'type_offer',
@@ -11,5 +13,12 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true
     }
   );
+
+  typeOffer.findAllTypes = () => {
+    return typeOffer.findAll().catch(err => {
+      throw errors.databaseError(err.message);
+    });
+  };
+
   return typeOffer;
 };

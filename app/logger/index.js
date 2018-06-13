@@ -31,16 +31,6 @@ const logger = new winston.Logger({
       handleExceptions: config.loggerHandlesExceptions,
       humanReadableUnhandledException: config.loggerHandlesExceptions
     }),
-    new winston.transports.DailyRotateFile({
-      filename: `${logDir}/history/-results.log`,
-      timestamp: tsFormat,
-      datePattern: 'yyyy-MM-dd.',
-      colorize: false,
-      prepend: true,
-      json: false,
-      level: 'info',
-      prettyPrint: true
-    }),
     new winston.transports.Console({
       timestamp: tsFormat,
       colorize: false,

@@ -17,7 +17,7 @@ exports.requireToken = (req, res, next) => {
         next();
       }
     } catch (err) {
-      next(errors.badToken);
+      next(errors.userUnauthorized);
     }
   } else {
     next(errors.userUnauthorized);
