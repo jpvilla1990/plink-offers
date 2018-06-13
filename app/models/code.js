@@ -9,10 +9,10 @@ module.exports = (sequelize, DataTypes) => {
       offer: DataTypes.INTEGER,
       dateRedemption: DataTypes.DATE
     },
-    {}
+    {
+      paranoid: true,
+      underscored: true
+    }
   );
-  code.associate = function(models) {
-    // associations can be defined here
-  };
   return code;
 };

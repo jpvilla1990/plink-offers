@@ -40,6 +40,12 @@ module.exports = (sequelize, DataTypes) => {
       },
       category: {
         type: DataTypes.INTEGER
+      },
+      codes: {
+        type: DataTypes.INTEGER
+      },
+      redemptions: {
+        type: DataTypes.INTEGER
       }
     },
     {
@@ -60,18 +66,9 @@ module.exports = (sequelize, DataTypes) => {
   offer.getAllBy = filter => {
     return offer
       .findAndCountAll({ offset: filter.offset, where: { retail: filter.retail }, limit: filter.limit })
-      .then(result => {
-        result.url = 'asj';
-        return new Promise((resolve, reject) => {
-          resolve(result);
-        });
-      })
       .catch(err => {
         throw errors.databaseError(err.message);
       });
-  };
-  offer.associate = function(models) {
-    // associations can be defined here
   };
   return offer;
 };

@@ -35,6 +35,7 @@ describe('/retail/:id/offers POST', () => {
             json.should.have.status(200);
             json.should.be.json;
             json.body.should.have.property('urlBucket');
+            dictum.chai(json);
             Offer.getBy({ retail: 1222 }).then(exist => {
               const off = !!exist;
               off.should.eql(true);
@@ -121,6 +122,7 @@ describe('/retail/:id/offers GET', () => {
                 json.body.should.have.property('count');
                 json.body.should.have.property('offers');
                 json.body.offers.length.should.eql(1);
+                dictum.chai(json);
               })
               .then(() => done());
           });
@@ -154,6 +156,7 @@ describe('/retail/:id/offers GET', () => {
                 json.body.should.have.property('count');
                 json.body.should.have.property('offers');
                 json.body.offers.length.should.eql(1);
+                dictum.chai(json);
               })
               .then(() => done());
           });

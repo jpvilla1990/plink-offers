@@ -11,8 +11,5 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true
     }
   );
-  typeOffer.associate = function(models) {
-    // associations can be defined here
-  };
   return typeOffer;
 };
