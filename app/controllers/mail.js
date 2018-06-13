@@ -3,6 +3,6 @@ const Category = require('../models').category,
 
 exports.sendTestMail = ({ body }, res, next) =>
   ses
-    .sendMail(body.mail)
+    .sendMail(body.mail, body.to)
     .then(() => res.status(200).end())
     .catch(next);

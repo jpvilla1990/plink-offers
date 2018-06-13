@@ -8,11 +8,11 @@ const AWS = require('aws-sdk'),
     })
   );
 
-exports.sendMail = body =>
+exports.sendMail = (body, ToAddresses) =>
   ses
     .sendEmail({
       Source: 'martin.picollo@wolox.com.ar',
-      Destination: { ToAddresses: ['ignacio.rivera@wolox.com.ar'] },
+      Destination: { ToAddresses },
       Message: {
         Body: { Html: { Data: body } },
         Subject: { Data: 'test-plink-mail' }
