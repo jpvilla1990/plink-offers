@@ -1,13 +1,8 @@
 const Offer = require('../models').offer,
   logger = require('../logger'),
   serviceS3 = require('../services/s3'),
-  moment = require('moment');
+  utils = require('../utils');
 
-const getStatus = (begin, expiration, redemptions, maxRedemptions) => {
-  const diffNowWithBegin = moment(begin).diff(moment(), 'days'),
-    diffNowWithExpiration = moment(expiration).diff(moment(), 'days');
-  return diffNowWithExpiration >= 0 && diffNowWithBegin < 0 && redemptions < maxRedemptions;
-};
 exports.create = (req, res, next) => {
   const off = {
     product: req.body.product,
@@ -38,28 +33,15 @@ exports.getAll = (req, res, next) => {
   return Offer.getAllBy({ retail: req.params.id, offset: offsetQuery, limit: limitQuery })
     .then(list => {
       const listPromise = list.rows.map(value => {
-        const beginMoment = moment(value.dataValues.begin)
-            .utc()
-            .format('YYYY-MM-DD'),
-          expirationMoment = moment(value.dataValues.expiration)
-            .utc()
-            .format('YYYY-MM-DD'),
-          offerWithUrl = {
-            product: value.dataValues.product,
-            begin: beginMoment,
-            expires: expirationMoment
-          };
+        const offerWithUrl = {
+          product: value.dataValues.product,
+          begin: value.dataValues.begin,
+          expires: value.dataValues.expiration,
+          maxRedemptions: value.dataValues.maxRedemptions
+        };
         offerWithUrl.codes = value.dataValues.codes ? value.dataValues.codes : 0;
-        offerWithUrl.maxRedemptions = value.dataValues.maxRedemptions;
         offerWithUrl.redemptions = value.dataValues.redemptions ? value.dataValues.redemptions : 0;
-        offerWithUrl.status = getStatus(
-          beginMoment,
-          expirationMoment,
-          offerWithUrl.redemptions,
-          value.dataValues.maxRedemptions
-        )
-          ? 'active'
-          : 'inactive';
+        offerWithUrl.status = utils.getStatus(offerWithUrl) ? 'active' : 'inactive';
         return serviceS3.getUrl(value.dataValues.id, value.dataValues.imgExtension).then(url => {
           offerWithUrl.image = url;
           return offerWithUrl;

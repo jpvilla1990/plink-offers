@@ -11,10 +11,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING
       },
       begin: {
-        type: DataTypes.DATE
+        type: DataTypes.DATEONLY
       },
       expiration: {
-        type: DataTypes.DATE
+        type: DataTypes.DATEONLY
       },
       strategy: {
         type: DataTypes.INTEGER
