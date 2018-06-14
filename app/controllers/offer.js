@@ -41,7 +41,7 @@ exports.getAll = (req, res, next) => {
         };
         offerWithUrl.codes = value.dataValues.codes ? value.dataValues.codes : 0;
         offerWithUrl.redemptions = value.dataValues.redemptions ? value.dataValues.redemptions : 0;
-        offerWithUrl.status = utils.getStatus(offerWithUrl) ? 'active' : 'inactive';
+        offerWithUrl.status = utils.getOfferStatus(offerWithUrl) ? 'active' : 'inactive';
         return serviceS3.getUrl(value.dataValues.id, value.dataValues.imgExtension).then(url => {
           offerWithUrl.image = url;
           return offerWithUrl;

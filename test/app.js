@@ -12,7 +12,7 @@ chai.use(chaiHttp);
 
 const getTablesQuery = `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE';`;
 
-const destroyTableOrder = ['category', 'type_offer', 'offer'];
+const destroyTableOrder = ['categories', 'type_offers', 'offers', 'codes'];
 
 beforeEach('drop tables', done => {
   const destroys = [];
@@ -21,12 +21,8 @@ beforeEach('drop tables', done => {
       db.sequelize.transaction(transaction =>
         db.sequelize
           .query('SET FOREIGN_KEY_CHECKS = 0', { transaction })
-          .then(() => {
-            return db.sequelize.models[tableName].truncate({
-              restartIdentity: true,
-              transaction
-            });
-          })
+          .then(() => db.sequelize.query(`ALTER TABLE ${tableName} AUTO_INCREMENT = 1`, { transaction }))
+          .then(() => db.sequelize.query(`TRUNCATE TABLE ${tableName}`, { transaction }))
           .then(() => db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', { transaction }))
       )
     );

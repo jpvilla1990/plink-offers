@@ -1,10 +1,10 @@
 const moment = require('moment-timezone'),
   config = require('../config');
 
-moment.tz.setDefault(config.common.database.timezone);
+moment.tz.setDefault(config.common.timezone);
 
-exports.getStatus = offer => {
-  const afterExpires = moment().isSameOrBefore(offer.expires, 'days'),
-    beforeBegin = moment().isSameOrAfter(offer.begin, 'days');
+exports.getOfferStatus = offer => {
+  const afterExpires = moment().isSameOrBefore(moment(offer.expires).endOf('day')),
+    beforeBegin = moment().isSameOrAfter(moment(offer.begin).startOf('day'));
   return afterExpires && beforeBegin && offer.redemptions < offer.maxRedemptions;
 };
