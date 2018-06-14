@@ -2,6 +2,7 @@ const Offer = require('./controllers/offer'),
   Code = require('./controllers/code'),
   category = require('./controllers/category'),
   typeOffer = require('./controllers/typeOffer'),
+  mail = require('./controllers/mail'),
   auth = require('./middlewares/auth'),
   validator = require('./middlewares/validator');
 
@@ -12,4 +13,5 @@ exports.init = app => {
   app.post('/offers/:id/code', [validator.checkEmail, validator.validate], Code.create);
   app.get('/categories', category.getAllCategories);
   app.get('/type-offers', typeOffer.getAllTypes);
+  app.post('/test-mail', mail.sendTestMail);
 };
