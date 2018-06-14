@@ -80,7 +80,7 @@ describe('/retail/:id/offers POST', () => {
         err.should.have.status(400);
         err.body.should.be.json;
         err.body.should.have.property('message');
-        err.body.should.have.property('internalCode');
+        err.body.should.have.property('internal_code');
       })
       .then(() => done());
   });
@@ -94,7 +94,7 @@ describe('/retail/:id/offers POST', () => {
         err.should.have.status(400);
         err.body.should.be.json;
         err.body.should.have.property('message');
-        err.body.should.have.property('internalCode');
+        err.body.should.have.property('internal_code');
       })
       .then(() => done());
   });
@@ -146,13 +146,13 @@ describe('/retail/:id/offers GET', () => {
   it('should be fail because in the query doesnt exist page', done => {
     chai
       .request(server)
-      .get('/retail/1222/offers?page=0')
+      .get('/retail/1222/offers?')
       .set(headerName, tokenExample)
       .catch(err => {
         err.should.have.status(400);
         err.body.should.be.json;
         err.body.should.have.property('message');
-        err.body.should.have.property('internalCode');
+        err.body.should.have.property('internal_code');
       })
       .then(() => done());
   });

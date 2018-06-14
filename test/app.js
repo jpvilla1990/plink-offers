@@ -12,7 +12,7 @@ chai.use(chaiHttp);
 
 const getTablesQuery = `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE';`;
 
-const destroyTableOrder = ['category', 'type_offer', 'offer'];
+const destroyTableOrder = ['category', 'type_offer', 'offer', 'code'];
 
 beforeEach('drop tables', done => {
   const destroys = [];

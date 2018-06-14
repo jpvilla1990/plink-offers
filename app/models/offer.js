@@ -63,6 +63,11 @@ module.exports = (sequelize, DataTypes) => {
       throw errors.databaseError(err.message);
     });
   };
+  offer.incrementField = (field, filter) => {
+    return offer.increment(field, { where: filter }).catch(err => {
+      throw errors.databaseError(err.detail);
+    });
+  };
   offer.getAllBy = filter => {
     return offer
       .findAndCountAll({ offset: filter.offset, where: { retail: filter.retail }, limit: filter.limit })
