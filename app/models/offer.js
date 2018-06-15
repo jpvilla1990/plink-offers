@@ -4,7 +4,7 @@ const errors = require('../errors'),
 ('use strict');
 
 module.exports = (sequelize, DataTypes) => {
-  const offer = sequelize.define(
+  const Offer = sequelize.define(
     'offer',
     {
       product: {
@@ -53,22 +53,29 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true
     }
   );
-  offer.createModel = off => {
-    return offer.create(off).catch(err => {
+  Offer.createModel = off => {
+    return Offer.create(off).catch(err => {
       throw errors.databaseError(err.message);
     });
   };
-  offer.getBy = filter => {
-    return offer.findOne({ where: filter }).catch(err => {
+  Offer.getBy = filter => {
+    return Offer.findOne({ where: filter }).catch(err => {
       throw errors.databaseError(err.message);
     });
   };
-  offer.getAllBy = filter => {
-    return offer
-      .findAndCountAll({ offset: filter.offset, where: { retail: filter.retail }, limit: filter.limit })
-      .catch(err => {
-        throw errors.databaseError(err.message);
-      });
+  Offer.incrementField = (field, filter) => {
+    return Offer.increment(field, { where: filter }).catch(err => {
+      throw errors.databaseError(err.detail);
+    });
   };
-  return offer;
+  Offer.getAllBy = filter => {
+    return Offer.findAndCountAll({
+      offset: filter.offset,
+      where: { retail: filter.retail },
+      limit: filter.limit
+    }).catch(err => {
+      throw errors.databaseError(err.message);
+    });
+  };
+  return Offer;
 };

@@ -59,11 +59,11 @@ describe('/retail/:id/offers POST', () => {
           .then(json => {
             json.should.have.status(200);
             json.body.should.have.property('urlBucket');
-            dictum.chai(json);
             Offer.getBy({ retail: 1222 }).then(exist => {
               const off = !!exist;
               off.should.eql(true);
             });
+            dictum.chai(json);
             done();
           });
       });
@@ -88,10 +88,10 @@ describe('/retail/:id/offers POST', () => {
       .post('/retail/1222/offers')
       .set(headerName, tokenExample)
       .send(offerWithoutProduct)
-      .then(res => {
-        res.should.have.status(400);
-        res.body.should.have.property('message');
-        res.body.should.have.property('internal_code');
+      .then(err => {
+        err.should.have.status(400);
+        err.body.should.have.property('message');
+        err.body.should.have.property('internal_code');
         done();
       });
   });
@@ -137,5 +137,17 @@ describe('/retail/:id/offers GET', () => {
         });
       });
     });
+  });
+  it('should be fail because in the query doesnt exist page', done => {
+    chai
+      .request(server)
+      .get('/retail/1222/offers?')
+      .set(headerName, tokenExample)
+      .then(json => {
+        json.should.have.status(400);
+        json.body.should.have.property('message');
+        json.body.should.have.property('internal_code');
+        done();
+      });
   });
 });

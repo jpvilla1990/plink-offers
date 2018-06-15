@@ -23,10 +23,7 @@ exports.redeemCode = ({ retailId, code }) =>
     }).then(result => {
       if (result) {
         if (result.dateRedemption === null) {
-          const statusOffer = getOfferStatus({
-            expires: result.offer.expiration,
-            ...result.offer.dataValues
-          });
+          const statusOffer = getOfferStatus(result.offer.dataValues);
           if (statusOffer) {
             return result.offer
               .increment({ redemptions: 1 }, { transaction })

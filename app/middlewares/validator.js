@@ -13,6 +13,7 @@ const verifyExistQuery = key =>
 
 const verifyString = (result, key) => result.isString().withMessage(`The ${key} must be String`);
 const verifyInteger = (result, key) => result.isInt().withMessage(`The ${key} must be Integer`);
+const verifyEmail = (result, key) => result.isEmail().withMessage(`The ${key} must be valid`);
 exports.checkAll = [
   verifyString(verifyExist('product'), 'product'),
   verifyString(verifyExist('begin'), 'begin'),
@@ -25,14 +26,7 @@ exports.checkAll = [
   verifyString(verifyExist('extension'), 'extension')
 ];
 exports.checkQuery = [verifyInteger(verifyExistQuery('page'), 'page')];
-exports.validateQuery = (req, res, next) => {
-  const errorsMessages = validationResult(req).array();
-  if (errorsMessages.length !== 0) {
-    next(errors.badRequest(errorsMessages.map(error => error.msg)));
-  } else {
-    next();
-  }
-};
+exports.checkEmail = [verifyEmail(verifyExist('email'), 'email')];
 exports.validate = (req, res, next) => {
   const errorsMessages = validationResult(req).array();
   if (errorsMessages.length !== 0) {

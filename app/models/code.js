@@ -1,5 +1,7 @@
 'use strict';
 
+const Sequelize = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   const Code = sequelize.define(
     'code',
@@ -11,13 +13,15 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       paranoid: true,
-      underscored: true
+      underscored: true,
+      indexes: [{ unique: true, fields: ['email', 'offer_id'] }]
     }
   );
-
+  Code.createModel = off => {
+    return Code.create(off);
+  };
   Code.associate = models => {
     Code.belongsTo(models.offer, { as: 'offer' });
   };
-
   return Code;
 };
