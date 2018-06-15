@@ -16,7 +16,6 @@ exports.create = (req, res, next) => {
     imgExtension: req.body.extension
   };
   off.retail = req.retail;
-  off.redemptions = off.maxRedemptions;
   return Offer.createModel(off)
     .then(rv => {
       return serviceS3.obtainUrl(rv.id, off.imgExtension).then(result => {
@@ -37,11 +36,11 @@ exports.getAll = (req, res, next) => {
           product: value.dataValues.product,
           begin: value.dataValues.begin,
           expires: value.dataValues.expiration,
-          maxRedemptions: value.dataValues.maxRedemptions
+          maxRedemptions: value.dataValues.maxRedemptions,
+          codes: value.dataValues.codes,
+          redemptions: value.dataValues.redemptions
         };
-        offerWithUrl.codes = value.dataValues.codes ? value.dataValues.codes : 0;
-        offerWithUrl.redemptions = value.dataValues.redemptions ? value.dataValues.redemptions : 0;
-        offerWithUrl.status = utils.getStatus(offerWithUrl) ? 'active' : 'inactive';
+        offerWithUrl.status = utils.getOfferStatus(offerWithUrl) ? 'active' : 'inactive';
         return serviceS3.getUrl(value.dataValues.id, value.dataValues.imgExtension).then(url => {
           offerWithUrl.image = url;
           return offerWithUrl;

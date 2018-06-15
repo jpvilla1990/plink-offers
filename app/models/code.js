@@ -3,24 +3,25 @@
 const Sequelize = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  const code = sequelize.define(
+  const Code = sequelize.define(
     'code',
     {
       code: DataTypes.STRING,
       email: DataTypes.STRING,
-      offer: DataTypes.INTEGER,
-      dateRedemption: {
-        type: DataTypes.DATEONLY,
-        field: 'date_redemption'
-      }
+      offerId: { type: DataTypes.INTEGER, field: 'offer_id' },
+      dateRedemption: { type: DataTypes.DATE, field: 'date_redemption' }
     },
     {
       paranoid: true,
-      underscored: true
+      underscored: true,
+      indexes: [{ unique: true, fields: ['email', 'offer_id'] }]
     }
   );
-  code.createModel = off => {
-    return code.create(off);
+  Code.createModel = off => {
+    return Code.create(off);
   };
-  return code;
+  Code.associate = models => {
+    Code.belongsTo(models.offer, { as: 'offer' });
+  };
+  return Code;
 };

@@ -58,15 +58,14 @@ describe('/retail/:id/offers POST', () => {
           .send(offerExample)
           .then(json => {
             json.should.have.status(200);
-            json.should.be.json;
             json.body.should.have.property('urlBucket');
-            dictum.chai(json);
             Offer.getBy({ retail: 1222 }).then(exist => {
               const off = !!exist;
               off.should.eql(true);
             });
-          })
-          .then(() => done());
+            dictum.chai(json);
+            done();
+          });
       });
     });
   });
@@ -76,13 +75,12 @@ describe('/retail/:id/offers POST', () => {
       .post('/retail/1222/offers')
       .set(headerName, tokenExample)
       .send(offerWithCategoryWrong)
-      .catch(err => {
-        err.should.have.status(400);
-        err.body.should.be.json;
-        err.body.should.have.property('message');
-        err.body.should.have.property('internal_code');
-      })
-      .then(() => done());
+      .then(res => {
+        res.should.have.status(400);
+        res.body.should.have.property('message');
+        res.body.should.have.property('internal_code');
+        done();
+      });
   });
   it('should be fail because didnt sent product', done => {
     chai
@@ -90,13 +88,12 @@ describe('/retail/:id/offers POST', () => {
       .post('/retail/1222/offers')
       .set(headerName, tokenExample)
       .send(offerWithoutProduct)
-      .catch(err => {
+      .then(err => {
         err.should.have.status(400);
-        err.body.should.be.json;
         err.body.should.have.property('message');
         err.body.should.have.property('internal_code');
-      })
-      .then(() => done());
+        done();
+      });
   });
 });
 
@@ -109,15 +106,14 @@ describe('/retail/:id/offers GET', () => {
             .request(server)
             .get('/retail/1222/offers?page=0')
             .set(headerName, tokenExample)
-            .then(json => {
-              json.should.have.status(200);
-              json.should.be.json;
-              json.body.should.have.property('count');
-              json.body.should.have.property('offers');
-              json.body.offers.length.should.eql(1);
-              dictum.chai(json);
-            })
-            .then(() => done());
+            .then(res => {
+              res.should.have.status(200);
+              res.body.should.have.property('count');
+              res.body.should.have.property('offers');
+              res.body.offers.length.should.eql(1);
+              dictum.chai(res);
+              done();
+            });
         });
       });
     });
@@ -130,15 +126,14 @@ describe('/retail/:id/offers GET', () => {
             .request(server)
             .get('/retail/1222/offers?page=0')
             .set(headerName, tokenExample)
-            .then(json => {
-              json.should.have.status(200);
-              json.should.be.json;
-              json.body.should.have.property('count');
-              json.body.should.have.property('offers');
-              json.body.offers.length.should.eql(1);
-              dictum.chai(json);
-            })
-            .then(() => done());
+            .then(res => {
+              res.should.have.status(200);
+              res.body.should.have.property('count');
+              res.body.should.have.property('offers');
+              res.body.offers.length.should.eql(1);
+              dictum.chai(res);
+              done();
+            });
         });
       });
     });
@@ -148,70 +143,11 @@ describe('/retail/:id/offers GET', () => {
       .request(server)
       .get('/retail/1222/offers?')
       .set(headerName, tokenExample)
-      .catch(err => {
-        err.should.have.status(400);
-        err.body.should.be.json;
-        err.body.should.have.property('message');
-        err.body.should.have.property('internal_code');
-      })
-      .then(() => done());
-  });
-});
-
-describe('/retail/:id/offers GET', () => {
-  it('should be successful with one page and with limit', done => {
-    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
-      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
-        factoryManager.create(factoryOffer, offerExample).then(off => {
-          chai
-            .request(server)
-            .get('/retail/1222/offers?page=0')
-            .set(headerName, tokenExample)
-            .then(json => {
-              json.should.have.status(200);
-              json.should.be.json;
-              json.body.should.have.property('count');
-              json.body.should.have.property('offers');
-              json.body.offers.length.should.eql(1);
-              dictum.chai(json);
-            })
-            .then(() => done());
-        });
+      .then(json => {
+        json.should.have.status(400);
+        json.body.should.have.property('message');
+        json.body.should.have.property('internal_code');
+        done();
       });
-    });
-  });
-  it('should be succesfull  with one page but without limit', done => {
-    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
-      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
-        factoryManager.create(factoryOffer, offerExample).then(off => {
-          chai
-            .request(server)
-            .get('/retail/1222/offers?page=0')
-            .set(headerName, tokenExample)
-            .then(json => {
-              json.should.have.status(200);
-              json.should.be.json;
-              json.body.should.have.property('count');
-              json.body.should.have.property('offers');
-              json.body.offers.length.should.eql(1);
-              dictum.chai(json);
-            })
-            .then(() => done());
-        });
-      });
-    });
-  });
-  it('should be fail because in the query doesnt exist page', done => {
-    chai
-      .request(server)
-      .get('/retail/1222/offers?page=0')
-      .set(headerName, tokenExample)
-      .catch(err => {
-        err.should.have.status(400);
-        err.body.should.be.json;
-        err.body.should.have.property('message');
-        err.body.should.have.property('internalCode');
-      })
-      .then(() => done());
   });
 });

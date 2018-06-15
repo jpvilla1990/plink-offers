@@ -3,4 +3,6 @@ const factory = require('./factoryManager').factory,
 
 exports.nameFactory = 'TypeOffer';
 
-factory.define(exports.nameFactory, typeOffer, {});
+factory.define(exports.nameFactory, typeOffer, {
+  description: factory.seq('TypeOffer.description', n => `description${n}`)
+});
