@@ -1,12 +1,10 @@
-const Code = require('../models').code,
-  Offer = require('../models').offer,
+const codeService = require('../services/code'),
   utils = require('../utils'),
-  moment = require('moment'),
-  logger = require('../logger'),
+  serviceS3 = require('../services/s3'),
   errors = require('../errors'),
+  Offer = require('../models').offer,
   uniqueCode = require('../services/uniqueCode'),
-  uuid = require('uuid'),
-  codeService = require('../services/code');
+  uuid = require('uuid');
 
 exports.create = (req, res, next) => {
   const code = {
@@ -35,4 +33,26 @@ exports.redeemCode = ({ params }, res, next) =>
   codeService
     .redeemCode({ retailId: params.id, code: params.code })
     .then(() => res.status(200).end())
+    .catch(next);
+
+exports.getCode = ({ params }, res, next) =>
+  codeService
+    .getCode({ retailId: params.id, number: params.code })
+    .then(code => {
+      const result = {
+        email: code.email,
+        code: code.code,
+        dateRedemption: code.dateRedemption
+          ? utils.moment(code.dateRedemption).format('YYYY-MM-DD HH:MM:ss')
+          : null,
+        status: utils.getOfferStatusString(code.offer.dataValues),
+        product: code.offer.product
+      };
+      serviceS3.obtainUrl(code.offer.id, code.offer.imgExtension).then(url => {
+        result.image = url;
+        res.status(200);
+        res.send(result);
+        res.end();
+      });
+    })
     .catch(next);

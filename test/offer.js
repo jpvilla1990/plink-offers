@@ -62,9 +62,9 @@ describe('/retail/:id/offers POST', () => {
             Offer.getBy({ retail: 1222 }).then(exist => {
               const off = !!exist;
               off.should.eql(true);
+              dictum.chai(json);
+              done();
             });
-            dictum.chai(json);
-            done();
           });
       });
     });

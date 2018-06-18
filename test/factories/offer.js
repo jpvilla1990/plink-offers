@@ -12,7 +12,7 @@ factory.define(exports.nameFactory, Offer, {
   maxRedemptions: 50,
   retail: 11,
   purpose: 'Vacations',
-  imgExtension: '.jpg',
+  imgExtension: 'jpg',
   valueStrategy: '30%',
   category: factory.assoc('Category', 'id')
 });

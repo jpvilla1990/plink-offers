@@ -5,6 +5,24 @@ const Code = require('../models').code,
   sequelize = require('../models').sequelize,
   errors = require('../errors');
 
+exports.getCode = ({ retailId, number }) =>
+  Code.findOne({
+    where: { code: number },
+    include: [
+      {
+        model: Offer,
+        as: 'offer',
+        where: { retail: retailId },
+        require: true
+      }
+    ]
+  }).then(code => {
+    if (code) {
+      return code;
+    }
+    throw errors.codeNotFound;
+  });
+
 exports.redeemCode = ({ retailId, code }) =>
   sequelize.transaction(transaction =>
     Code.findOne({

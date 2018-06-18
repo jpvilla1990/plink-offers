@@ -1,5 +1,4 @@
 const Offer = require('../models').offer,
-  logger = require('../logger'),
   serviceS3 = require('../services/s3'),
   utils = require('../utils');
 
@@ -40,7 +39,9 @@ exports.getAll = (req, res, next) => {
           codes: value.dataValues.codes,
           redemptions: value.dataValues.redemptions
         };
-        offerWithUrl.status = utils.getOfferStatus(offerWithUrl) ? 'active' : 'inactive';
+        offerWithUrl.codes = value.dataValues.codes ? value.dataValues.codes : 0;
+        offerWithUrl.redemptions = value.dataValues.redemptions ? value.dataValues.redemptions : 0;
+        offerWithUrl.status = utils.getOfferStatusString(value.dataValues);
         return serviceS3.getUrl(value.dataValues.id, value.dataValues.imgExtension).then(url => {
           offerWithUrl.image = url;
           return offerWithUrl;

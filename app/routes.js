@@ -15,5 +15,6 @@ exports.init = app => {
   app.get('/categories', category.getAllCategories);
   app.get('/type-offers', typeOffer.getAllTypes);
   app.patch('/retail/:id/code/:code/redeem', [auth.requireToken], code.redeemCode);
+  app.get('/retail/:id/code/:code', [auth.requireToken], code.getCode);
   app.post('/test-mail', mail.sendTestMail);
 };
