@@ -1,0 +1,10 @@
+{
+  "newCode": {
+    "subject": "Nuevo código",
+    "message": "Se ha creado un código exitosamente para la oferta"
+  },
+  "offerInvalid": {
+    "subject": "Oferta inválida",
+    "message": "No se pudo crear la oferta"
+  }
+}

@@ -2,13 +2,24 @@ const chai = require('chai'),
   expect = chai.expect,
   dictum = require('dictum.js'),
   server = require('./../app'),
+  logger = require('../app/logger'),
+  config = require('../config'),
+  AWS = require('aws-sdk'),
+  utils = require('../app/utils'),
   moment = require('moment'),
+  nodemailer = require('nodemailer/lib/mailer'),
   Offer = require('../app/models').offer,
+  Code = require('../app/models').code,
+  mailer = require('../app/services/mailer'),
+  simple = require('simple-mock'),
   token = require('../test/factories/token'),
   factoryManager = require('../test/factories/factoryManager'),
   factoryCategory = require('../test/factories/category').nameFactory,
   factoryTypeOffer = require('../test/factories/typeOffer').nameFactory,
   factoryOffer = require('../test/factories/offer').nameFactory,
+  i18next = require('i18next'),
+  should = chai.should(),
+  headerName = config.common.session.header_name,
   factoryCode = require('../test/factories/code').nameFactory;
 
 const offerWithRetail = {
@@ -25,7 +36,12 @@ const offerWithRetail = {
 };
 describe('/offers/:id/code POST', () => {
   offerWithRetail.retail = 1222;
-  const email = { email: 'example@saraza.com.ar' };
+  const emailTest = { email: 'julian.molina@wolox.com.ar' };
+  beforeEach(() => {
+    simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
+      callback(undefined, true);
+    });
+  });
   it('should be successful', done => {
     factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
@@ -33,16 +49,18 @@ describe('/offers/:id/code POST', () => {
           chai
             .request(server)
             .post(`/offers/${before.id}/code`)
-            .send(email)
+            .send(emailTest)
             .then(json => {
               json.should.have.status(200);
               json.should.be.json;
               Offer.getBy({ id: before.id }).then(after => {
                 after.codes.should.eqls(1);
-                dictum.chai(json);
               });
-            })
-            .then(() => done());
+              mailer.transporter.sendMail.lastCall.args[0].subject.should.equal(i18next.t(`newCode.subject`));
+              mailer.transporter.sendMail.lastCall.args[0].to.should.equal(emailTest.email);
+              done();
+              dictum.chai(json);
+            });
         });
       });
     });
@@ -57,12 +75,16 @@ describe('/offers/:id/code POST', () => {
           chai
             .request(server)
             .post(`/offers/${before.id}/code`)
-            .send(email)
+            .send(emailTest)
             .then(err => {
               err.should.have.status(400);
               err.should.be.json;
               err.body.should.have.property('message');
               err.body.should.have.property('internal_code');
+              mailer.transporter.sendMail.lastCall.args[0].subject.should.eqls(
+                i18next.t(`offerInvalid.subject`)
+              );
+              mailer.transporter.sendMail.lastCall.args[0].to.should.eqls(emailTest.email);
               done();
             });
         });

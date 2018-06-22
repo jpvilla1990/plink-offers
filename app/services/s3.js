@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk'),
   config = require('../../config'),
+  errors = require('../errors'),
   logger = require('../logger'),
   s3 = new AWS.S3(
     new AWS.Config({
@@ -37,4 +38,10 @@ exports.getUrl = (id, extension) => {
       resolve(data);
     });
   });
+};
+
+exports.getUrlEmail = name => {
+  return `${config.common.aws.url_s3}/${config.common.aws.bucket_email}/${
+    config.common.aws.folder_s3
+  }/${name}.jpg`;
 };
