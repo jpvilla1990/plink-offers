@@ -2,6 +2,14 @@ const Offer = require('../models').offer,
   serviceS3 = require('../services/s3'),
   utils = require('../utils');
 
+exports.getImageUrl = (req, res, next) =>
+  serviceS3
+    .getSignedUrlPut()
+    .then(url => {
+      res.send({ url });
+    })
+    .catch(next);
+
 exports.create = (req, res, next) => {
   const off = {
     product: req.body.product,
@@ -12,16 +20,12 @@ exports.create = (req, res, next) => {
     maxRedemptions: req.body.maxRedemptions,
     purpose: req.body.purpose,
     valueStrategy: req.body.valueStrategy,
-    imgExtension: req.body.extension
+    imageUrl: req.body.url
   };
   off.retail = req.retail;
   return Offer.createModel(off)
-    .then(rv => {
-      return serviceS3.obtainUrl(rv.id, off.imgExtension).then(result => {
-        res.status(200);
-        res.send({ urlBucket: result });
-        res.end();
-      });
+    .then(() => {
+      res.status(201).end();
     })
     .catch(err => next(err));
 };
@@ -30,28 +34,19 @@ exports.getAll = (req, res, next) => {
   const offsetQuery = req.query.page === 0 ? 0 : req.query.page * limitQuery;
   return Offer.getAllBy({ retail: req.params.id, offset: offsetQuery, limit: limitQuery })
     .then(list => {
-      const listPromise = list.rows.map(value => {
-        const offerWithUrl = {
-          product: value.dataValues.product,
-          begin: value.dataValues.begin,
-          expires: value.dataValues.expiration,
-          maxRedemptions: value.dataValues.maxRedemptions,
-          codes: value.dataValues.codes,
-          redemptions: value.dataValues.redemptions
-        };
-        offerWithUrl.codes = value.dataValues.codes ? value.dataValues.codes : 0;
-        offerWithUrl.redemptions = value.dataValues.redemptions ? value.dataValues.redemptions : 0;
-        offerWithUrl.status = utils.getOfferStatusString(value.dataValues);
-        return serviceS3.getUrl(value.dataValues.id, value.dataValues.imgExtension).then(url => {
-          offerWithUrl.image = url;
-          return offerWithUrl;
-        });
-      });
-      return Promise.all(listPromise).then(offs => {
-        res.status(200);
-        res.send({ count: list.count, offers: offs });
-        res.end();
-      });
+      const listResult = list.rows.map(value => ({
+        product: value.dataValues.product,
+        begin: value.dataValues.begin,
+        expires: value.dataValues.expiration,
+        maxRedemptions: value.dataValues.maxRedemptions,
+        image: value.dataValues.imageUrl,
+        codes: value.dataValues.codes ? value.dataValues.codes : 0,
+        redemptions: value.dataValues.redemptions ? value.dataValues.redemptions : 0,
+        status: utils.getOfferStatusString(value.dataValues)
+      }));
+      res.status(200);
+      res.send({ count: list.count, offers: listResult });
+      res.end();
     })
     .catch(err => next(err));
 };

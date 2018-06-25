@@ -20,7 +20,7 @@ const chai = require('chai'),
     valueStrategy: '30%',
     maxRedemptions: 1200,
     purpose: 'Atraer clientes',
-    extension: 'jpg'
+    url: 'https://s3.amazonaws.com/plink-email-assets/plink_offers/bg_general.png'
   },
   offerWithoutProduct = {
     begin: '2017-02-13',
@@ -30,7 +30,7 @@ const chai = require('chai'),
     valueStrategy: '30%',
     maxRedemptions: 1200,
     purpose: 'Atraer clientes',
-    extension: 'jpg'
+    url: 'https://s3.amazonaws.com/plink-email-assets/plink_offers/bg_general.png'
   },
   offerWithCategoryWrong = {
     product: '2x1 en McDuo',
@@ -41,7 +41,7 @@ const chai = require('chai'),
     valueStrategy: '30%',
     maxRedemptions: 1200,
     purpose: 'Atraer clientes',
-    extension: 'jpg'
+    url: 'https://s3.amazonaws.com/plink-email-assets/plink_offers/bg_general.png'
   },
   tokenExample = `test ${token.generate({ points: '1222,1444,1333' })}`;
 
@@ -57,8 +57,7 @@ describe('/retail/:id/offers POST', () => {
           .set(headerName, tokenExample)
           .send(offerExample)
           .then(json => {
-            json.should.have.status(200);
-            json.body.should.have.property('urlBucket');
+            json.should.have.status(201);
             Offer.getBy({ retail: 1222 }).then(exist => {
               const off = !!exist;
               off.should.eql(true);
