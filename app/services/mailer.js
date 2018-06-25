@@ -3,6 +3,7 @@ const AWS = require('aws-sdk'),
   logger = require('../logger'),
   Offer = require('../models').offer,
   config = require('../../config'),
+  pug = require('pug'),
   serviceS3 = require('../services/s3'),
   htmlService = require('../services/html'),
   path = require('path'),
@@ -25,14 +26,14 @@ exports.transporter = transporter;
 exports.sendEmail = (type, offer, code) => {
   return i18next.init().then(t => {
     return new Promise((resolve, reject) => {
-      const e = new Email(),
-        templateDir = path.join(__dirname, `/emailTemplates/${type}.jade`),
+      templateDir = path.join(__dirname, `/emailTemplates/${type}.pug`),
         params = {
           logo_plink: serviceS3.getUrlEmail('logo_plink'),
           bg_footer: serviceS3.getUrlEmail('bg_footer'),
           bg_general_code: serviceS3.getUrlEmail('bg_general_code'),
           logo_bancocolombia: serviceS3.getUrlEmail('logo_bancocolombia'),
           logo_superintendencia: serviceS3.getUrlEmail('logo_superintendencia'),
+          brand_logo: serviceS3.getUrlEmail('brand_logo'),
           ticket: serviceS3.getUrlEmail('ticket'),
           value_strategy: offer.valueStrategy,
           product: offer.product,
@@ -40,22 +41,21 @@ exports.sendEmail = (type, offer, code) => {
           available: offer.maxRedemptions - offer.redemptions,
           expiration: offer.expiration
         },
-        subjectEmail = i18n.t(`${type}.subject`);
+        subjectEmail = i18n.t(`${type}.subject`),
+        html = pug.renderFile(templateDir, params);
 
-      e.render(templateDir, params).then(rv => {
-        transporter.sendMail(
-          {
-            from: `no-reply@plink.com.co`,
-            to: code.email,
-            subject: subjectEmail,
-            html: rv.html
-          },
-          (err, info) => {
-            if (err) reject(err);
-            resolve(info);
-          }
-        );
-      });
+      transporter.sendMail(
+        {
+          from: `no-reply@plink.com.co`,
+          to: code.email,
+          subject: subjectEmail,
+          html: html
+        },
+        (err, info) => {
+          if (err) reject(err);
+          resolve(info);
+        }
+      );
     });
   });
 };
