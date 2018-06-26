@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk'),
   config = require('../../config'),
-  logger = require('../logger'),
+  uuid = require('uuid'),
   s3 = new AWS.S3(
     new AWS.Config({
       accessKeyId: config.common.aws.key,
@@ -9,28 +9,15 @@ const AWS = require('aws-sdk'),
     })
   );
 
-exports.obtainUrl = (id, extension) => {
-  const s3Params = {
-    Bucket: config.common.aws.bucket,
-    Key: `offer-${id}.${extension}`
-  };
-  return new Promise((resolve, reject) => {
-    s3.getSignedUrl('putObject', s3Params, (error, data) => {
-      if (error) {
-        reject(error);
-      }
-      resolve(data);
-    });
-  });
-};
+exports.getSignedUrlPut = key => exports.getSignedUrl(key, 'putObject');
 
-exports.getUrl = (id, extension) => {
+exports.getSignedUrl = (key, action = 'getObject') => {
   const s3Params = {
     Bucket: config.common.aws.bucket,
-    Key: `offer-${id}.${extension}`
+    Key: key || uuid()
   };
   return new Promise((resolve, reject) => {
-    s3.getSignedUrl('getObject', s3Params, (error, data) => {
+    s3.getSignedUrl(action, s3Params, (error, data) => {
       if (error) {
         reject(error);
       }

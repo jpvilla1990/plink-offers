@@ -46,13 +46,11 @@ exports.getCode = ({ params }, res, next) =>
           ? utils.moment(code.dateRedemption).format('YYYY-MM-DD HH:MM:ss')
           : null,
         status: utils.getOfferStatusString(code.offer.dataValues),
-        product: code.offer.product
+        product: code.offer.product,
+        image: code.offer.dataValues.imageUrl
       };
-      serviceS3.obtainUrl(code.offer.id, code.offer.imgExtension).then(url => {
-        result.image = url;
-        res.status(200);
-        res.send(result);
-        res.end();
-      });
+      res.status(200);
+      res.send(result);
+      res.end();
     })
     .catch(next);
