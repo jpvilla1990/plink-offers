@@ -40,8 +40,12 @@ exports.getUrl = (id, extension) => {
   });
 };
 
-exports.getUrlEmail = (name,extension='png') => {
+exports.getUrlEmail = (name, extension = 'png') => {
   return `${config.common.aws.url_s3}/${config.common.aws.bucket_email}/${
     config.common.aws.folder_s3
   }/${name}.${extension}`;
+};
+
+exports.getUrlOffer = (id, extension = 'jpg') => {
+  return `${config.common.aws.url_s3}/${config.common.aws.bucket}/offer-${id}.${extension}`;
 };

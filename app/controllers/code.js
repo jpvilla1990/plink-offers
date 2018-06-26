@@ -5,7 +5,6 @@ const codeService = require('../services/code'),
   Offer = require('../models').offer,
   uniqueCode = require('../services/uniqueCode'),
   emailService = require('../services/mailer'),
-  htmlService = require('../services/html'),
   uuid = require('uuid');
 
 exports.create = (req, res, next) => {
@@ -22,7 +21,7 @@ exports.create = (req, res, next) => {
           return serviceS3.obtainUrl(off.dataValues.id, off.imgExtension).then(urlOffer => {
             return Offer.incrementField('codes', { id: newCode.offerId }).then(() => {
               off.dataValues.urlImg = urlOffer;
-              return emailService.sendEmail('newCode', off.dataValues, newCode.dataValues).then(() => {
+              return emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
                 res.status(200);
                 res.send({ code: newCode });
                 res.end();
@@ -31,11 +30,9 @@ exports.create = (req, res, next) => {
           });
         });
       } else {
-        return emailService
-          .sendEmail('offerInvalid', htmlService.offerInvalid(off.dataValues, code.email))
-          .then(() => {
-            throw errors.offerInactive;
-          });
+        return emailService.sendEmail('offerInvalid', off.dataValues, code.dataValues).then(() => {
+          throw errors.offerInactive;
+        });
       }
     })
     .catch(next);
