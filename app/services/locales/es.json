@@ -6,5 +6,9 @@
   "offerInvalid": {
     "subject": "Oferta inválida",
     "message": "No se pudo crear la oferta"
+  },
+  "offerExpired": {
+    "subject": "Oferta expirada",
+    "message": "No se pudo crear el código"
   }
 }

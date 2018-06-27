@@ -23,7 +23,7 @@ exports.checkAll = [
   verifyString(verifyExist('valueStrategy'), 'valueStrategy'),
   verifyInteger(verifyExist('maxRedemptions'), 'maxRedemptions'),
   verifyString(verifyExist('purpose'), 'purpose'),
-  verifyString(verifyExist('extension'), 'extension')
+  verifyString(verifyExist('url'), 'url')
 ];
 exports.checkQuery = [verifyInteger(verifyExistQuery('page'), 'page')];
 exports.checkEmail = [verifyEmail(verifyExist('email'), 'email')];

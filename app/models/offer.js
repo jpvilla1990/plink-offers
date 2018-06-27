@@ -1,5 +1,4 @@
-const errors = require('../errors'),
-  logger = require('../logger');
+const errors = require('../errors');
 
 ('use strict');
 
@@ -30,9 +29,9 @@ module.exports = (sequelize, DataTypes) => {
       purpose: {
         type: DataTypes.STRING
       },
-      imgExtension: {
+      imageUrl: {
         type: DataTypes.STRING,
-        field: 'img_extension'
+        field: 'image_url'
       },
       valueStrategy: {
         type: DataTypes.STRING,

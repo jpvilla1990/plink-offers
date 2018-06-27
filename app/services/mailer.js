@@ -3,6 +3,7 @@ const AWS = require('aws-sdk'),
   logger = require('../logger'),
   Offer = require('../models').offer,
   config = require('../../config'),
+  requestService = require('../services/request'),
   servicesHtml = require('../services/html'),
   pug = require('pug'),
   serviceS3 = require('../services/s3'),
@@ -24,12 +25,31 @@ exports.transporter = transporter;
 
 exports.sendNewCode = (offer, code) => {
   return i18next.init().then(t => {
-    const email = {
-      subject: i18n.t(`newCode.subject`),
-      html: servicesHtml.newCode(offer, code),
-      to: code.email
-    };
-    return exports.sendEmail(email);
+    return requestService.retail(`/points/${offer.retail}`).then(rv => {
+      offer.retailName = rv.commerce.description;
+      offer.retailAddres = rv.addres;
+      const email = {
+        subject: i18n.t(`newCode.subject`),
+        html: servicesHtml.newCode(offer, code),
+        to: code.email
+      };
+      return exports.sendEmail(email);
+    });
+  });
+};
+
+exports.sendOfferExpired = (offer, code) => {
+  return i18next.init().then(t => {
+    return requestService.retail(`/points/${offer.retail}`).then(rv => {
+      offer.retailName = rv.commerce.description;
+      offer.retailAddres = rv.addres;
+      const email = {
+        subject: i18n.t(`offerExpired.subject`),
+        html: servicesHtml.offerExpired(offer, code),
+        to: code.email
+      };
+      return exports.sendEmail(email);
+    });
   });
 };
 

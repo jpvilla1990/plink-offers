@@ -7,6 +7,7 @@ const chai = require('chai'),
   AWS = require('aws-sdk'),
   utils = require('../app/utils'),
   moment = require('moment'),
+  requestService = require('../app/services/request'),
   nodemailer = require('nodemailer/lib/mailer'),
   Offer = require('../app/models').offer,
   Code = require('../app/models').code,
@@ -41,6 +42,9 @@ describe('/offers/:id/code POST', () => {
     simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
       callback(undefined, true);
     });
+    simple
+      .mock(requestService, 'retail')
+      .resolveWith({ addres: 'Cochabamba 3254', commerce: { description: 'McDonalds' } });
   });
   it('should be successful', done => {
     factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
@@ -58,8 +62,8 @@ describe('/offers/:id/code POST', () => {
               });
               mailer.transporter.sendMail.lastCall.args[0].subject.should.equal(i18next.t(`newCode.subject`));
               mailer.transporter.sendMail.lastCall.args[0].to.should.equal(emailTest.email);
-              done();
               dictum.chai(json);
+              done();
             });
         });
       });
@@ -82,7 +86,7 @@ describe('/offers/:id/code POST', () => {
               err.body.should.have.property('message');
               err.body.should.have.property('internal_code');
               mailer.transporter.sendMail.lastCall.args[0].subject.should.eqls(
-                i18next.t(`offerInvalid.subject`)
+                i18next.t(`offerExpired.subject`)
               );
               mailer.transporter.sendMail.lastCall.args[0].to.should.eqls(emailTest.email);
               done();

@@ -18,19 +18,16 @@ exports.create = (req, res, next) => {
       if (active) {
         code.code = uuid().slice(0, 8);
         return uniqueCode.verify(code).then(newCode => {
-          return serviceS3.obtainUrl(off.dataValues.id, off.imgExtension).then(urlOffer => {
-            return Offer.incrementField('codes', { id: newCode.offerId }).then(() => {
-              off.dataValues.urlImg = urlOffer;
-              return emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
-                res.status(200);
-                res.send({ code: newCode });
-                res.end();
-              });
+          return Offer.incrementField('codes', { id: newCode.offerId }).then(() => {
+            return emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
+              res.status(200);
+              res.send({ code: newCode });
+              res.end();
             });
           });
         });
       } else {
-        return emailService.sendEmail('offerInvalid', off.dataValues, code.dataValues).then(() => {
+        return emailService.sendOfferExpired(off.dataValues, code).then(() => {
           throw errors.offerInactive;
         });
       }
@@ -54,13 +51,11 @@ exports.getCode = ({ params }, res, next) =>
           ? utils.moment(code.dateRedemption).format('YYYY-MM-DD HH:MM:ss')
           : null,
         status: utils.getOfferStatusString(code.offer.dataValues),
-        product: code.offer.product
+        product: code.offer.product,
+        image: code.offer.dataValues.imageUrl
       };
-      serviceS3.obtainUrl(code.offer.id, code.offer.imgExtension).then(url => {
-        result.image = url;
-        res.status(200);
-        res.send(result);
-        res.end();
-      });
+      res.status(200);
+      res.send(result);
+      res.end();
     })
     .catch(next);
