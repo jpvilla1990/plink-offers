@@ -1,5 +1,7 @@
 const Offer = require('../models').offer,
+  Category = require('../models').category,
   serviceS3 = require('../services/s3'),
+  emailService = require('../services/mailer'),
   utils = require('../utils');
 
 exports.getImageUrl = (req, res, next) =>
@@ -24,8 +26,13 @@ exports.create = (req, res, next) => {
   };
   off.retail = req.retail;
   return Offer.createModel(off)
-    .then(() => {
-      res.status(201).end();
+    .then(newOff => {
+      return Category.getBy({ id: off.category }).then(category => {
+        newOff.nameCategory = category.name;
+        return emailService.sendNewOffer(newOff).then(() => {
+          res.status(201).end();
+        });
+      });
     })
     .catch(err => next(err));
 };
@@ -53,6 +60,10 @@ exports.getAll = (req, res, next) => {
 
 exports.info = (req, res, next) => {
   res.status(200);
-  res.send({ addres: 'Cochabamba 3254', commerce: { description: 'McDonalds' } });
+  res.send({
+    addres: 'Cochabamba 3254',
+    commerce: { description: 'McDonalds', nit: '546822' },
+    posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
+  });
   res.end();
 };
