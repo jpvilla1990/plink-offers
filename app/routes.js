@@ -9,7 +9,6 @@ const Offer = require('./controllers/offer'),
 
 exports.init = app => {
   app.post('/retail/:id/offers', [auth.requireToken, validator.checkAll, validator.validate], Offer.create);
-  app.get('/points/:id', Offer.info);
   app.get('/image-offer', Offer.getImageUrl);
   app.get('/retail/:id/offers', [auth.requireToken, validator.checkQuery, validator.validate], Offer.getAll);
   app.post('/offers/:id/code', [validator.checkEmail, validator.validate], Code.create);
@@ -18,4 +17,5 @@ exports.init = app => {
   app.patch('/retail/:id/code/:code/redeem', [auth.requireToken], code.redeemCode);
   app.get('/retail/:id/code/:code', [auth.requireToken], code.getCode);
   app.post('/test-mail', mail.sendTestMail);
+  app.get('/points/:id', Offer.info);
 };

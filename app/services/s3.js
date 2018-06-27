@@ -12,7 +12,6 @@ const AWS = require('aws-sdk'),
   );
 
 exports.getSignedUrlPut = key => exports.getSignedUrl(key, 'putObject');
-
 exports.getSignedUrl = (key, action = 'getObject') => {
   const s3Params = {
     Bucket: config.common.aws.bucket,
