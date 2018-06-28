@@ -19,6 +19,8 @@ head
         .brand-name #{name_retail}
         .brand-adress #{addres}
     form(method='POST' action=`${create_code_url}`)
+      div.form-group(style='display:none')
+        input#pw.form-control( name='email' value=`${emailTo}`)
       button.cta-button(type='submit', style='display: block;margin-left: auto;margin-right: auto;height: 47.18px;width: 293.98px;border-radius: 5px;background-color: #FF6500;   margin-top: 25px; ')
         .button-text(style='height: 21px;color: #FFFFFF;font-family: Exo;font-size: 16px;font-weight: bold;letter-spacing: 0.62px;	line-height: 21px;text-align: center;')
           | QUIERO ESTA OFERTA

@@ -60,10 +60,11 @@ exports.sendNewOffer = offer => {
       rv.posTerminals.map(value => postIds.push(value.posId));
       offer.retailName = rv.commerce.description;
       offer.retailAddres = rv.addres;
+      const emailTo = config.common.server.email_new_offer;
       const email = {
         subject: `IdOferta=${offer.id} Nit=${rv.commerce.nit} Posids=${postIds.join()}`,
-        html: servicesHtml.newOffer(offer),
-        to: config.common.server.email_new_offer
+        html: servicesHtml.newOffer(offer, emailTo),
+        to: emailTo
       };
       return exports.sendEmail(email);
     });

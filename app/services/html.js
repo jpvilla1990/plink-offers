@@ -27,7 +27,8 @@ exports.newCode = (offer, code) => {
   return html;
 };
 
-exports.newOffer = offer => {
+exports.newOffer = (offer, emailTo) => {
+  console.log(offer);
   const templateDir = path.join(__dirname, `/emailTemplates/newOffer.pug`),
     params = {
       logo_plink: serviceS3.getUrlEmail('logo_plink'),
@@ -46,8 +47,8 @@ exports.newOffer = offer => {
       name_retail: offer.retailName,
       addres: offer.retailAddres,
       name_category: offer.nameCategory.toUpperCase(),
-      create_code_url: `${config.common.server.base_path}/offers/${offer.id}/code`
-      // http://localhost:8080/offers/29/code
+      create_code_url: `${config.common.server.base_path}/offers/${offer.id}/code`,
+      emailTo
     },
     html = pug.renderFile(templateDir, params);
   return html;
