@@ -20,15 +20,22 @@ exports.create = (req, res, next) => {
         return uniqueCode.verify(code).then(newCode => {
           return Offer.incrementField('codes', { id: newCode.offerId }).then(() => {
             return emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
-              res.status(200);
-              res.send({ code: newCode });
+              // res.status(200);
+              // res.send({ code: newCode });
+              res.writeHead(301, {
+                Location: 'http://plink-dashboard-development.s3-website-us-east-1.amazonaws.com/'
+              });
               res.end();
             });
           });
         });
       } else {
         return emailService.sendOfferExpired(off.dataValues, code).then(() => {
-          throw errors.offerInactive;
+          // throw errors.offerInactive;
+          res.writeHead(301, {
+            Location: 'http://plink-dashboard-development.s3-website-us-east-1.amazonaws.com/'
+          });
+          res.end();
         });
       }
     })
