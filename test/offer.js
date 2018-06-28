@@ -213,7 +213,6 @@ describe('job notify', () => {
         mailer.transporter.sendMail.callCount.should.eqls(4);
         done();
       }, 3000);
-      // logger.info(emailService.transporter.sendMail.call.length);
     });
   });
 });

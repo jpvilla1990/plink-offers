@@ -1,6 +1,7 @@
 const pug = require('pug'),
-  serviceS3 = require('../services/s3'),
-  path = require('path');
+  path = require('path'),
+  config = require('../../config'),
+  serviceS3 = require('../services/s3');
 
 exports.newCode = (offer, code) => {
   const templateDir = path.join(__dirname, `/emailTemplates/newCode.pug`),
@@ -26,12 +27,12 @@ exports.newCode = (offer, code) => {
   return html;
 };
 
-exports.newOffer = offer => {
+exports.newOffer = (offer, emailTo) => {
   const templateDir = path.join(__dirname, `/emailTemplates/newOffer.pug`),
     params = {
       logo_plink: serviceS3.getUrlEmail('logo_plink'),
       bg_footer: serviceS3.getUrlEmail('bg_footer'),
-      bg_general_code: serviceS3.getUrlEmail('bg_general_code'),
+      bg_general_offer: serviceS3.getUrlEmail('bg_general_offer'),
       logo_bancocolombia: serviceS3.getUrlEmail('logo_bancocolombia'),
       logo_superintendence: serviceS3.getUrlEmail('logo_superintendencia'),
       brand_logo: serviceS3.getUrlEmail('ic_default_comercio'),
@@ -44,7 +45,9 @@ exports.newOffer = offer => {
       expiration: offer.expiration,
       name_retail: offer.retailName,
       addres: offer.retailAddres,
-      name_category: offer.nameCategory
+      name_category: offer.nameCategory.toUpperCase(),
+      create_code_url: `${config.common.server.base_path}/${offer.id}/code`,
+      emailTo
     },
     html = pug.renderFile(templateDir, params);
   return html;

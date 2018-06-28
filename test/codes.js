@@ -45,7 +45,7 @@ describe('/offers/:id/code POST', () => {
         factoryManager.create(factoryOffer, offerWithRetail).then(before => {
           chai
             .request(server)
-            .post(`/offers/${before.id}/code/julian.molina@wolox.com.ar`)
+            .post(`/offers/${before.id}/code`)
             .send(emailTest)
             .then(json => {
               json.should.have.status(200);
@@ -71,7 +71,7 @@ describe('/offers/:id/code POST', () => {
         factoryManager.create(factoryOffer, offerWithRetail).then(before => {
           chai
             .request(server)
-            .post(`/offers/${before.id}/code/julian.molina@wolox.com.ar`)
+            .post(`/offers/${before.id}/code`)
             .send(emailTest)
             .then(err => {
               err.should.have.status(400);
@@ -94,7 +94,7 @@ describe('/offers/:id/code POST', () => {
         factoryManager.create(factoryOffer, offerWithRetail).then(before => {
           chai
             .request(server)
-            .post(`/offers/${before.id}/code/julian.molina@wolox.com.ar`)
+            .post(`/offers/${before.id}/code`)
             .send({})
             .then(err => {
               err.should.have.status(400);

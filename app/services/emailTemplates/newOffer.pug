@@ -2,11 +2,11 @@ doctype html
 head
   link(href='https://fonts.googleapis.com/css?family=Exo' rel='stylesheet')
 .wrapper(style="position: relative;text-align: center;background-color: #f1f2f2;font-family: 'Exo', sans-serif;width: 650px;")
-  article.main(style=`text-align: left;background-image: url(${bg_general_code});height: 600px;	width: 650px;background-size: cover;align-items: center;`)
+  article.main(style=`text-align: left;background-image: url(${bg_general_offer});height: 900px;	width: 650px;background-size: cover;align-items: center;`)
     img.logo(src=logo_plink style='padding-top: 30px;margin-bottom: 50px;display: block;margin-left: auto;margin-right: auto;')
     p.greetings(style='display: block;margin-left: auto;margin-right: auto;margin-bottom: 0px;height: 27px;	width: 147px;	color: #FDF8F1;	font-family: Exo;	font-size: 20px;	font-weight: bold;	letter-spacing: 0.78px;	line-height: 27px;	') Hola #{name} :)
     .subtitle(style='display: block;margin-left: auto;margin-right: auto;margin-top: 0px;height: 19px;	width: 276px;	color: #FFF1DE;	font-family: Exo;	font-size: 14px;	font-weight: 500;	letter-spacing: 0.55px;	line-height: 19px;') Te traemos  esta oferta pensada para ti
-    img.main-image(src=img_offer style='display: block;margin-left: auto;margin-right: auto;margin-top: 22px;height: 303.6px;width: 475.71px;border-radius: 10px;background-color: #FFFFFF;')
+    img.main-image(src=img_offer style='display: block;margin-left: auto;margin-right: auto;margin-top: 22px;height: 303.6px;width: 475.71px;zborder-radius: 10px;background-color: #FFFFFF;')
     .main-button(style='display: block;margin-left: auto;margin-right: auto;margin-top: 20px;width: 91.18px;border: 1.5px solid #0D63F9;opacity: 0.9;border-radius: 5px;align-items: center;color: #0D63F9;font-family: Exo;font-size: 12px;font-weight: bold;letter-spacing: 0.68px;line-height: 16px;padding: 5px;text-align: center;')
       .info(style='display: block;margin: auto;') #{name_category}
     .main-info(style='display: block;margin-left: auto;margin-right: auto;margin-top: 10px;height: 88.58px;width: 460.5px;color: #5C5C5C;font-family: Exo;font-size: 18px;font-weight: 600;letter-spacing: 1.14px;line-height: 25px;text-align: center;')
@@ -18,37 +18,54 @@ head
       .brand-data(style='color: #9B9B9B;font-family: Exo;font-size: 14px;font-weight: 500;letter-spacing: 0.8px;line-height: 19px;float: left;display: inline;width: 77%;padding-top: 10px;margin-left: 3%;')
         .brand-name #{name_retail}
         .brand-adress #{addres}
-    button.cta-button(style='display: block;margin-left: auto;margin-right: auto;height: 47.18px;width: 293.98px;border-radius: 5px;background-color: #FF6500;   margin-top: 25px; ')
-      .button-text(style='height: 21px;color: #FFFFFF;font-family: Exo;font-size: 16px;font-weight: bold;letter-spacing: 0.62px;	line-height: 21px;text-align: center;')
-        | QUIERO ESTA OFERTA
-    .button-disclaimer(style='display: block;margin-left: auto;margin-right: auto;height: 13px;width: 399px;color: #9B9B9B;font-family: Exo;font-size: 10px;font-weight: 500;letter-spacing: 0.66px;line-height: 13px;text-align: center;margin-top: 30px;margin-bottom: 30px;')
-      | Al presionar este bot&oacute;n te enviaremos un correo con el c&oacute;digo de redenci&oacute;n
+    form(method='POST' action=`${create_code_url}`)
+      div.form-group(style='display:none')
+        input#pw.form-control( name='email' value=`${emailTo}`)
+      button.cta-button(type='submit', style='display: block;margin-left: auto;margin-right: auto;height: 47.18px;width: 293.98px;border-radius: 5px;background-color: #FF6500;   margin-top: 25px; ')
+        .button-text(style='height: 21px;color: #FFFFFF;font-family: Exo;font-size: 16px;font-weight: bold;letter-spacing: 0.62px;	line-height: 21px;text-align: center;')
+          | QUIERO ESTA OFERTA
+      .button-disclaimer(style='display: block;margin-left: auto;margin-right: auto;height: 13px;width: 399px;color: #9B9B9B;font-family: Exo;font-size: 10px;font-weight: 500;letter-spacing: 0.66px;line-height: 13px;text-align: center;margin-top: 30px;margin-bottom: 30px;')
+        | Al presionar este bot&oacute;n te enviaremos un correo con el c&oacute;digo de redenci&oacute;n
   .tyc-section(style='display: block;margin-left: auto;margin-right: auto;width: 523.3px;color: #757575;font-family: Exo;font-size: 12px;font-weight: 500;letter-spacing: 0.74px;line-height: 16px;background-color: #f1f2f2;margin-top: 20px;')
     .tyc-title(style='height: 19px;width: 162px;color: #424242;font-family: Exo;font-size: 14px;font-weight: 600;letter-spacing: 0.8px;line-height: 19px;')
       | Condiciones generales
     .tyc-text(style='width: 523.3px;color: #757575;font-family: Exo;font-size: 12px;font-weight: 500;letter-spacing: 0.74px;line-height: 16px;margin-top: 15px;text-align: left;')
+      
       | - BANCOLOMBIA S.A. s&oacute;lo es el emisor de los medios de pago a trav&eacute;s de los
       | cuales se puede acceder a los beneficios mencionados. Los beneficios aqu&iacute;
-      | descritos son ofrecidos y asumidos por Hamburguesas #{name_retail} lo tanto, son ellos los responsables de la oferta, la venta, la entrega, el funcionamiento y la garant&iacute;a de los mismos.
+      | descritos son ofrecidos y asumidos por Hamburguesas #{name_retail} lo tanto, son ellos los responsables de la oferta, la venta, 
+      | la entrega, el funcionamiento y la garant&iacute;a de los mismos.  <br />  <br />
+       
       | - Los Productos y Servicios Financieros son ofrecidos por Bancolombia.
-      | Producto de cr&eacute;dito sujeto a reglamento.
-      | - El beneficio corresponde a #{value_strategy} off en #{name_retail} con #{product}
-      | - El beneficio aplica en la tienda f&iacute;sica: #{addres}
-      | - Este beneficio no es acumulable con bonos de compra, otros descuentos y/o promociones vigentes en el punto de venta. No aplica para domicilios.
+      | Producto de cr&eacute;dito sujeto a reglamento.  <br />  <br />
+       
+      | - El beneficio corresponde a #{value_strategy} off en #{name_retail} con #{product}  <br />  <br />
+       
+      | - El beneficio aplica en la tienda f&iacute;sica: #{addres}  <br />  <br />
+       
+      | - Este beneficio no es acumulable con bonos de compra, otros descuentos y/o promociones vigentes en el punto de venta. No aplica para domicilios.  <br />  <br />
+       
       | - Bancolombia podr&aacute; realizar modificaciones, adiciones o eliminaciones a los
-      | presentes t&eacute;rminos y condiciones en caso de considerarlo necesario.
+      | presentes t&eacute;rminos y condiciones en caso de considerarlo necesario.  <br />  <br />
+       
       | - La calidad, idoneidad, seguridad y garant&iacute;a de los productos y servicios
-      | ofrecidos son responsabilidad exclusiva de #{name_retail}.
+      | ofrecidos son responsabilidad exclusiva de #{name_retail}.  <br />  <br />
+      
       | - Es indispensable mencionar la actividad promocional al momento de realizar el
       | pedido, y &uacute;nicamente para clientes que realicen el pago con tarjetas
-      | Bancolombia.
-      | - Descuento v&aacute;lido hasta #{expiration}
-      | - Aplica &uacute;nicamente para la totalidad de compras hechas tarjetas Bancolombia.
+      | Bancolombia.  <br />
+       
+      | - Descuento v&aacute;lido hasta #{expiration}  <br />  <br />
+       
+      | - Aplica &uacute;nicamente para la totalidad de compras hechas tarjetas Bancolombia.  <br />  <br />
+       
       | - El beneficio es personal e intransferible, y no es canjeable por efectivo u otros
       | bienes y/o servicios. El cumplimiento de las normas de comercializaci&oacute;n de los
-      | productos y/o servicios es total y exclusiva responsabilidad de #{name_retail}.
-      | - Las im&aacute;genes de los productos son de referencia.
-  .contact(style=`width: 650px;	height: 80px;background-color: #f1f2f2;	background-image: url(${bg_footer});`)
+      | productos y/o servicios es total y exclusiva responsabilidad de #{name_retail}.  <br />  <br />
+       
+      | - Las im&aacute;genes de los productos son de referencia. 
+      
+  .contact(style=`width: 650px;	height: 125px;background-color: #f1f2f2;	background-image: url(${bg_footer});`)
   .disclaimer(style='background-color: #ffffff;display: block;margin-left: auto;margin-right: auto;')
     .contact-info(style='display: block;margin-left: auto;margin-right: auto;color: #FF6500;')
       .contact-title
@@ -57,8 +74,9 @@ head
         | hello@plink.com.co
     img.superintendence(src=logo_superintendence style='position: relative;float: left;bottom: 94px;left: 25px;')
     .footer-logos(style='display: block;margin-left: auto;margin-right: auto;margin-top: 25px;height: 75px;width: 65%;')
-      img.footer-logo(src=logo_bancocolombia style='height: 54.66px;display: inline;width: 30%;')
-      img.brand-footer-logo(src=brand_logo style='height: 54.66px;float: right;display: inline;width: 60%;')
+      .img_container( style='display: flex; justify-content: center; width: 80%;')
+        img.footer-logo(src=logo_bancocolombia style='display: inline;width: 50%;margin-right: 50px;height: 54.66px;    margin-left: 60px;')
+        img.brand-footer-logo(src=brand_logo style='float: right;display: inline;width: 20%;height: 54.66px')
     hr.dotted-line2(style='display: block;margin-left: auto;margin-right: auto;margin-bottom: 0px;width: 150px;border-top: dashed 0px #E0DEDE;height: 0px;')
     .disclaimer-conatiner(style='display: block;margin-left: auto;margin-right: auto;height: 65px;width: 602.95px;color: #4A4A4A;font-family: Exo;font-size: 10px;letter-spacing: 0.39px;line-height: 13px;text-align: center;margin-top: 18px;margin-bottom: 18px;')
       .disclaimer-text

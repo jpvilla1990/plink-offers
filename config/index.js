@@ -31,6 +31,7 @@ const config = {
   common: {
     timezone: process.env.TIME_ZONE || 'America/Bogota',
     server: {
+      base_path: process.env.URL_SERVER_API,
       info_retail: process.env.URL_INFO_RETAIL,
       email_new_offer: process.env.EMAIL_OFFER
     },
