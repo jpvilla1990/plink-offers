@@ -28,7 +28,6 @@ exports.newCode = (offer, code) => {
 };
 
 exports.newOffer = (offer, emailTo) => {
-  console.log(offer);
   const templateDir = path.join(__dirname, `/emailTemplates/newOffer.pug`),
     params = {
       logo_plink: serviceS3.getUrlEmail('logo_plink'),
