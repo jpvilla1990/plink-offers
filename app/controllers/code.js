@@ -1,10 +1,24 @@
 const codeService = require('../services/code'),
   utils = require('../utils'),
-  serviceS3 = require('../services/s3'),
   errors = require('../errors'),
   Offer = require('../models').offer,
   uniqueCode = require('../services/uniqueCode'),
   uuid = require('uuid');
+
+const changeCode = code => {
+  const result = {
+    email: code.email,
+    code: code.code,
+    dateRedemption: code.dateRedemption
+      ? utils.moment(code.dateRedemption).format('YYYY-MM-DD HH:MM:ss')
+      : null,
+    status: utils.getOfferStatusString(code.offer.dataValues),
+    product: code.offer.product,
+    image: code.offer.dataValues.imageUrl
+  };
+
+  return result;
+};
 
 exports.create = (req, res, next) => {
   const code = {
@@ -32,23 +46,16 @@ exports.create = (req, res, next) => {
 exports.redeemCode = ({ params }, res, next) =>
   codeService
     .redeemCode({ retailId: params.id, code: params.code })
-    .then(() => res.status(200).end())
+    .then(code => {
+      res.status(200).send(changeCode(code));
+    })
     .catch(next);
 
 exports.getCode = ({ params }, res, next) =>
   codeService
     .getCode({ retailId: params.id, number: params.code })
     .then(code => {
-      const result = {
-        email: code.email,
-        code: code.code,
-        dateRedemption: code.dateRedemption
-          ? utils.moment(code.dateRedemption).format('YYYY-MM-DD HH:MM:ss')
-          : null,
-        status: utils.getOfferStatusString(code.offer.dataValues),
-        product: code.offer.product,
-        image: code.offer.dataValues.imageUrl
-      };
+      const result = changeCode(code);
       res.status(200);
       res.send(result);
       res.end();

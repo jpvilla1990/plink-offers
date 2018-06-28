@@ -56,7 +56,8 @@ const config = {
       secret: process.env.SECRET_AWS,
       region: process.env.REGION_AWS,
       bucket: process.env.BUCKET_AWS,
-      expiration: process.env.EXPIRATION_AWS
+      expiration: process.env.EXPIRATION_AWS,
+      s3SignatureVersion: process.env.SIGNATURE_VERSION_S3 || 'v4'
     }
   }
 };

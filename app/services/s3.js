@@ -5,7 +5,8 @@ const AWS = require('aws-sdk'),
     new AWS.Config({
       accessKeyId: config.common.aws.key,
       secretAccessKey: config.common.aws.secret,
-      region: config.common.aws.region
+      region: config.common.aws.region,
+      signatureVersion: config.common.aws.s3SignatureVersion
     })
   );
 
