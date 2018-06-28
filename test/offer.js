@@ -208,9 +208,13 @@ describe('job notify', () => {
     simple.mock(jobNotify.sqs, 'deleteMessage').returnWith({
       promise: () => Promise.resolve({})
     });
+    simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
+      callback(undefined, true);
+    });
     jobNotify.notify().then(() => {
       setTimeout(() => {
-        mailer.transporter.sendMail.callCount.should.eqls(4);
+        logger.info(mailer.transporter.sendMail.callCount);
+        mailer.transporter.sendMail.callCount.should.eqls(3);
         done();
       }, 3000);
     });

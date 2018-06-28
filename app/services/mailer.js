@@ -69,7 +69,7 @@ exports.sendNewOffer = (offer, mail, name = null) => {
           : `IdOferta=${offer.id} Nit=${rv.commerce.nit} Posids=${postIds.join()}`;
       const email = {
         subject: subjectEmail,
-        html: servicesHtml.newOffer(offer),
+        html: servicesHtml.newOffer(offer, mail),
         to: mail
       };
       return exports.sendEmail(email);

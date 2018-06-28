@@ -2,6 +2,7 @@ const codeService = require('../services/code'),
   utils = require('../utils'),
   serviceS3 = require('../services/s3'),
   errors = require('../errors'),
+  config = require('../../config'),
   Offer = require('../models').offer,
   uniqueCode = require('../services/uniqueCode'),
   emailService = require('../services/mailer'),
@@ -9,7 +10,7 @@ const codeService = require('../services/code'),
 
 exports.create = (req, res, next) => {
   const code = {
-    email: req.params.email,
+    email: req.body.email,
     offerId: parseInt(req.params.id)
   };
   return Offer.getBy({ id: code.offerId })
@@ -23,7 +24,7 @@ exports.create = (req, res, next) => {
               // res.status(200);
               // res.send({ code: newCode });
               res.writeHead(301, {
-                Location: 'http://plink-dashboard-development.s3-website-us-east-1.amazonaws.com/'
+                Location: config.common.server.url_land
               });
               res.end();
             });
@@ -33,7 +34,7 @@ exports.create = (req, res, next) => {
         return emailService.sendOfferExpired(off.dataValues, code).then(() => {
           // throw errors.offerInactive;
           res.writeHead(301, {
-            Location: 'http://plink-dashboard-development.s3-website-us-east-1.amazonaws.com/'
+            Location: config.common.server.url_land
           });
           res.end();
         });

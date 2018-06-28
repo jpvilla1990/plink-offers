@@ -33,7 +33,8 @@ const config = {
     server: {
       base_path: process.env.URL_SERVER_API,
       info_retail: process.env.URL_INFO_RETAIL,
-      email_new_offer: process.env.EMAIL_OFFER
+      email_new_offer: process.env.EMAIL_OFFER,
+      url_land: process.env.URL_LAND
     },
     database: {
       url: process.env.NODE_API_DB_URL,

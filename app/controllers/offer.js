@@ -58,13 +58,3 @@ exports.getAll = (req, res, next) => {
     })
     .catch(err => next(err));
 };
-
-exports.info = (req, res, next) => {
-  res.status(200);
-  res.send({
-    addres: 'Cochabamba 3254',
-    commerce: { description: 'McDonalds', nit: '546822' },
-    posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
-  });
-  res.end();
-};
