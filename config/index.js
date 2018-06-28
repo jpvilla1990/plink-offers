@@ -63,7 +63,9 @@ const config = {
       bucket_email: process.env.BUCKET_EMAIL,
       expiration: process.env.EXPIRATION_AWS,
       url_s3: process.env.URL_S3_EMAIL,
-      folder_s3: process.env.FOLDER_BUCKET_EMAIL
+      folder_s3: process.env.FOLDER_BUCKET_EMAIL,
+      group_id: process.env.GROUP_ID,
+      queue_url: process.env.QUEUE_URL
     }
   }
 };

@@ -1,6 +1,7 @@
 const Offer = require('../models').offer,
   Category = require('../models').category,
   serviceS3 = require('../services/s3'),
+  config = require('../../config'),
   emailService = require('../services/mailer'),
   utils = require('../utils');
 
@@ -29,7 +30,7 @@ exports.create = (req, res, next) => {
     .then(newOff => {
       return Category.getBy({ id: off.category }).then(category => {
         newOff.nameCategory = category.name;
-        return emailService.sendNewOffer(newOff).then(() => {
+        return emailService.sendNewOffer(newOff, config.common.server.email_new_offer).then(() => {
           res.status(201).end();
         });
       });

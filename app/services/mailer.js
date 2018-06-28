@@ -53,17 +53,22 @@ exports.sendOfferExpired = (offer, code) => {
   });
 };
 
-exports.sendNewOffer = offer => {
+exports.sendNewOffer = (offer, mail, name = null) => {
   return i18next.init().then(t => {
     return requestService.retail(`/points/${offer.retail}`).then(rv => {
       const postIds = new Array();
       rv.posTerminals.map(value => postIds.push(value.posId));
       offer.retailName = rv.commerce.description;
       offer.retailAddres = rv.addres;
+      offer.name = name != null ? name : '';
+      const subjectEmail =
+        name != null
+          ? i18n.t(`newOffer.subject`)
+          : `IdOferta=${offer.id} Nit=${rv.commerce.nit} Posids=${postIds.join()}`;
       const email = {
-        subject: `IdOferta=${offer.id} Nit=${rv.commerce.nit} Posids=${postIds.join()}`,
+        subject: subjectEmail,
         html: servicesHtml.newOffer(offer),
-        to: config.common.server.email_new_offer
+        to: mail
       };
       return exports.sendEmail(email);
     });

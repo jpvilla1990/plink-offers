@@ -42,6 +42,7 @@
     "aws-sdk": "^2.252.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.2",
+    "cron": "^1.3.0",
     "dictum": "0.0.0",
     "email-templates": "^4.0.1",
     "express": "^4.16.2",

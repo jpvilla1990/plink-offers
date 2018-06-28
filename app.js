@@ -5,6 +5,7 @@ const express = require('express'),
   path = require('path'),
   config = require('./config'),
   routes = require('./app/routes'),
+  jobNotify = require('./app/jobs/notify'),
   errors = require('./app/middlewares/errors'),
   migrationsManager = require('./migrations'),
   logger = require('./app/logger'),
@@ -34,6 +35,7 @@ const init = () => {
   app.use(bodyParser.urlencoded(bodyParserUrlencodedConfig()));
 
   if (!config.isTesting) {
+    jobNotify.start();
     morgan.token('req-params', req => req.params);
     app.use(
       morgan(

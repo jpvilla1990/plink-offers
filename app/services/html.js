@@ -39,7 +39,7 @@ exports.newOffer = offer => {
       img_offer: offer.imageUrl,
       value_strategy: offer.valueStrategy,
       product: offer.product,
-      available: offer.maxRedemptions - (offer.redemptions ? offer.redemptions : 0),
+      available: offer.maxRedemptions - offer.redemptions,
       max_redemptions: offer.maxRedemptions,
       expiration: offer.expiration,
       name_retail: offer.retailName,
