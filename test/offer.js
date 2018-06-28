@@ -56,9 +56,11 @@ describe('/retail/:id/offers POST', () => {
   const offerWithRetail = offerExample;
   offerWithRetail.retail = 1222;
   beforeEach(() => {
-    simple
-      .mock(requestService, 'retail')
-      .resolveWith({ addres: 'Cochabamba 3254', commerce: { description: 'McDonalds' } });
+    simple.mock(requestService, 'retail').resolveWith({
+      addres: 'Cochabamba 3254',
+      commerce: { description: 'McDonalds' },
+      posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
+    });
   });
   it('should be successful', done => {
     factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
@@ -169,19 +171,17 @@ describe('job notify', () => {
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r =>
         factoryManager.create(factoryOffer, { category: rv.id, strategy: r.id }).then(off => {
           simple.mock(jobNotify.sqs, 'receiveMessage').returnWith({
-            promise: () => {
-              return {
+            promise: () =>
+              Promise.resolve({
                 Messages: [
                   {
                     Attributes: { MessageDeduplicationId: off.id },
                     Body:
-                      "mails:[{'mail':'julian.molina@wolox.com.ar','name':'julian'},{'mail':'julian.molina@wolox.com.ar','name':'julian'}]"
+                      '{"mails":[{"mail":"julian.molina@wolox.com.ar","name":"julian"},{"mail":"julian.molina@wolox.com.ar","name":"julian"},{"mail":"julian.molina@wolox.com.ar","name":"julian"}]}'
                   }
                 ]
-              };
-            }
+              })
           });
-          logger.info(off.id);
           simple.mock(jobNotify.ses, 'getSendQuota').callFn((obj, callback) => {
             callback(undefined, {
               Max24HourSend: 2,
@@ -195,6 +195,25 @@ describe('job notify', () => {
   it('should be fail because the count of mail es grather than Daily quota limit ', done => {
     jobNotify.notify().then(() => {
       done();
+    });
+  });
+  it('should be sucessfull ', done => {
+    simple.restore(jobNotify.ses, 'getSendQuota');
+    simple.mock(jobNotify.ses, 'getSendQuota').callFn((obj, callback) => {
+      callback(undefined, {
+        Max24HourSend: 50,
+        SentLast24Hours: 1
+      });
+    });
+    simple.mock(jobNotify.sqs, 'deleteMessage').returnWith({
+      promise: () => Promise.resolve({})
+    });
+    jobNotify.notify().then(() => {
+      setTimeout(() => {
+        mailer.transporter.sendMail.callCount.should.eqls(4);
+        done();
+      }, 3000);
+      // logger.info(emailService.transporter.sendMail.call.length);
     });
   });
 });
