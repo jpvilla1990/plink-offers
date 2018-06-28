@@ -28,6 +28,11 @@ exports.getSignedUrl = (key, action = 'getObject') => {
 };
 
 exports.getUrlEmail = (name, extension = 'png') => {
+  console.log(
+    `${config.common.aws.url_s3}/${config.common.aws.bucket_email}/${
+      config.common.aws.folder_s3
+    }/${name}.${extension}`
+  );
   return `${config.common.aws.url_s3}/${config.common.aws.bucket_email}/${
     config.common.aws.folder_s3
   }/${name}.${extension}`;

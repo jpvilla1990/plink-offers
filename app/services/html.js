@@ -1,6 +1,7 @@
 const pug = require('pug'),
-  serviceS3 = require('../services/s3'),
-  path = require('path');
+  path = require('path'),
+  config = require('../../config'),
+  serviceS3 = require('../services/s3');
 
 exports.newCode = (offer, code) => {
   const templateDir = path.join(__dirname, `/emailTemplates/newCode.pug`),
@@ -44,7 +45,9 @@ exports.newOffer = offer => {
       expiration: offer.expiration,
       name_retail: offer.retailName,
       addres: offer.retailAddres,
-      name_category: offer.nameCategory.toUpperCase()
+      name_category: offer.nameCategory.toUpperCase(),
+      create_code_url: `${config.common.server.base_path}/offers/${offer.id}/code`
+      // http://localhost:8080/offers/29/code
     },
     html = pug.renderFile(templateDir, params);
   return html;
