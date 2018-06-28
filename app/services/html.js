@@ -31,7 +31,7 @@ exports.newOffer = offer => {
     params = {
       logo_plink: serviceS3.getUrlEmail('logo_plink'),
       bg_footer: serviceS3.getUrlEmail('bg_footer'),
-      bg_general: serviceS3.getUrlEmail('bg_general'),
+      bg_general_offer: serviceS3.getUrlEmail('bg_general_offer'),
       logo_bancocolombia: serviceS3.getUrlEmail('logo_bancocolombia'),
       logo_superintendence: serviceS3.getUrlEmail('logo_superintendencia'),
       brand_logo: serviceS3.getUrlEmail('ic_default_comercio'),
