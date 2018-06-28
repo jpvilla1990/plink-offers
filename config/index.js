@@ -65,7 +65,10 @@ const config = {
       url_s3: process.env.URL_S3_EMAIL,
       folder_s3: process.env.FOLDER_BUCKET_EMAIL,
       group_id: process.env.GROUP_ID,
-      queue_url: process.env.QUEUE_URL
+      queue_url: process.env.QUEUE_URL,
+      rate_transport: process.env.SENDING_RATE,
+      time_nodecron: process.env.TIME_NODECRON,
+      hidden_msg_time: process.env.TIME_MSG
     }
   }
 };

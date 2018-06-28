@@ -18,11 +18,12 @@ const AWS = require('aws-sdk'),
     })
   ),
   transporter = nodemailer.createTransport({
-    SES: ses
+    SES: ses,
+    sendingRate: config.common.aws.rate_transport
   });
 
 exports.transporter = transporter;
-
+exports.ses = ses;
 exports.sendNewCode = (offer, code) => {
   return i18next.init().then(t => {
     return requestService.retail(`/points/${offer.retail}`).then(rv => {
@@ -61,6 +62,7 @@ exports.sendNewOffer = (offer, mail, name = null) => {
       offer.retailName = rv.commerce.description;
       offer.retailAddres = rv.addres;
       offer.name = name != null ? name : '';
+      offer.nameCategory = offer.nameCategory.toUpperCase();
       const subjectEmail =
         name != null
           ? i18n.t(`newOffer.subject`)

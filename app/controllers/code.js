@@ -9,7 +9,7 @@ const codeService = require('../services/code'),
 
 exports.create = (req, res, next) => {
   const code = {
-    email: req.body.email,
+    email: req.params.email,
     offerId: parseInt(req.params.id)
   };
   return Offer.getBy({ id: code.offerId })

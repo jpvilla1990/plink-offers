@@ -2,15 +2,10 @@ const chai = require('chai'),
   expect = chai.expect,
   dictum = require('dictum.js'),
   server = require('./../app'),
-  logger = require('../app/logger'),
   config = require('../config'),
-  AWS = require('aws-sdk'),
-  utils = require('../app/utils'),
   moment = require('moment'),
   requestService = require('../app/services/request'),
-  nodemailer = require('nodemailer/lib/mailer'),
   Offer = require('../app/models').offer,
-  Code = require('../app/models').code,
   mailer = require('../app/services/mailer'),
   simple = require('simple-mock'),
   token = require('../test/factories/token'),
@@ -19,8 +14,6 @@ const chai = require('chai'),
   factoryTypeOffer = require('../test/factories/typeOffer').nameFactory,
   factoryOffer = require('../test/factories/offer').nameFactory,
   i18next = require('i18next'),
-  should = chai.should(),
-  headerName = config.common.session.header_name,
   factoryCode = require('../test/factories/code').nameFactory;
 
 const offerWithRetail = {
@@ -52,7 +45,7 @@ describe('/offers/:id/code POST', () => {
         factoryManager.create(factoryOffer, offerWithRetail).then(before => {
           chai
             .request(server)
-            .post(`/offers/${before.id}/code`)
+            .post(`/offers/${before.id}/code/julian.molina@wolox.com.ar`)
             .send(emailTest)
             .then(json => {
               json.should.have.status(200);
@@ -78,7 +71,7 @@ describe('/offers/:id/code POST', () => {
         factoryManager.create(factoryOffer, offerWithRetail).then(before => {
           chai
             .request(server)
-            .post(`/offers/${before.id}/code`)
+            .post(`/offers/${before.id}/code/julian.molina@wolox.com.ar`)
             .send(emailTest)
             .then(err => {
               err.should.have.status(400);
@@ -101,7 +94,7 @@ describe('/offers/:id/code POST', () => {
         factoryManager.create(factoryOffer, offerWithRetail).then(before => {
           chai
             .request(server)
-            .post(`/offers/${before.id}/code`)
+            .post(`/offers/${before.id}/code/julian.molina@wolox.com.ar`)
             .send({})
             .then(err => {
               err.should.have.status(400);

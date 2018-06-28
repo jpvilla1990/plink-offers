@@ -1,14 +1,14 @@
 {
   "newCode": {
-    "subject": "Nuevo código",
-    "message": "Se ha creado un código exitosamente para la oferta"
+    "subject": "Nuevo código"
   },
   "offerInvalid": {
-    "subject": "Oferta inválida",
-    "message": "No se pudo crear la oferta"
+    "subject": "Oferta inválida"
   },
   "offerExpired": {
-    "subject": "Oferta expirada",
-    "message": "No se pudo crear el código"
+    "subject": "Oferta expirada"
+  },
+  "newOffer": {
+    "subject": "Nueva oferta"
   }
 }

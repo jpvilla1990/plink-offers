@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk'),
   config = require('../../config'),
   Offer = require('../models').offer,
+  Category = require('../models').category,
   logger = require('../logger'),
   emailService = require('../services/mailer'),
   CronJob = require('cron').CronJob,
@@ -10,29 +11,95 @@ const AWS = require('aws-sdk'),
       secretAccessKey: config.common.aws.secret,
       region: config.common.aws.region
     })
+  ),
+  ses = new AWS.SES(
+    new AWS.Config({
+      accessKeyId: config.common.aws.key,
+      secretAccessKey: config.common.aws.secret,
+      region: config.common.aws.region
+    })
   );
 
-const notify = () => {
+exports.sqs = sqs;
+exports.ses = ses;
+
+exports.notify = () => {
   const params = {
     QueueUrl: config.common.aws.queue_url,
     AttributeNames: ['MessageDeduplicationId', 'MessageGroupId'],
-    MaxNumberOfMessages: 1
+    MaxNumberOfMessages: 1,
+    VisibilityTimeout: parseInt(config.common.aws.hidden_msg_time)
   };
-  sqs.receiveMessage(params, function(err, data) {
-    if (err) {
-      logger.info(err);
-    } else {
+  logger.info('Beginning process to notify offers');
+  return sqs
+    .receiveMessage(params)
+    .promise()
+    .then(data => {
       if (data.Messages) {
-        return Offer.getBy({ id: data.Messages[0].Attributes.MessageDeduplicationId }).then(off => {
-          const emails = JSON.parse(data.Messages[0].Body).mails;
-          emails.forEach(element => {
-            emailService.sendNewOffer(off.dataValues, element.mail, element.name).catch(console.log);
+        logger.info(`Exist a message in the queue`);
+        return Offer.getBy({ id: data.Messages[0].Attributes.MessageDeduplicationId })
+          .then(off => {
+            return Category.getBy({ id: off.dataValues.category })
+              .then(cat => {
+                logger.info(`Values associated with the offer obtained`);
+                const emails = JSON.parse(data.Messages[0].Body).mails;
+                ses.getSendQuota({}, function(errQuota, quota) {
+                  const available = quota.Max24HourSend - quota.SentLast24Hours;
+                  if (emails.length > available) {
+                    logger.info(`The count of emails is greather than daily quota limit`);
+                  } else {
+                    off.dataValues.nameCategory = cat.dataValues.name;
+                    emails.forEach(element => {
+                      emailService
+                        .sendNewOffer(off.dataValues, element.mail, element.name)
+                        .catch(error => {
+                          logger.error(
+                            `Didnt send offer ${off.id} to ${element.name} ( ${
+                              element.mail
+                            } ) because ${error}`
+                          );
+                        })
+                        .then(() => {
+                          logger.info(`Sent offer id:${off.id}  to ${element.name} ( ${element.mail} )`);
+                        });
+                    });
+                    const deleteParams = {
+                      QueueUrl: config.common.aws.queue_url,
+                      ReceiptHandle: data.Messages[0].ReceiptHandle
+                    };
+                    return sqs
+                      .deleteMessage(deleteParams)
+                      .promise()
+                      .then(() => {
+                        logger.error(`Message deleted`);
+                        logger.info('End process');
+                      })
+                      .catch(e => {
+                        logger.error(`Error while deleting message for the queue, reason: ${e}`);
+                      });
+                  }
+                });
+              })
+              .catch(errCat => {
+                logger.error(
+                  `Error when tried to obtain category for the offer ${
+                    data.Messages[0].Attributes.MessageDeduplicationId
+                  }, reason: ${errCat}`
+                );
+              });
+          })
+          .catch(() => {
+            logger.error(
+              `Error when tried to obtain off ${data.Messages[0].Attributes.MessageDeduplicationId}`
+            );
           });
-        });
+      } else {
+        logger.info('Dont be message in the queue');
       }
-      // return Offer.getBy({id: data[]})
-    }
-  });
+      logger.info('End process');
+    })
+    .catch(err => {
+      logger.error(`Error while receiving message for the queue, reason: ${err}`);
+    });
 };
-
-module.exports = new CronJob('* * * * * *', notify, false, true);
+exports.jobNotify = new CronJob(config.common.aws.time_nodecron, exports.notify, false, true);

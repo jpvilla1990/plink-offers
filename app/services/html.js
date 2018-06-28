@@ -44,7 +44,7 @@ exports.newOffer = offer => {
       expiration: offer.expiration,
       name_retail: offer.retailName,
       addres: offer.retailAddres,
-      name_category: offer.nameCategory.toUpperCase()
+      name_category: offer.nameCategory
     },
     html = pug.renderFile(templateDir, params);
   return html;
