@@ -70,7 +70,8 @@ const config = {
       queue_url: process.env.QUEUE_URL,
       rate_transport: process.env.SENDING_RATE,
       time_nodecron: process.env.TIME_NODECRON,
-      hidden_msg_time: process.env.TIME_MSG
+      hidden_msg_time: process.env.TIME_MSG,
+      s3SignatureVersion: process.env.SIGNATURE_VERSION_S3 || 'v4'
     }
   }
 };
