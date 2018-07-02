@@ -36,10 +36,6 @@ const init = () => {
   app.use(bodyParser.urlencoded(bodyParserUrlencodedConfig()));
 
   if (!config.isTesting) {
-    i18next
-      .init()
-      .then(() => jobNotify.start())
-      .catch(logger.error);
     morgan.token('req-params', req => req.params);
     app.use(
       morgan(
@@ -54,7 +50,10 @@ const init = () => {
         return migrationsManager.check();
       }
     })
+    .then(() => i18next.init())
     .then(() => {
+      if (config.isTesting) jobNotify.start();
+
       routes.init(app);
 
       app.use(errors.handle);

@@ -169,6 +169,7 @@ describe('/retail/:id/offers GET', () => {
 });
 
 describe('job notify', () => {
+  let warning;
   beforeEach(() =>
     factoryManager.create(factoryCategory, { name: 'travel' }).then(rv =>
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r =>
@@ -194,12 +195,14 @@ describe('job notify', () => {
           simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
             callback(undefined, true);
           });
+          warning = simple.mock(logger.warn);
         })
       )
     )
   );
   it('should be fail because the count of mail es grather than Daily quota limit ', done => {
     jobNotify.notify().then(() => {
+      mailer.transporter.sendMail.callCount.should.eqls(0);
       done();
     });
   });
@@ -219,7 +222,6 @@ describe('job notify', () => {
     });
     jobNotify.notify().then(() => {
       setTimeout(() => {
-        logger.info(mailer.transporter.sendMail.callCount);
         mailer.transporter.sendMail.callCount.should.eqls(3);
         done();
       }, 3000);
