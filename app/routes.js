@@ -17,5 +17,4 @@ exports.init = app => {
   app.patch('/retail/:id/code/:code/redeem', [auth.requireToken], code.redeemCode);
   app.get('/retail/:id/code/:code', [auth.requireToken], code.getCode);
   app.post('/test-mail', mail.sendTestMail);
-  app.get('/points/:id', [], Offer.info);
 };
