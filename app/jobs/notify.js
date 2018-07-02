@@ -39,67 +39,59 @@ exports.notify = () => {
         logger.info(`Exist a message in the queue`);
         return Offer.getBy({ id: data.Messages[0].Attributes.MessageDeduplicationId })
           .then(off => {
-            return Category.getBy({ id: off.dataValues.category })
-              .then(cat => {
-                logger.info(`Values associated with the offer obtained`);
-                const emails = JSON.parse(data.Messages[0].Body).mails;
-                ses.getSendQuota({}, function(errQuota, quota) {
-                  const available = quota.Max24HourSend - quota.SentLast24Hours;
-                  if (emails.length > available) {
-                    logger.info(`The count of emails is greather than daily quota limit`);
-                  } else {
-                    off.dataValues.nameCategory = cat.dataValues.name;
-                    emails.forEach(element => {
-                      emailService
-                        .sendNewOffer(off.dataValues, element.mail, element.name)
-                        .catch(error => {
-                          logger.error(
-                            `Didnt send offer ${off.id} to ${element.name} ( ${
-                              element.mail
-                            } ) because ${error}`
-                          );
-                        })
-                        .then(() => {
-                          logger.info(`Sent offer id:${off.id}  to ${element.name} ( ${element.mail} )`);
-                        });
+            logger.info(`Values associated with the offer obtained`);
+            const emails = JSON.parse(data.Messages[0].Body).mails;
+            ses.getSendQuota({}, function(errQuota, quota) {
+              const available = quota.Max24HourSend - quota.SentLast24Hours;
+              if (emails.length > available) {
+                logger.warning(`The count of emails is greather than daily quota limit`);
+              } else {
+                off.dataValues.nameCategory = off.category.dataValues.name;
+                emails.forEach(element => {
+                  emailService
+                    .sendNewOffer(off.dataValues, element.mail, element.name)
+                    .catch(error => {
+                      logger.error(
+                        `Didnt send offer with id: ${off.id} to ${element.name} ( ${
+                          element.mail
+                        } ) because ${error}`
+                      );
+                    })
+                    .then(() => {
+                      logger.info(`Sent offer with id: ${off.id} to ${element.name} ( ${element.mail} )`);
                     });
-                    const deleteParams = {
-                      QueueUrl: config.common.aws.queue_url,
-                      ReceiptHandle: data.Messages[0].ReceiptHandle
-                    };
-                    return sqs
-                      .deleteMessage(deleteParams)
-                      .promise()
-                      .then(() => {
-                        logger.error(`Message deleted`);
-                        logger.info('End process');
-                      })
-                      .catch(e => {
-                        logger.error(`Error while deleting message for the queue, reason: ${e}`);
-                      });
-                  }
                 });
-              })
-              .catch(errCat => {
-                logger.error(
-                  `Error when tried to obtain category for the offer ${
-                    data.Messages[0].Attributes.MessageDeduplicationId
-                  }, reason: ${errCat}`
-                );
-              });
+                const deleteParams = {
+                  QueueUrl: config.common.aws.queue_url,
+                  ReceiptHandle: data.Messages[0].ReceiptHandle
+                };
+                return sqs
+                  .deleteMessage(deleteParams)
+                  .promise()
+                  .then(() => {
+                    logger.error(`Message deleted`);
+                    logger.info('End process');
+                  })
+                  .catch(e => {
+                    logger.error(`Error while deleting message from the queue, reason: ${e}`);
+                  });
+              }
+            });
           })
           .catch(() => {
             logger.error(
-              `Error when tried to obtain off ${data.Messages[0].Attributes.MessageDeduplicationId}`
+              `Error when tried to obtain the offer with id: ${
+                data.Messages[0].Attributes.MessageDeduplicationId
+              }`
             );
           });
       } else {
-        logger.info('Dont be message in the queue');
+        logger.info('No messages in the queue');
       }
       logger.info('End process');
     })
     .catch(err => {
-      logger.error(`Error while receiving message for the queue, reason: ${err}`);
+      logger.error(`Error while receiving message from the queue, reason: ${err}`);
     });
 };
 exports.jobNotify = new CronJob(config.common.aws.time_nodecron, exports.notify, false, true);

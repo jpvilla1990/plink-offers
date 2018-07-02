@@ -61,6 +61,9 @@ describe('/retail/:id/offers POST', () => {
       commerce: { description: 'McDonalds' },
       posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
     });
+    simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
+      callback(undefined, true);
+    });
   });
   it('should be successful', done => {
     factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
@@ -187,6 +190,9 @@ describe('job notify', () => {
               Max24HourSend: 2,
               SentLast24Hours: 1
             });
+          });
+          simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
+            callback(undefined, true);
           });
         })
       )

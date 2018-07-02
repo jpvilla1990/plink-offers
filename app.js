@@ -7,6 +7,7 @@ const express = require('express'),
   routes = require('./app/routes'),
   { jobNotify } = require('./app/jobs/notify'),
   errors = require('./app/middlewares/errors'),
+  i18next = require('./app/services/i18next'),
   migrationsManager = require('./migrations'),
   logger = require('./app/logger'),
   DEFAULT_BODY_SIZE_LIMIT = 1024 * 1024 * 10,
@@ -35,7 +36,10 @@ const init = () => {
   app.use(bodyParser.urlencoded(bodyParserUrlencodedConfig()));
 
   if (!config.isTesting) {
-    jobNotify.start();
+    i18next
+      .init()
+      .then(() => jobNotify.start())
+      .catch(logger.error);
     morgan.token('req-params', req => req.params);
     app.use(
       morgan(

@@ -46,13 +46,14 @@ exports.newOffer = (offer, emailTo) => {
       name_retail: offer.retailName,
       addres: offer.retailAddres,
       name_category: offer.nameCategory.toUpperCase(),
+      name_person: offer.name,
       create_code_url: `${config.common.server.base_path}/${offer.id}/code`,
       emailTo
     },
     html = pug.renderFile(templateDir, params);
   return html;
 };
-exports.offerExpired = (offer, code) => {
+exports.offerExpired = offer => {
   const templateDir = path.join(__dirname, `/emailTemplates/offerExpired.pug`),
     params = {
       logo_plink: serviceS3.getUrlEmail('logo_plink'),

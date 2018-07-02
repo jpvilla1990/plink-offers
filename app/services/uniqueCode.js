@@ -5,7 +5,7 @@ const uuid = require('uuid'),
 
 exports.verify = offer =>
   Code.createModel(offer).catch(err => {
-    if (err instanceof Sequelize.UniqueConstraintError && err.fields.code) {
+    if (err instanceof Sequelize.UniqueConstraintError && err.fields.codes_email_offer_id) {
       offer.code = uuid().slice(0, 8);
       return exports.verify(offer);
     } else {

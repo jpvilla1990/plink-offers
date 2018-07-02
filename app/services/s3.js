@@ -1,7 +1,5 @@
 const AWS = require('aws-sdk'),
   config = require('../../config'),
-  errors = require('../errors'),
-  logger = require('../logger'),
   uuid = require('uuid'),
   s3 = new AWS.S3(
     new AWS.Config({
