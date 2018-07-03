@@ -29,6 +29,28 @@ exports.create = (req, res, next) => {
     })
     .catch(err => next(err));
 };
+exports.getOffer = (req, res, next) => {
+  const idOffer = req.params.id;
+  return Offer.getBy({ id: idOffer })
+    .then(off => {
+      const send = {
+        image: off.dataValues.imageUrl,
+        product: off.dataValues.product,
+        begin: off.dataValues.begin,
+        expires: off.dataValues.expiration,
+        maxRedemptions: off.dataValues.maxRedemptions,
+        redemptions: off.dataValues.redemptions,
+        status: utils.getOfferStatusString(off.dataValues),
+        category: off.category.name,
+        typeOffer: off.type.description,
+        valueStrategy: off.dataValues.valueStrategy
+      };
+      res.status(200);
+      res.send(send);
+      res.end();
+    })
+    .catch(next);
+};
 exports.getAll = (req, res, next) => {
   const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10;
   const offsetQuery = req.query.page === 0 ? 0 : req.query.page * limitQuery;

@@ -37,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         field: 'value_type_offer'
       },
-      category: {
+      categoryId: {
         type: DataTypes.INTEGER
       },
       codes: {
@@ -58,7 +58,19 @@ module.exports = (sequelize, DataTypes) => {
     });
   };
   Offer.getBy = filter => {
-    return Offer.findOne({ where: filter }).catch(err => {
+    return Offer.findOne({
+      where: filter,
+      include: [
+        {
+          model: sequelize.models.category,
+          as: 'category'
+        },
+        {
+          model: sequelize.models.type_offer,
+          as: 'type'
+        }
+      ]
+    }).catch(err => {
       throw errors.databaseError(err.message);
     });
   };
@@ -75,6 +87,10 @@ module.exports = (sequelize, DataTypes) => {
     }).catch(err => {
       throw errors.databaseError(err.message);
     });
+  };
+  Offer.associate = models => {
+    Offer.belongsTo(models.category, { as: 'category' });
+    Offer.belongsTo(models.type_offer, { as: 'type', foreignKey: 'strategy' });
   };
   return Offer;
 };
