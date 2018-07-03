@@ -1,5 +1,6 @@
 const Offer = require('../models').offer,
   logger = require('../logger'),
+  errors = require('../errors'),
   serviceS3 = require('../services/s3'),
   config = require('../../config'),
   emailService = require('../services/mailer'),
@@ -38,24 +39,28 @@ exports.create = (req, res, next) => {
     .catch(err => next(err));
 };
 exports.getOffer = (req, res, next) => {
-  const idOffer = req.params.id;
+  const idOffer = req.params.id_offer;
   return Offer.getBy({ id: idOffer })
     .then(off => {
-      const send = {
-        image: off.dataValues.imageUrl,
-        product: off.dataValues.product,
-        begin: off.dataValues.begin,
-        expires: off.dataValues.expiration,
-        maxRedemptions: off.dataValues.maxRedemptions,
-        redemptions: off.dataValues.redemptions,
-        status: utils.getOfferStatusString(off.dataValues),
-        category: off.category.name,
-        typeOffer: off.type.description,
-        valueStrategy: off.dataValues.valueStrategy
-      };
-      res.status(200);
-      res.send(send);
-      res.end();
+      if (off) {
+        const send = {
+          image: off.dataValues.imageUrl,
+          product: off.dataValues.product,
+          begin: off.dataValues.begin,
+          expires: off.dataValues.expiration,
+          maxRedemptions: off.dataValues.maxRedemptions,
+          redemptions: off.dataValues.redemptions,
+          status: utils.getOfferStatusString(off.dataValues),
+          category: off.category.name,
+          typeOffer: off.type.description.toUpperCase(),
+          valueStrategy: off.dataValues.valueStrategy
+        };
+        res.status(200);
+        res.send(send);
+        res.end();
+      } else {
+        throw errors.offerNotFound;
+      }
     })
     .catch(next);
 };
