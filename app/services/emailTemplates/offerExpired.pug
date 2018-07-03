@@ -1,0 +1,43 @@
+doctype html
+head
+  link(href='https://fonts.googleapis.com/css?family=Exo' rel='stylesheet')
+.wrapper(style="position: relative;text-align: center;background-color: #f1f2f2;font-family: 'Exo', sans-serif;width: 650px;")
+  article.main(style=`text-align: left;background-image: url(${bg_expired_general});    height: 553px;	width: 650px;background-size: cover;align-items: center;`)
+    img.logo(src=logo_plink style='padding-top: 30px;margin-bottom: 50px;display: block;margin-left: auto;margin-right: auto;')
+    img.logo(src=ic_error_mail style='margin-bottom: 35px;display: block;margin-left: auto;margin-right: auto;')
+    p.greetings(style='display: block;margin-left: auto;margin-right: auto;margin-bottom: 0px;height: 27px;	width: 198px;	color: #FDF8F1;	font-family: Exo;font-size: 20px;font-weight: bold;letter-spacing: 0.78px;	line-height: 27px;	') La oferta ya caduc&oacute;
+    .subtitle(style='display: block;margin-left: auto;margin-right: auto;margin-top: 0px;height: 19px;	width: 541px; text-align: center;	color: #FFF1DE;	font-family: Exo;	font-size: 14px;	font-weight: 500;	letter-spacing: 0.55px;	line-height: 19px;') La siguiente oferta ya no esta disponible
+    .white-coupon(style='width: 500px;margin-left: auto;margin-right: auto;margin-top: 50px;height:175px;')
+      img.main-image(src=img_offer style='display: inline;height: 115.83px;width: 33%;border-radius: 10px;background-color: #FFFFFF;float: left;')
+      .left-coupon(style='width: 60%;display: inline;float: right;text-align: left;')
+        .main-info(style='height: 69px;	width: 300px;	color: #5C5C5C;	font-family: Exo;	font-size: 16px;	font-weight: 600;	letter-spacing: 0.97px;	line-height: 23px;')
+          | #{value_strategy} en #{product} pagando con tus tarjetas Bancolombia
+        .offer(style='display: block;margin-top: 5px;height: 19px;width: 231px;color: #9B9B9B;font-family: Exo;font-size: 14px;font-weight: 500;letter-spacing: 0.86px;line-height: 19px;') Oferta caduc&oacute;: #{expiration}
+        .brand-info(style='display: block;height: 56px;width: 249px;')
+          img.brand-logo(src=brand_logo style='height: 54.66px;	float:left; display:inline; width: 20%;')
+          .brand-data(style='color: #9B9B9B;font-family: Exo;font-size: 14px;font-weight: 500;letter-spacing: 0.8px;line-height: 19px;float: left;display: inline;width: 77%;padding-top: 10px;margin-left: 3%;')
+            .brand-name #{name_retail}
+            .brand-adress #{addres}
+  .contact(style=`width: 650px;	height: 125px;background-color: #f1f2f2;	background-image: url(${bg_footer});`)
+  .disclaimer(style='background-color: #ffffff;display: block;margin-left: auto;margin-right: auto;')
+    .contact-info(style='display: block;margin-left: auto;margin-right: auto;color: #FF6500;')
+      .contact-title
+        | Manteng&aacute;monos en cont&aacute;cto
+      .contact-email(style='font-weight: bold;')
+        | hello@plink.com.co
+    img.superintendence(src=logo_superintendence style='position: relative;float: left;bottom: 94px;left: 25px;')
+    .footer-logos(style='display: block;margin-left: auto;margin-right: auto;margin-top: 25px;height: 75px;width: 65%;')
+      .img_container( style='display: flex; justify-content: center; width: 80%;')
+        img.footer-logo(src=logo_bancocolombia style='display: inline;width: 50%;margin-right: 50px;height: 54.66px;    margin-left: 60px;')
+        img.brand-footer-logo(src=brand_logo style='float: right;display: inline;width: 20%;height: 54.66px')
+    hr.dotted-line2(style='display: block;margin-left: auto;margin-right: auto;margin-bottom: 0px;width: 150px;border-top: dashed 0px #E0DEDE;height: 0px;')
+    .disclaimer-conatiner(style='display: block;margin-left: auto;margin-right: auto;height: 65px;width: 602.95px;color: #4A4A4A;font-family: Exo;font-size: 10px;letter-spacing: 0.39px;line-height: 13px;text-align: center;margin-top: 18px;margin-bottom: 18px;')
+      .disclaimer-text
+        | &ldquo;Bancolombia nunca le solicitar&aacute; datos financieros como usuarios, claves, n&uacute;meros de tarjetas de cr&eacute;dito con sus c&oacute;digos de seguridad y fechas de vencimiento mediante v&iacute;nculos de correo electr&oacute;nico o llamadas telef&oacute;nicas.
+      .disclaimer-text2(style='margin-top: 10px;')
+        | Para verificar la autenticidad de este correo electr&oacute;nico puede reenviarlo a
+      .disclaimer-email(style='font-weight: bold;')
+        | correosospechoso@bancolombia.com.co.&rdquo;
+    hr.dotted-line2(style='display: block;margin-left: auto;margin-right: auto;margin-bottom: 0px;width: 150px;border-top: dashed 0px #E0DEDE;height: 0px;')
+    .footer(style='display: block;margin-left: auto;margin-right: auto;text-align: center;width: 540px;background-color: #ffffff;color: #FF6500;font-size: 10px;font-weight: 500;letter-spacing: 0.39px;line-height: 13px;margin-top: 20px;')
+      | PLINK es una marca de Bancolombia S.A. Los productos y servicios ofrecidos a trav&eacute;s de PLINK , son otorgados por Bancolombia S.A. Copyright &copy; 2018 GRUPO BANCOLOMBIA.

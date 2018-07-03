@@ -11,7 +11,7 @@ exports.init = app => {
   app.post('/retail/:id/offers', [auth.requireToken, validator.checkAll, validator.validate], Offer.create);
   app.get('/image-offer', Offer.getImageUrl);
   app.get('/retail/:id/offers', [auth.requireToken, validator.checkQuery, validator.validate], Offer.getAll);
-  app.post('/offers/:id/code', [validator.checkEmail, validator.validate], Code.create);
+  app.post('/offers/:id/code', [], Code.create);
   app.get('/categories', category.getAllCategories);
   app.get('/type-offers', typeOffer.getAllTypes);
   app.patch('/retail/:id/code/:code/redeem', [auth.requireToken], code.redeemCode);

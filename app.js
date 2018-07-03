@@ -5,7 +5,9 @@ const express = require('express'),
   path = require('path'),
   config = require('./config'),
   routes = require('./app/routes'),
+  { jobNotify } = require('./app/jobs/notify'),
   errors = require('./app/middlewares/errors'),
+  i18next = require('./app/services/i18next'),
   migrationsManager = require('./migrations'),
   logger = require('./app/logger'),
   DEFAULT_BODY_SIZE_LIMIT = 1024 * 1024 * 10,
@@ -48,7 +50,10 @@ const init = () => {
         return migrationsManager.check();
       }
     })
+    .then(() => i18next.init())
     .then(() => {
+      if (config.isTesting) jobNotify.start();
+
       routes.init(app);
 
       app.use(errors.handle);

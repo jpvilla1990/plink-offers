@@ -14,8 +14,8 @@ factory.define(exports.nameFactory, Offer, {
   purpose: 'Vacations',
   imageUrl: factory.seq(
     'Offer.image',
-    n => `'https://s3.amazonaws.com/plink-email-assets/plink_offers/${n}.png`
+    n => `'https://s3.amazonaws.com/plink-email-assets/plink_offers/${n}.jpg`
   ),
   valueStrategy: '30%',
-  category: factory.assoc('Category', 'id')
+  categoryId: factory.assoc('Category', 'id')
 });

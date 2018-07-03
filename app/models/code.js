@@ -1,6 +1,7 @@
 'use strict';
 
-const Sequelize = require('sequelize');
+const Sequelize = require('sequelize'),
+  errors = require('../errors');
 
 module.exports = (sequelize, DataTypes) => {
   const Code = sequelize.define(
@@ -19,6 +20,11 @@ module.exports = (sequelize, DataTypes) => {
   );
   Code.createModel = off => {
     return Code.create(off);
+  };
+  Code.getBy = filter => {
+    return Code.findOne({ where: filter }).catch(err => {
+      throw errors.databaseError(err.message);
+    });
   };
   Code.associate = models => {
     Code.belongsTo(models.offer, { as: 'offer' });

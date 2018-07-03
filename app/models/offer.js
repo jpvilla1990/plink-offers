@@ -38,7 +38,8 @@ module.exports = (sequelize, DataTypes) => {
         field: 'value_type_offer'
       },
       categoryId: {
-        type: DataTypes.INTEGER
+        type: DataTypes.INTEGER,
+        field: 'category_id'
       },
       codes: {
         type: DataTypes.INTEGER
@@ -53,7 +54,14 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   Offer.createModel = off => {
-    return Offer.create(off).catch(err => {
+    return Offer.create(off, {
+      include: [
+        {
+          model: sequelize.models.category,
+          as: 'category'
+        }
+      ]
+    }).catch(err => {
       throw errors.databaseError(err.message);
     });
   };

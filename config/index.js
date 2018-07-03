@@ -30,6 +30,12 @@ const assignObject = (target, source) => {
 const config = {
   common: {
     timezone: process.env.TIME_ZONE || 'America/Bogota',
+    server: {
+      base_path: process.env.URL_SERVER_API,
+      info_retail: process.env.URL_INFO_RETAIL,
+      email_new_offer: process.env.EMAIL_OFFER,
+      url_land: process.env.URL_LAND
+    },
     database: {
       url: process.env.NODE_API_DB_URL,
       host: process.env.DB_HOST,
@@ -56,7 +62,15 @@ const config = {
       secret: process.env.SECRET_AWS,
       region: process.env.REGION_AWS,
       bucket: process.env.BUCKET_AWS,
+      bucket_email: process.env.BUCKET_EMAIL,
       expiration: process.env.EXPIRATION_AWS,
+      url_s3: process.env.URL_S3_EMAIL,
+      folder_s3: process.env.FOLDER_BUCKET_EMAIL,
+      group_id: process.env.GROUP_ID,
+      queue_url: process.env.QUEUE_URL,
+      rate_transport: process.env.SENDING_RATE,
+      time_nodecron: process.env.TIME_NODECRON,
+      hidden_msg_time: process.env.TIME_MSG,
       s3SignatureVersion: process.env.SIGNATURE_VERSION_S3 || 'v4'
     }
   }
