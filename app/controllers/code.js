@@ -38,8 +38,6 @@ exports.create = (req, res, next) => {
             return uniqueCode.verify(code).then(newCode => {
               return Offer.incrementField('codes', { id: newCode.offerId }).then(() => {
                 return emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
-                  // res.status(200);
-                  // res.send({ code: newCode });
                   res.writeHead(301, {
                     Location: config.common.server.url_land
                   });
@@ -49,7 +47,6 @@ exports.create = (req, res, next) => {
             });
           } else {
             return emailService.sendOfferExpired(off.dataValues, code).then(() => {
-              // throw errors.offerInactive;
               res.writeHead(301, {
                 Location: config.common.server.url_land
               });
