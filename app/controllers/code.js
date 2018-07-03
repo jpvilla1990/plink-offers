@@ -1,8 +1,11 @@
 const codeService = require('../services/code'),
   utils = require('../utils'),
+  Code = require('../models').code,
   errors = require('../errors'),
+  config = require('../../config'),
   Offer = require('../models').offer,
   uniqueCode = require('../services/uniqueCode'),
+  emailService = require('../services/mailer'),
   uuid = require('uuid');
 
 const changeCode = code => {
@@ -22,23 +25,37 @@ const changeCode = code => {
 
 exports.create = (req, res, next) => {
   const code = {
-    email: req.body.email,
+    email: req.query.email,
     offerId: parseInt(req.params.id)
   };
-  return Offer.getBy({ id: code.offerId })
-    .then(off => {
-      const active = utils.getOfferStatus(off.dataValues);
-      if (active) {
-        code.code = uuid().slice(0, 8);
-        return uniqueCode.verify(code).then(newCode => {
-          return Offer.incrementField('codes', { id: newCode.offerId }).then(() => {
-            res.status(200);
-            res.send({ code: newCode });
-            res.end();
-          });
+  return Code.getBy({ email: code.email })
+    .then(exist => {
+      if (!exist) {
+        return Offer.getBy({ id: code.offerId }).then(off => {
+          const active = utils.getOfferStatus(off.dataValues);
+          if (active) {
+            code.code = uuid().slice(0, 8);
+            return uniqueCode.verify(code).then(newCode => {
+              return Offer.incrementField('codes', { id: newCode.offerId }).then(() => {
+                return emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
+                  res.writeHead(301, {
+                    Location: config.common.server.url_land
+                  });
+                  res.end();
+                });
+              });
+            });
+          } else {
+            return emailService.sendOfferExpired(off.dataValues, code).then(() => {
+              res.writeHead(301, {
+                Location: config.common.server.url_land
+              });
+              res.end();
+            });
+          }
         });
       } else {
-        throw errors.offerInactive;
+        throw errors.existingMail;
       }
     })
     .catch(next);

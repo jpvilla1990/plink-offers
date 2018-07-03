@@ -3,14 +3,20 @@ const chai = require('chai'),
   server = require('./../app'),
   logger = require('../app/logger'),
   config = require('../config'),
+  AWS = require('aws-sdk'),
   factoryManager = require('../test/factories/factoryManager'),
   factoryCategory = require('../test/factories/category').nameFactory,
   factoryTypeOffer = require('../test/factories/typeOffer').nameFactory,
   factoryOffer = require('../test/factories/offer').nameFactory,
+  requestService = require('../app/services/request'),
+  simple = require('simple-mock'),
   token = require('./factories/token'),
+  jobNotify = require('../app/jobs/notify'),
   should = chai.should(),
+  mailer = require('../app/services/mailer'),
   headerName = config.common.session.header_name,
   Offer = require('../app/models').offer,
+  Category = require('../app/models').category,
   offerExample = {
     product: '2x1 en McDuo',
     begin: '2017-02-13',
@@ -43,11 +49,22 @@ const chai = require('chai'),
     purpose: 'Atraer clientes',
     url: 'https://s3.amazonaws.com/plink-email-assets/plink_offers/bg_general.png'
   },
-  tokenExample = `test ${token.generate({ points: '1222,1444,1333' })}`;
+  tokenExample = `test ${token.generate({ points: '1222,1444,1333' })}`,
+  emailService = require('../app/services/mailer');
 
 describe('/retail/:id/offers POST', () => {
   const offerWithRetail = offerExample;
   offerWithRetail.retail = 1222;
+  beforeEach(() => {
+    simple.mock(requestService, 'retail').resolveWith({
+      addres: 'Cochabamba 3254',
+      commerce: { description: 'McDonalds' },
+      posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
+    });
+    simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
+      callback(undefined, true);
+    });
+  });
   it('should be successful', done => {
     factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
@@ -148,5 +165,66 @@ describe('/retail/:id/offers GET', () => {
         json.body.should.have.property('internal_code');
         done();
       });
+  });
+});
+
+describe('job notify', () => {
+  let warning;
+  beforeEach(() =>
+    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv =>
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r =>
+        factoryManager.create(factoryOffer, { category: rv.id, strategy: r.id }).then(off => {
+          simple.mock(jobNotify.sqs, 'receiveMessage').returnWith({
+            promise: () =>
+              Promise.resolve({
+                Messages: [
+                  {
+                    Attributes: { MessageDeduplicationId: off.id },
+                    Body:
+                      '{"mails":[{"mail":"julian.molina@wolox.com.ar","name":"julian"},{"mail":"julian.molina@wolox.com.ar","name":"julian"},{"mail":"julian.molina@wolox.com.ar","name":"julian"}]}'
+                  }
+                ]
+              })
+          });
+          simple.mock(jobNotify.ses, 'getSendQuota').callFn((obj, callback) => {
+            callback(undefined, {
+              Max24HourSend: 2,
+              SentLast24Hours: 1
+            });
+          });
+          simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
+            callback(undefined, true);
+          });
+          warning = simple.mock(logger.warn);
+        })
+      )
+    )
+  );
+  it('should be fail because the count of mail es grather than Daily quota limit ', done => {
+    jobNotify.notify().then(() => {
+      mailer.transporter.sendMail.callCount.should.eqls(0);
+      done();
+    });
+  });
+  it('should be sucessfull ', done => {
+    simple.restore(jobNotify.ses, 'getSendQuota');
+    simple.mock(jobNotify.ses, 'getSendQuota').callFn((obj, callback) => {
+      callback(undefined, {
+        Max24HourSend: 50,
+        SentLast24Hours: 1
+      });
+    });
+    simple.mock(jobNotify.sqs, 'deleteMessage').returnWith({
+      promise: () => Promise.resolve({})
+    });
+    simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
+      callback(undefined, true);
+    });
+    jobNotify.notify().then(() => {
+      setTimeout(() => {
+        mailer.transporter.sendMail.callCount.should.eqls(3);
+        done();
+      }, 3000);
+    });
   });
 });

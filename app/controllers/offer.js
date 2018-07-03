@@ -1,5 +1,8 @@
 const Offer = require('../models').offer,
+  logger = require('../logger'),
   serviceS3 = require('../services/s3'),
+  config = require('../../config'),
+  emailService = require('../services/mailer'),
   utils = require('../utils');
 
 exports.getImageUrl = (req, res, next) =>
@@ -11,21 +14,26 @@ exports.getImageUrl = (req, res, next) =>
     .catch(next);
 
 exports.create = (req, res, next) => {
-  const off = {
+  const offer = {
     product: req.body.product,
     begin: req.body.begin,
     expiration: req.body.expiration,
-    category: req.body.category,
+    categoryId: req.body.category,
     strategy: req.body.strategy,
     maxRedemptions: req.body.maxRedemptions,
     purpose: req.body.purpose,
     valueStrategy: req.body.valueStrategy,
     imageUrl: req.body.url
   };
-  off.retail = req.retail;
-  return Offer.createModel(off)
-    .then(() => {
-      res.status(201).end();
+  offer.retail = req.retail;
+  return Offer.createModel(offer)
+    .then(off => {
+      return Offer.getBy({ id: off.dataValues.id }).then(newOff => {
+        offer.nameCategory = newOff.category.dataValues.name;
+        return emailService.sendNewOffer(offer, config.common.server.email_new_offer).then(() => {
+          res.status(201).end();
+        });
+      });
     })
     .catch(err => next(err));
 };

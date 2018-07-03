@@ -1,0 +1,14 @@
+{
+  "newCode": {
+    "subject": "Nuevo código"
+  },
+  "offerInvalid": {
+    "subject": "Oferta inválida"
+  },
+  "offerExpired": {
+    "subject": "Oferta expirada"
+  },
+  "newOffer": {
+    "subject": "Nueva oferta"
+  }
+}

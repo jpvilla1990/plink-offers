@@ -11,7 +11,6 @@ const AWS = require('aws-sdk'),
   );
 
 exports.getSignedUrlPut = key => exports.getSignedUrl(key, 'putObject');
-
 exports.getSignedUrl = (key, action = 'getObject') => {
   const s3Params = {
     Bucket: config.common.aws.bucket,
@@ -25,4 +24,14 @@ exports.getSignedUrl = (key, action = 'getObject') => {
       resolve(data);
     });
   });
+};
+
+exports.getUrlEmail = (name, extension = 'png') => {
+  return `${config.common.aws.url_s3}/${config.common.aws.bucket_email}/${
+    config.common.aws.folder_s3
+  }/${name}.${extension}`;
+};
+
+exports.getUrlOffer = (id, extension = 'jpg') => {
+  return `${config.common.aws.url_s3}/${config.common.aws.bucket}/offer-${id}.${extension}`;
 };
