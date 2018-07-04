@@ -1,7 +1,8 @@
 const Offer = require('../models').offer,
   logger = require('../logger'),
-  serviceS3 = require('../services/s3'),
+  errors = require('../errors'),
   config = require('../../config'),
+  serviceS3 = require('../services/s3'),
   emailService = require('../services/mailer'),
   utils = require('../utils');
 
@@ -57,4 +58,13 @@ exports.getAll = (req, res, next) => {
       res.end();
     })
     .catch(err => next(err));
+};
+
+exports.accessOffer = (req, res, next) => {
+  if (req.body.code && req.body.code === config.common.access_offer) {
+    res.status(200);
+    res.end();
+  } else {
+    next(errors.userUnauthorized);
+  }
 };
