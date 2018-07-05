@@ -39,7 +39,7 @@ const changeCode = code => {
 
 exports.create = (req, res, next) => {
   const code = {
-    email: req.query.email,
+    email: req.body.email,
     offerId: parseInt(req.params.id)
   };
   return Code.getBy({ email: code.email })

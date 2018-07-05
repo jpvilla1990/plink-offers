@@ -2,7 +2,6 @@ const chai = require('chai'),
   expect = chai.expect,
   dictum = require('dictum.js'),
   server = require('./../app'),
-  logger = require('../app/logger'),
   moment = require('moment'),
   requestService = require('../app/services/request'),
   Offer = require('../app/models').offer,
@@ -46,7 +45,8 @@ describe('/offers/:id/code POST', () => {
           .then(before => {
             chai
               .request(server)
-              .post(`/offers/${before.id}/code?email=julian.molina@wolox.com.ar`)
+              .post(`/offers/${before.id}/code`)
+              .send({ email: 'julian.molina@wolox.com.ar' })
               .then(json => {
                 json.should.have.status(200);
                 Offer.getBy({ id: before.id }).then(after => {
@@ -72,7 +72,8 @@ describe('/offers/:id/code POST', () => {
         factoryManager.create(factoryOffer, offerWithRetail).then(before => {
           chai
             .request(server)
-            .post(`/offers/${before.id}/code?email=julian.molina@wolox.com.ar`)
+            .post(`/offers/${before.id}/code`)
+            .send({ email: 'julian.molina@wolox.com.ar' })
             .then(() => {
               mailer.transporter.sendMail.lastCall.args[0].subject.should.eqls(
                 i18next.t(`offerExpired.subject`)

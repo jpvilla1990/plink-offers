@@ -1,5 +1,5 @@
 const Offer = require('../models').offer,
-  logger = require('../logger'),
+  Category = require('../models').category,
   codeService = require('../services/code'),
   serviceS3 = require('../services/s3'),
   config = require('../../config'),
@@ -29,9 +29,9 @@ exports.create = (req, res, next) => {
   offer.retail = req.retail;
   return Offer.createModel(offer)
     .then(off => {
-      return Offer.getBy({ id: off.dataValues.id }).then(newOff => {
-        offer.nameCategory = newOff.category.dataValues.name;
-        return emailService.sendNewOffer(offer, config.common.server.email_new_offer).then(() => {
+      return Category.getBy({ id: offer.categoryId }).then(category => {
+        off.nameCategory = category.dataValues.name;
+        return emailService.sendNewOffer(off, config.common.server.email_new_offer).then(() => {
           res.status(201).end();
         });
       });
