@@ -50,7 +50,7 @@ exports.sendNewOffer = (offer, mail, name = null) => {
     const postIds = new Array();
     rv.posTerminals.map(value => postIds.push(value.posId));
     offer.retailName = rv.commerce.description;
-    offer.retailAddres = rv.addres;
+    offer.retailAddres = rv.address;
     offer.name = name != null ? name : '';
     offer.nameCategory = offer.nameCategory.toUpperCase();
     const subjectEmail =

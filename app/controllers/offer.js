@@ -1,5 +1,6 @@
 const Offer = require('../models').offer,
   logger = require('../logger'),
+  codeService = require('../services/code'),
   serviceS3 = require('../services/s3'),
   config = require('../../config'),
   emailService = require('../services/mailer'),
@@ -54,6 +55,27 @@ exports.getAll = (req, res, next) => {
       }));
       res.status(200);
       res.send({ count: list.count, offers: listResult });
+      res.end();
+    })
+    .catch(err => next(err));
+};
+exports.getRedemptions = (req, res, next) => {
+  const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10,
+    offsetQuery = req.query.page === 0 ? 0 : req.query.page * limitQuery,
+    idOffer = req.params.id_offer;
+  return codeService
+    .getRedemptions({ id: idOffer, offset: offsetQuery, limit: limitQuery })
+    .then(list => {
+      const listRedemptions = list.rows.map(value => ({
+          code: value.code,
+          createdAt: utils.moment(value.created_at).format('YYYY-MM-DD'),
+          dateRedemption: utils.moment(value.dateRedemption).format('YYYY-MM-DD'),
+          hourRedemption: utils.moment(value.dateRedemption).format('HH:mm'),
+          mail: value.email
+        })),
+        pages = Math.ceil(list.count / limitQuery);
+      res.status(200);
+      res.send({ pages, redemptions: listRedemptions });
       res.end();
     })
     .catch(err => next(err));

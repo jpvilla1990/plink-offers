@@ -27,7 +27,7 @@ const changeCode = code => {
     email: mask(code.email),
     code: code.code,
     dateRedemption: code.dateRedemption
-      ? utils.moment(code.dateRedemption).format('YYYY-MM-DD HH:MM:ss')
+      ? utils.moment(code.dateRedemption).format('YYYY-MM-DD HH:mm:ss')
       : null,
     status: utils.getOfferStatusString(code.offer.dataValues),
     product: code.offer.product,
