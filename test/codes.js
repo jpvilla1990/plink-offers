@@ -170,7 +170,7 @@ describe('/retail/:id/code/:code/redeem PATCH', () => {
 
 describe('/retail/:id/code/:code GET', () => {
   it('should success get of code', done => {
-    factoryManager.create(factoryCode).then(code => {
+    factoryManager.create(factoryCode, { email: 'julian.molina@wolox.com.ar' }).then(code => {
       chai
         .request(server)
         .get(`/retail/11/code/${code.code}`)
@@ -185,6 +185,7 @@ describe('/retail/:id/code/:code GET', () => {
             'status',
             'product'
           ]);
+          response.body.email.should.eqls('juli*******@****x.com.ar');
           dictum.chai(response);
           done();
         });

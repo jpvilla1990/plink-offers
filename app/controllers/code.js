@@ -8,9 +8,23 @@ const codeService = require('../services/code'),
   emailService = require('../services/mailer'),
   uuid = require('uuid');
 
+const mask = email => {
+  const userName = email.split('@'),
+    count = parseInt(userName[0].length * 0.6),
+    countDomain = parseInt(userName[1].length * 0.4);
+  if (userName[0].length <= 8) {
+    return `${'*'.repeat(5)}@${userName[1]}`;
+  } else {
+    return `${userName[0].slice(0, 4)}${'*'.repeat(count)}@${'*'.repeat(countDomain)}${userName[1].slice(
+      countDomain,
+      userName[1].length
+    )}`;
+  }
+};
+
 const changeCode = code => {
   const result = {
-    email: code.email,
+    email: mask(code.email),
     code: code.code,
     dateRedemption: code.dateRedemption
       ? utils.moment(code.dateRedemption).format('YYYY-MM-DD HH:MM:ss')
