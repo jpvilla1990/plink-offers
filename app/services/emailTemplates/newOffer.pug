@@ -14,10 +14,10 @@ head
     .offer(style='display: block;margin-left: auto;margin-right: auto;margin-top: 10px;height: 19px;width: 231px;color: #FF6500;font-family: Exo;font-size: 14px;font-weight: 500;letter-spacing: 0.86px;line-height: 19px;') Oferta valida hasta: 12/06/2018
     hr.dotted-line(style='display: block;margin-left: auto;margin-right: auto;margin-top: 15px;width: 478px;border-top: dashed 1px #E0DEDE;height: 0px;')
     .brand-info(style='display: block;margin-left: auto;margin-right: auto;height: 56px;width: 249px;')
-      img.brand-logo(src=brand_logo style='height: 54.66px;	float:left; display:inline; width: 20%;')
-      .brand-data(style='color: #9B9B9B;font-family: Exo;font-size: 14px;font-weight: 500;letter-spacing: 0.8px;line-height: 19px;float: left;display: inline;width: 77%;padding-top: 10px;margin-left: 3%;')
-        .brand-name #{name_retail}
-        .brand-adress #{addres}
+      img.brand-logo(src=brand_logo style='height: 54.66px;	float:left; display:inline;')
+      .brand-data(style='margin-left: 10px;color: #9B9B9B;font-family: Exo;font-size: 14px;font-weight: 500;letter-spacing: 0.8px;line-height: 19px;float: left;display: inline;padding-top: 10px;')
+        .brand-name(style='font-weight: bold;') #{name_retail} Hamburguesas El Corral
+        .brand-adress #{addres} Carrera 32 D # 9 - 92
     form(method='POST' action=`${create_code_url}`)
       div.form-group(style='display:none')
         input#pw.form-control( name='email' value=`${emailTo}`)
@@ -68,23 +68,24 @@ head
   .contact(style=`width: 650px;	height: 125px;background-color: #f1f2f2;	background-image: url(${bg_footer});`)
   .disclaimer(style='background-color: #ffffff;display: block;margin-left: auto;margin-right: auto;')
     .contact-info(style='display: block;margin-left: auto;margin-right: auto;color: #FF6500;')
-      .contact-title
+      .contact-title(style='font-family: Exo;')
         | Manteng&aacute;monos en cont&aacute;cto
-      .contact-email(style='font-weight: bold;')
+      .contact-email(style='font-weight: bold; font-family: Exo;')
         | hello@plink.com.co
     img.superintendence(src=logo_superintendence style='position: relative;float: left;bottom: 94px;left: 25px;')
-    .footer-logos(style='display: block;margin-left: auto;margin-right: auto;margin-top: 25px;height: 75px;width: 65%;')
-      .img_container( style='display: flex; justify-content: center; width: 80%;')
-        img.footer-logo(src=logo_bancocolombia style='display: inline;width: 50%;margin-right: 50px;height: 54.66px;    margin-left: 60px;')
-        img.brand-footer-logo(src=brand_logo style='float: right;display: inline;width: 20%;height: 54.66px')
+    .footer-logos(style='display: flex; margin-left: auto;margin-right: auto;margin-top: 25px;height: 75px;margin-left: 200px;')
+      .img_container( style='display: flex; margin-bottom:30px;')
+        img.footer-logo(src=logo_bancocolombia style='display: inline;margin-right: 50px; ')
+        hr.dotted-line2(style='display: block;margin-left: auto;margin-right: auto;margin-bottom: 0px;width: 0px;border-top: dashed 0px #E0DEDE;height: 45px; margin-right: 40px;')
+        img.brand-footer-logo(src=brand_logo style='float: right;display: inline;')
     hr.dotted-line2(style='display: block;margin-left: auto;margin-right: auto;margin-bottom: 0px;width: 150px;border-top: dashed 0px #E0DEDE;height: 0px;')
     .disclaimer-conatiner(style='display: block;margin-left: auto;margin-right: auto;height: 65px;width: 602.95px;color: #4A4A4A;font-family: Exo;font-size: 10px;letter-spacing: 0.39px;line-height: 13px;text-align: center;margin-top: 18px;margin-bottom: 18px;')
-      .disclaimer-text
+      .disclaimer-text(style='font-family: Exo;')
         | &ldquo;Bancolombia nunca le solicitar&aacute; datos financieros como usuarios, claves, n&uacute;meros de tarjetas de cr&eacute;dito con sus c&oacute;digos de seguridad y fechas de vencimiento mediante v&iacute;nculos de correo electr&oacute;nico o llamadas telef&oacute;nicas.
-      .disclaimer-text2(style='margin-top: 10px;')
+      .disclaimer-text2(style='margin-top: 10px;font-family: Exo;')
         | Para verificar la autenticidad de este correo electr&oacute;nico puede reenviarlo a
-      .disclaimer-email(style='font-weight: bold;')
+      .disclaimer-email(style='font-weight: bold; font-family: Exo;')
         | correosospechoso@bancolombia.com.co.&rdquo;
     hr.dotted-line2(style='display: block;margin-left: auto;margin-right: auto;margin-bottom: 0px;width: 150px;border-top: dashed 0px #E0DEDE;height: 0px;')
-    .footer(style='display: block;margin-left: auto;margin-right: auto;text-align: center;width: 540px;background-color: #ffffff;color: #FF6500;font-size: 10px;font-weight: 500;letter-spacing: 0.39px;line-height: 13px;margin-top: 20px;')
+    .footer(style='display: block;margin-left: auto;margin-right: auto;text-align: center;width: 540px;background-color: #ffffff;color: #FF6500;font-size: 10px;font-weight: 500;letter-spacing: 0.39px;line-height: 13px;margin-top: 20px; font-family: Exo;')
       | PLINK es una marca de Bancolombia S.A. Los productos y servicios ofrecidos a trav&eacute;s de PLINK , son otorgados por Bancolombia S.A. Copyright &copy; 2018 GRUPO BANCOLOMBIA.
