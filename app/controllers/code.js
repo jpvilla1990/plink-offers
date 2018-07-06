@@ -69,7 +69,10 @@ exports.create = (req, res, next) => {
           }
         });
       } else {
-        throw errors.existingMail;
+        res.writeHead(301, {
+          Location: config.common.server.url_land
+        });
+        res.end();
       }
     })
     .catch(next);
