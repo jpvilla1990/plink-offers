@@ -3,6 +3,7 @@ const Offer = require('../models').offer,
   errors = require('../errors'),
   Category = require('../models').category,
   codeService = require('../services/code'),
+  offerService = require('../services/offer'),
   serviceS3 = require('../services/s3'),
   config = require('../../config'),
   emailService = require('../services/mailer'),
@@ -45,18 +46,7 @@ exports.getOffer = (req, res, next) => {
   return Offer.getBy({ id: idOffer })
     .then(off => {
       if (off) {
-        const send = {
-          image: off.dataValues.imageUrl,
-          product: off.dataValues.product,
-          begin: off.dataValues.begin,
-          expires: off.dataValues.expiration,
-          maxRedemptions: off.dataValues.maxRedemptions,
-          redemptions: off.dataValues.redemptions,
-          status: utils.getOfferStatusString(off.dataValues),
-          category: off.category.name,
-          typeOffer: off.type.description.toUpperCase(),
-          valueStrategy: off.dataValues.valueStrategy
-        };
+        const send = offerService.map(off);
         res.status(200);
         res.send(send);
         res.end();
