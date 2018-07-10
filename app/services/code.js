@@ -23,6 +23,15 @@ exports.getCode = ({ retailId, number }) =>
     throw errors.codeNotFound;
   });
 
+exports.getRedemptions = filter => {
+  return Code.findAndCountAll({
+    offset: filter.offset,
+    where: { offerId: filter.id },
+    limit: filter.limit
+  }).catch(err => {
+    throw errors.databaseError(err.message);
+  });
+};
 exports.redeemCode = ({ retailId, code }) =>
   sequelize.transaction(transaction =>
     Code.findOne({

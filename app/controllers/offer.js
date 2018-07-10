@@ -1,8 +1,10 @@
 const Offer = require('../models').offer,
   logger = require('../logger'),
   errors = require('../errors'),
-  config = require('../../config'),
+  Category = require('../models').category,
+  codeService = require('../services/code'),
   serviceS3 = require('../services/s3'),
+  config = require('../../config'),
   emailService = require('../services/mailer'),
   utils = require('../utils');
 
@@ -29,9 +31,9 @@ exports.create = (req, res, next) => {
   offer.retail = req.retail;
   return Offer.createModel(offer)
     .then(off => {
-      return Offer.getBy({ id: off.dataValues.id }).then(newOff => {
-        offer.nameCategory = newOff.category.dataValues.name;
-        return emailService.sendNewOffer(offer, config.common.server.email_new_offer).then(() => {
+      return Category.getBy({ id: offer.categoryId }).then(category => {
+        off.nameCategory = category.dataValues.name;
+        return emailService.sendNewOffer(off, config.common.server.email_new_offer).then(() => {
           res.status(201).end();
         });
       });
@@ -67,4 +69,25 @@ exports.accessOffer = (req, res, next) => {
   } else {
     next(errors.userUnauthorized);
   }
+};
+exports.getRedemptions = (req, res, next) => {
+  const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10,
+    offsetQuery = req.query.page === 0 ? 0 : req.query.page * limitQuery,
+    idOffer = req.params.id_offer;
+  return codeService
+    .getRedemptions({ id: idOffer, offset: offsetQuery, limit: limitQuery })
+    .then(list => {
+      const listRedemptions = list.rows.map(value => ({
+          code: value.code,
+          createdAt: utils.moment(value.created_at).format('YYYY-MM-DD'),
+          dateRedemption: utils.moment(value.dateRedemption).format('YYYY-MM-DD'),
+          hourRedemption: utils.moment(value.dateRedemption).format('HH:mm'),
+          mail: value.email
+        })),
+        pages = Math.ceil(list.count / limitQuery);
+      res.status(200);
+      res.send({ pages, redemptions: listRedemptions });
+      res.end();
+    })
+    .catch(err => next(err));
 };
