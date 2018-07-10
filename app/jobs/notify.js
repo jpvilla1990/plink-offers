@@ -44,7 +44,7 @@ exports.notify = () => {
             ses.getSendQuota({}, function(errQuota, quota) {
               const available = quota.Max24HourSend - quota.SentLast24Hours;
               if (emails.length > available) {
-                logger.warn(`The count of emails is greather than daily quota limit`);
+                logger.warn(`The count of emails is greater than daily quota limit`);
               } else {
                 off.dataValues.nameCategory = off.category.dataValues.name;
                 emails.forEach(element => {
