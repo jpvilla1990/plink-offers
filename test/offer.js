@@ -3,10 +3,12 @@ const chai = require('chai'),
   server = require('./../app'),
   logger = require('../app/logger'),
   config = require('../config'),
+  utils = require('../app/utils'),
   factoryManager = require('../test/factories/factoryManager'),
   factoryCategory = require('../test/factories/category').nameFactory,
   factoryTypeOffer = require('../test/factories/typeOffer').nameFactory,
   factoryOffer = require('../test/factories/offer').nameFactory,
+  factoryCode = require('../test/factories/code').nameFactory,
   requestService = require('../app/services/request'),
   simple = require('simple-mock'),
   token = require('./factories/token'),
@@ -49,8 +51,7 @@ const chai = require('chai'),
     purpose: 'Atraer clientes',
     url: 'https://s3.amazonaws.com/plink-email-assets/plink_offers/bg_general.png'
   },
-  tokenExample = `test ${token.generate({ points: '1222,1444,1333' })}`,
-  emailService = require('../app/services/mailer');
+  tokenExample = `test ${token.generate({ points: '1222,1444,1333' })}`;
 
 describe('/retail/:id/offers POST', () => {
   const offerWithRetail = offerExample;
@@ -147,7 +148,6 @@ describe('/retail/:id/offers GET', () => {
               res.body.should.have.property('count');
               res.body.should.have.property('offers');
               res.body.offers.length.should.eql(1);
-              dictum.chai(res);
               done();
             });
         });
@@ -206,7 +206,7 @@ describe('job notify', () => {
       done();
     });
   });
-  it('should be sucessfull ', done => {
+  it('should be successful ', done => {
     simple.restore(jobNotify.ses, 'getSendQuota');
     simple.mock(jobNotify.ses, 'getSendQuota').callFn((obj, callback) => {
       callback(undefined, {
@@ -226,6 +226,38 @@ describe('job notify', () => {
         done();
       }, 3000);
     });
+  });
+});
+
+describe('/access-offer POST', () => {
+  it('should be success', done => {
+    chai
+      .request(server)
+      .post('/access-offer')
+      .send({ code: config.common.access_offer })
+      .then(json => {
+        json.should.have.status(200);
+        done();
+      });
+  });
+  it('should be fail because the code was not sent ', done => {
+    chai
+      .request(server)
+      .post('/access-offer')
+      .then(json => {
+        json.should.have.status(401);
+        done();
+      });
+  });
+  it('should be fail because the code is incorrect ', done => {
+    chai
+      .request(server)
+      .post('/access-offer')
+      .send({ code: 'code123' })
+      .then(json => {
+        json.should.have.status(401);
+        done();
+      });
   });
 });
 
@@ -285,5 +317,59 @@ describe('/retail/:id/offers/:id_offer GET', () => {
         response.should.have.status(401);
         done();
       });
+  });
+});
+
+describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
+  const generateToken = (points = '11') => `bearer ${token.generate({ points })}`;
+  it('should fail because in the query doesnt exist page', done => {
+    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv =>
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r =>
+        factoryManager.create(factoryOffer, { category: rv.id, strategy: r.id }).then(off => {
+          chai
+            .request(server)
+            .get(`/retail/1333/offers/${off.dataValues.id}/redemptions?`)
+            .set(headerName, tokenExample)
+            .then(json => {
+              json.should.have.status(400);
+              json.body.should.have.property('message');
+              json.body.should.have.property('internal_code');
+              done();
+            });
+        })
+      )
+    );
+  });
+  it('should be successful with one page but without limit', done => {
+    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv =>
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r =>
+        factoryManager.create(factoryOffer, { category: rv.id, strategy: r.id }).then(off =>
+          factoryManager
+            .create(factoryCode, {
+              offerId: off.dataValues.id,
+              dateRedemption: utils.moment()
+            })
+            .then(() =>
+              factoryManager
+                .create(factoryCode, {
+                  offerId: off.dataValues.id,
+                  dateRedemption: utils.moment()
+                })
+                .then(() => {
+                  chai
+                    .request(server)
+                    .get(`/retail/11/offers/${off.dataValues.id}/redemptions?page=0`)
+                    .set('authorization', generateToken())
+                    .then(res => {
+                      res.body.pages.should.eqls(1);
+                      res.body.redemptions.length.should.eqls(2);
+                      done();
+                      dictum.chai(res);
+                    });
+                })
+            )
+        )
+      )
+    );
   });
 });

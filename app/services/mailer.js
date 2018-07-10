@@ -22,7 +22,7 @@ exports.ses = ses;
 exports.sendNewCode = (offer, code) => {
   return requestService.retail(`/points/${offer.retail}`).then(rv => {
     offer.retailName = rv.commerce.description;
-    offer.retailAddres = rv.addres;
+    offer.retailAddres = rv.address;
     const email = {
       subject: i18n.t(`newCode.subject`),
       html: servicesHtml.newCode(offer, code),
@@ -35,7 +35,7 @@ exports.sendNewCode = (offer, code) => {
 exports.sendOfferExpired = (offer, code) => {
   return requestService.retail(`/points/${offer.retail}`).then(rv => {
     offer.retailName = rv.commerce.description;
-    offer.retailAddres = rv.addres;
+    offer.retailAddres = rv.address;
     const email = {
       subject: i18n.t(`offerExpired.subject`),
       html: servicesHtml.offerExpired(offer),
@@ -50,7 +50,7 @@ exports.sendNewOffer = (offer, mail, name = null) => {
     const postIds = new Array();
     rv.posTerminals.map(value => postIds.push(value.posId));
     offer.retailName = rv.commerce.description;
-    offer.retailAddres = rv.addres;
+    offer.retailAddres = rv.address;
     offer.name = name != null ? name : '';
     offer.nameCategory = offer.nameCategory.toUpperCase();
     const subjectEmail =

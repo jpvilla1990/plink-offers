@@ -16,7 +16,7 @@ exports.newCode = (offer, code) => {
       img_offer: offer.imageUrl,
       value_strategy: offer.valueStrategy,
       product: offer.product,
-      code: code.code.toUpperCase(),
+      code: code.code,
       available: offer.maxRedemptions - offer.redemptions,
       max_redemptions: offer.max_redemptions,
       expiration: offer.expiration,

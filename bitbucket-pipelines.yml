@@ -15,7 +15,7 @@ pipelines:
           - export GROUP_ID=1 SENDING_RATE=1 QUEUE_URL=https://sqs.us-east-1.amazonaws.com/082149138148/plink-offers-development.fifo
           - export EMAIL_OFFER=julian.molina@wolox.com.ar URL_INFO_RETAIL=http://localhost:8080 BUCKET_EMAIL=plink-email-assets
           - export URL_S3_EMAIL=https://s3.amazonaws.com FOLDER_BUCKET_EMAIL=plink_offers TIME_MSG=60
-          - export URL_SERVER_API=http://localhost:8080/offers
+          - export URL_SERVER_API=http://localhost:8080/offers CODE_ACCESS=1234
           - export TIME_NODECRON='10 * * * * *'
           - npm install
           - npm run migrations
