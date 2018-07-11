@@ -196,7 +196,8 @@ describe('job notify', () => {
           warning = simple.mock(logger.warn);
         })
       )
-    ));
+    )
+  );
   it('should be fail because the count of mail es grather than Daily quota limit ', done => {
     jobNotify.notify().then(() => {
       mailer.transporter.sendMail.callCount.should.eqls(0);

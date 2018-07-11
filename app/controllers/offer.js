@@ -82,7 +82,7 @@ exports.getRedemptions = (req, res, next) => {
           createdAt: utils.moment(value.created_at).format('YYYY-MM-DD'),
           dateRedemption: utils.moment(value.dateRedemption).format('YYYY-MM-DD'),
           hourRedemption: utils.moment(value.dateRedemption).format('HH:mm'),
-          mail: codeService.mask(value.email)
+          mail: utils.mask(value.email)
         })),
         pages = Math.ceil(list.count / limitQuery);
       res.status(200);

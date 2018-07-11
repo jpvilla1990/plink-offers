@@ -49,18 +49,17 @@ exports.sendNewOffer = (offer, mail, name = null) => {
   return requestService.retail(`/points/${offer.retail}`).then(rv => {
     const postIds = new Array();
     rv.posTerminals.map(value => postIds.push(value.posId));
-    const offerValues = offer.dataValues;
-    offerValues.retailName = rv.commerce.description;
-    offerValues.retailAddres = rv.address;
-    offerValues.name = name != null ? name : '';
-    offerValues.nameCategory = offer.nameCategory.toUpperCase();
+    offer.retailName = rv.commerce.description;
+    offer.retailAddres = rv.address;
+    offer.name = name != null ? name : '';
+    offer.nameCategory = offer.nameCategory.toUpperCase();
     const subjectEmail =
       name != null
         ? i18n.t(`newOffer.subject`)
         : `IdOferta=${offer.id} Nit=${rv.commerce.nit} Posids=${postIds.join()}`;
     const email = {
       subject: subjectEmail,
-      html: servicesHtml.newOffer(offerValues, mail),
+      html: servicesHtml.newOffer(offer, mail),
       to: mail
     };
     return exports.sendEmail(email);

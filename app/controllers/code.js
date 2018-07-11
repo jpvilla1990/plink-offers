@@ -11,7 +11,7 @@ const codeService = require('../services/code'),
 
 const changeCode = code => {
   const result = {
-    email: codeService.mask(code.email),
+    email: utils.mask(code.email),
     code: code.code,
     dateRedemption: code.dateRedemption
       ? utils.moment(code.dateRedemption).format('YYYY-MM-DD HH:mm:ss')
