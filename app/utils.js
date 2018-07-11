@@ -12,4 +12,19 @@ exports.getOfferStatus = offer => {
 
 exports.getOfferStatusString = offer => (exports.getOfferStatus(offer) ? OFFER_ACTIVE : OFFER_INACTIVE);
 
+exports.map = off => {
+  const send = {
+    image: off.dataValues.imageUrl,
+    product: off.dataValues.product,
+    begin: off.dataValues.begin,
+    expires: off.dataValues.expiration,
+    maxRedemptions: off.dataValues.maxRedemptions,
+    redemptions: off.dataValues.redemptions,
+    status: exports.getOfferStatusString(off.dataValues),
+    category: off.category.name,
+    typeOffer: off.type.description.toUpperCase(),
+    valueStrategy: off.dataValues.valueStrategy
+  };
+  return send;
+};
 exports.moment = moment;

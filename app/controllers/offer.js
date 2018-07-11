@@ -3,7 +3,6 @@ const Offer = require('../models').offer,
   errors = require('../errors'),
   Category = require('../models').category,
   codeService = require('../services/code'),
-  offerService = require('../services/offer'),
   serviceS3 = require('../services/s3'),
   config = require('../../config'),
   emailService = require('../services/mailer'),
@@ -46,7 +45,7 @@ exports.getOffer = (req, res, next) => {
   return Offer.getBy({ id: idOffer })
     .then(off => {
       if (off) {
-        const send = offerService.map(off);
+        const send = utils.map(off);
         res.status(200);
         res.send(send);
         res.end();
