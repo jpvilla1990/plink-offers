@@ -42,27 +42,25 @@ exports.create = (req, res, next) => {
     email: req.body.email,
     offerId: parseInt(req.params.id)
   };
-  return Code.getBy({ email: code.email })
-    .then(exist => {
-      if (!exist) {
-        return Offer.getBy({ id: code.offerId }).then(off => {
-          const active = utils.getOfferStatus(off.dataValues);
-          if (active) {
-            code.code = uuid().slice(0, 8);
-            return uniqueCode.verify(code).then(newCode => {
-              return Offer.incrementField('codes', { id: newCode.offerId }).then(() => {
-                return emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
-                  res.status(201);
-                  res.end();
-                });
+  return Offer.getBy({ id: code.offerId })
+    .then(off => {
+      if (off) {
+        const active = utils.getOfferStatus(off.dataValues);
+        if (active) {
+          code.code = uuid().slice(0, 8);
+          return uniqueCode.verify(code).then(newCode => {
+            return Offer.incrementField('codes', { id: newCode.offerId }).then(() => {
+              return emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
+                res.status(201);
+                res.end();
               });
             });
-          } else {
-            return emailService.sendOfferExpired(off.dataValues, code).then(() => {
-              throw errors.offerInactive;
-            });
-          }
-        });
+          });
+        } else {
+          return emailService.sendOfferExpired(off.dataValues, code).then(() => {
+            throw errors.offerInactive;
+          });
+        }
       } else {
         throw errors.offerNotFound;
       }

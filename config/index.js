@@ -30,6 +30,7 @@ const assignObject = (target, source) => {
 const config = {
   common: {
     timezone: process.env.TIME_ZONE || 'America/Bogota',
+    access_offer: process.env.CODE_ACCESS,
     server: {
       base_path: process.env.URL_SERVER_API,
       info_retail: process.env.URL_INFO_RETAIL,

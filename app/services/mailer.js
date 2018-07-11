@@ -22,7 +22,7 @@ exports.ses = ses;
 exports.sendNewCode = (offer, code) => {
   return requestService.retail(`/points/${offer.retail}`).then(rv => {
     offer.retailName = rv.commerce.description;
-    offer.retailAddres = rv.addres;
+    offer.retailAddres = rv.address;
     const email = {
       subject: i18n.t(`newCode.subject`),
       html: servicesHtml.newCode(offer, code),

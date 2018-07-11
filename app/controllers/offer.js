@@ -1,4 +1,6 @@
 const Offer = require('../models').offer,
+  logger = require('../logger'),
+  errors = require('../errors'),
   Category = require('../models').category,
   codeService = require('../services/code'),
   serviceS3 = require('../services/s3'),
@@ -58,6 +60,15 @@ exports.getAll = (req, res, next) => {
       res.end();
     })
     .catch(err => next(err));
+};
+
+exports.accessOffer = (req, res, next) => {
+  if (req.body.code && req.body.code === config.common.access_offer) {
+    res.status(200);
+    res.end();
+  } else {
+    next(errors.userUnauthorized);
+  }
 };
 exports.getRedemptions = (req, res, next) => {
   const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10,

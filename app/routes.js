@@ -18,6 +18,7 @@ exports.init = app => {
   app.get('/retail/:id/code/:code', [auth.requireToken], code.getCode);
   app.post('/test-mail', mail.sendTestMail);
   app.get('/points/:id', [], Offer.info);
+  app.post('/access-offer', [], Offer.accessOffer);
   app.get(
     '/retail/:id/offers/:id_offer/redemptions',
     [auth.requireToken, validator.checkQuery, validator.validate],

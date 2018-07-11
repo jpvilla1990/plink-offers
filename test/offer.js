@@ -204,7 +204,7 @@ describe('job notify', () => {
       done();
     });
   });
-  it('should be sucessfull ', done => {
+  it('should be successful ', done => {
     simple.restore(jobNotify.ses, 'getSendQuota');
     simple.mock(jobNotify.ses, 'getSendQuota').callFn((obj, callback) => {
       callback(undefined, {
@@ -226,6 +226,39 @@ describe('job notify', () => {
     });
   });
 });
+
+describe('/access-offer POST', () => {
+  it('should be success', done => {
+    chai
+      .request(server)
+      .post('/access-offer')
+      .send({ code: config.common.access_offer })
+      .then(json => {
+        json.should.have.status(200);
+        done();
+      });
+  });
+  it('should be fail because the code was not sent ', done => {
+    chai
+      .request(server)
+      .post('/access-offer')
+      .then(json => {
+        json.should.have.status(401);
+        done();
+      });
+  });
+  it('should be fail because the code is incorrect ', done => {
+    chai
+      .request(server)
+      .post('/access-offer')
+      .send({ code: 'code123' })
+      .then(json => {
+        json.should.have.status(401);
+        done();
+      });
+  });
+});
+
 describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
   const generateToken = (points = '11') => `bearer ${token.generate({ points })}`;
   it('should fail because in the query doesnt exist page', done => {
