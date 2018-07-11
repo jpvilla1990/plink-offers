@@ -35,7 +35,7 @@ exports.sendNewCode = (offer, code) => {
 exports.sendOfferExpired = (offer, code) => {
   return requestService.retail(`/points/${offer.retail}`).then(rv => {
     offer.retailName = rv.commerce.description;
-    offer.retailAddres = rv.addres;
+    offer.retailAddres = rv.address;
     const email = {
       subject: i18n.t(`offerExpired.subject`),
       html: servicesHtml.offerExpired(offer),
