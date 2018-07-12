@@ -61,6 +61,7 @@ exports.getAll = (req, res, next) => {
   return Offer.getAllBy({ retail: req.params.id, offset: offsetQuery, limit: limitQuery })
     .then(list => {
       const listResult = list.rows.map(value => ({
+        id: value.dataValues.id,
         product: value.dataValues.product,
         begin: value.dataValues.begin,
         expires: value.dataValues.expiration,
