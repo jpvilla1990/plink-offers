@@ -40,6 +40,21 @@ exports.create = (req, res, next) => {
     })
     .catch(err => next(err));
 };
+exports.getOffer = (req, res, next) => {
+  const idOffer = req.params.id_offer;
+  return Offer.getBy({ id: idOffer })
+    .then(off => {
+      if (off) {
+        const send = utils.map(off);
+        res.status(200);
+        res.send(send);
+        res.end();
+      } else {
+        throw errors.offerNotFound;
+      }
+    })
+    .catch(next);
+};
 exports.getAll = (req, res, next) => {
   const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10;
   const offsetQuery = req.query.page === 0 ? 0 : req.query.page * limitQuery;

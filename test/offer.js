@@ -17,6 +17,8 @@ const chai = require('chai'),
   mailer = require('../app/services/mailer'),
   headerName = config.common.session.header_name,
   Offer = require('../app/models').offer,
+  Category = require('../app/models').category,
+  expect = chai.expect,
   offerExample = {
     product: '2x1 en McDuo',
     begin: '2017-02-13',
@@ -254,6 +256,65 @@ describe('/access-offer POST', () => {
       .send({ code: 'code123' })
       .then(json => {
         json.should.have.status(401);
+        done();
+      });
+  });
+});
+
+describe('/retail/:id/offers/:id_offer GET', () => {
+  const generateToken = (points = '11') => `bearer ${token.generate({ points })}`;
+  it('should success get of offer', done => {
+    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv =>
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r =>
+        factoryManager.create(factoryOffer, { category: rv.id, strategy: r.id }).then(off => {
+          chai
+            .request(server)
+            .get(`/retail/11/offers/${off.dataValues.id}`)
+            .set('authorization', generateToken())
+            .then(response => {
+              response.should.have.status(200);
+              expect(response.body).to.have.all.keys([
+                'image',
+                'product',
+                'begin',
+                'expires',
+                'maxRedemptions',
+                'redemptions',
+                'status',
+                'category',
+                'typeOffer',
+                'valueStrategy'
+              ]);
+              dictum.chai(response);
+              done();
+            });
+        })
+      )
+    );
+  });
+  it('should fail get of offer because not exist', done => {
+    chai
+      .request(server)
+      .get(`/retail/11/offers/15`)
+      .set('authorization', generateToken())
+      .then(response => {
+        response.body.should.have.property('internal_code');
+        response.body.should.have.property('message');
+        response.body.internal_code.should.be.equal('offer_not_found');
+        response.should.have.status(404);
+        done();
+      });
+  });
+  it('should fail get of offer because user is unauthorized', done => {
+    chai
+      .request(server)
+      .get(`/retail/15/offers/15`)
+      .set('authorization', generateToken())
+      .then(response => {
+        response.body.should.have.property('internal_code');
+        response.body.should.have.property('message');
+        response.body.internal_code.should.be.equal('user_unauthorized');
+        response.should.have.status(401);
         done();
       });
   });

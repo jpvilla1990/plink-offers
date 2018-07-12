@@ -16,6 +16,7 @@ exports.init = app => {
   app.get('/type-offers', typeOffer.getAllTypes);
   app.patch('/retail/:id/code/:code/redeem', [auth.requireToken], code.redeemCode);
   app.get('/retail/:id/code/:code', [auth.requireToken], code.getCode);
+  app.get('/retail/:id/offers/:id_offer', [auth.requireToken], Offer.getOffer);
   app.post('/test-mail', mail.sendTestMail);
   app.post('/access-offer', [], Offer.accessOffer);
   app.get(
