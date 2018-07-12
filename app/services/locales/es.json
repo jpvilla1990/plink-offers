@@ -1,6 +1,6 @@
 {
   "newCode": {
-    "subject": "Nuevo código"
+    "subject": "¡ Usá tu nuevo codigo de oferta !"
   },
   "offerInvalid": {
     "subject": "Oferta inválida"
@@ -9,6 +9,6 @@
     "subject": "Oferta expirada"
   },
   "newOffer": {
-    "subject": "Nueva oferta"
+    "subject": "¡ No puedes dejar pasar esta oportunidad !"
   }
 }

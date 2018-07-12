@@ -70,7 +70,7 @@ exports.sendEmail = email => {
   return new Promise((resolve, reject) => {
     transporter.sendMail(
       {
-        from: `no-reply@plink.com.co`,
+        from: `ofertas@plink.com`,
         to: email.to,
         subject: email.subject,
         html: email.html
