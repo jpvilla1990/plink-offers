@@ -1,5 +1,6 @@
 const codeService = require('../services/code'),
   utils = require('../utils'),
+  logger = require('../logger'),
   Code = require('../models').code,
   errors = require('../errors'),
   config = require('../../config'),
@@ -8,23 +9,9 @@ const codeService = require('../services/code'),
   emailService = require('../services/mailer'),
   uuid = require('uuid');
 
-const mask = email => {
-  const userName = email.split('@'),
-    count = parseInt(userName[0].length * 0.6),
-    countDomain = parseInt(userName[1].length * 0.4);
-  if (userName[0].length <= 8) {
-    return `${'*'.repeat(5)}@${userName[1]}`;
-  } else {
-    return `${userName[0].slice(0, 4)}${'*'.repeat(count)}@${'*'.repeat(countDomain)}${userName[1].slice(
-      countDomain,
-      userName[1].length
-    )}`;
-  }
-};
-
 const changeCode = code => {
   const result = {
-    email: mask(code.email),
+    email: utils.mask(code.email),
     code: code.code,
     dateRedemption: code.dateRedemption
       ? utils.moment(code.dateRedemption).format('YYYY-MM-DD HH:mm:ss')
@@ -42,40 +29,41 @@ exports.create = (req, res, next) => {
     email: req.body.email,
     offerId: parseInt(req.params.id)
   };
-  return Code.getBy({ email: code.email })
-    .then(exist => {
-      if (!exist) {
-        return Offer.getBy({ id: code.offerId }).then(off => {
-          const active = utils.getOfferStatus(off.dataValues);
-          if (active) {
-            code.code = uuid().slice(0, 8);
-            return uniqueCode.verify(code).then(newCode => {
-              return Offer.incrementField('codes', { id: newCode.offerId }).then(() => {
-                return emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
-                  res.writeHead(301, {
-                    Location: config.common.server.url_land
-                  });
-                  res.end();
+  return Offer.getBy({ id: code.offerId })
+    .then(off => {
+      if (off) {
+        const active = utils.getOfferStatus(off.dataValues);
+        if (active) {
+          code.code = uuid().slice(0, 8);
+          return uniqueCode.verify(code).then(newCode => {
+            return Offer.incrementField('codes', { id: newCode.offerId }).then(() => {
+              return emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
+                res.writeHead(301, {
+                  Location: config.common.server.url_land
                 });
+                res.end();
               });
             });
-          } else {
-            return emailService.sendOfferExpired(off.dataValues, code).then(() => {
-              res.writeHead(301, {
-                Location: config.common.server.url_land
-              });
-              res.end();
+          });
+        } else {
+          return emailService.sendOfferExpired(off.dataValues, code).then(() => {
+            res.writeHead(301, {
+              Location: config.common.server.url_land
             });
-          }
-        });
+            res.end();
+          });
+        }
       } else {
-        res.writeHead(301, {
-          Location: config.common.server.url_land
-        });
-        res.end();
+        throw errors.nonExistentOffer;
       }
     })
-    .catch(next);
+    .catch(err => {
+      logger.error(`internalCode: ${err.internalCode}, message: ${err.message}`);
+      res.writeHead(301, {
+        Location: config.common.server.url_land
+      });
+      res.end();
+    });
 };
 exports.redeemCode = ({ params }, res, next) =>
   codeService
