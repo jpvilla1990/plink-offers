@@ -372,4 +372,34 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
       )
     );
   });
+  it('should be successful with one page, two offers but only one was redeemed', done => {
+    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv =>
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r =>
+        factoryManager.create(factoryOffer, { category: rv.id, strategy: r.id }).then(off =>
+          factoryManager
+            .create(factoryCode, {
+              offerId: off.dataValues.id
+            })
+            .then(() =>
+              factoryManager
+                .create(factoryCode, {
+                  offerId: off.dataValues.id,
+                  dateRedemption: utils.moment()
+                })
+                .then(() => {
+                  chai
+                    .request(server)
+                    .get(`/retail/11/offers/${off.dataValues.id}/redemptions?page=0`)
+                    .set('authorization', generateToken())
+                    .then(res => {
+                      res.body.pages.should.eqls(1);
+                      res.body.redemptions.length.should.eqls(1);
+                      done();
+                    });
+                })
+            )
+        )
+      )
+    );
+  });
 });
