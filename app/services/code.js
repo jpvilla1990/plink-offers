@@ -3,6 +3,7 @@ const Code = require('../models').code,
   moment = require('moment'),
   { getOfferStatus } = require('../utils'),
   sequelize = require('../models').sequelize,
+  Op = sequelize.Op,
   errors = require('../errors');
 
 exports.getCode = ({ retailId, number }) =>
@@ -26,7 +27,7 @@ exports.getCode = ({ retailId, number }) =>
 exports.getRedemptions = filter => {
   return Code.findAndCountAll({
     offset: filter.offset,
-    where: { offerId: filter.id },
+    where: { offerId: filter.id, dateRedemption: { [Op.ne]: null } },
     limit: filter.limit
   }).catch(err => {
     throw errors.databaseError(err.message);
