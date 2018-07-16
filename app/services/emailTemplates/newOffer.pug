@@ -18,9 +18,10 @@ head
       .brand-data(style='margin-left: 5px;color: #9B9B9B;font-family: Exo;font-size: 14px;font-weight: 500;letter-spacing: 0.8px;line-height: 19px;float: left;display: inline;padding-top: 20px;')
         .brand-name(style='font-weight: bold;') #{name_retail}
         .brand-adress #{addres}
-    form(method='POST' action=`${create_code_url}`)
+    form(method='GET' action=`${create_code_url}`)
       div.form-group(style='display:none')
         input#pw.form-control( name='email' value=`${emailTo}`)
+        input#pw.form-control( name='id' value=`${offer_id}`)
       button.cta-button(type='submit', style='display: block;margin-left: auto;margin-right: auto;height: 47.18px;width: 293.98px;border-radius: 5px;background-color: #FF6500;   margin-top: 25px; ')
         .button-text(style='height: 21px;color: #FFFFFF;font-family: Exo;font-size: 16px;font-weight: bold;letter-spacing: 0.62px;	line-height: 21px;text-align: center;')
           | QUIERO ESTA OFERTA
@@ -80,12 +81,12 @@ head
         img.brand-footer-logo(src=brand_logo style='float: right;display: inline;')
     hr.dotted-line2(style='display: block;margin-left: auto;margin-right: auto;margin-bottom: 0px;width: 150px;border-top: dashed 0px #E0DEDE;height: 0px;')
     .disclaimer-conatiner(style='display: block;margin-left: auto;margin-right: auto;height: 65px;width: 602.95px;color: #4A4A4A;font-family: Exo;font-size: 10px;letter-spacing: 0.39px;line-height: 13px;text-align: center;margin-top: 18px;margin-bottom: 18px;')
-      .disclaimer-text(style='font-family: Exo;')
+      .disclaimer-text
         | &ldquo;Bancolombia nunca le solicitar&aacute; datos financieros como usuarios, claves, n&uacute;meros de tarjetas de cr&eacute;dito con sus c&oacute;digos de seguridad y fechas de vencimiento mediante v&iacute;nculos de correo electr&oacute;nico o llamadas telef&oacute;nicas.
-      .disclaimer-text2(style='margin-top: 10px;font-family: Exo;')
+      .disclaimer-text2(style='margin-top: 10px;')
         | Para verificar la autenticidad de este correo electr&oacute;nico puede reenviarlo a
-      .disclaimer-email(style='font-weight: bold; font-family: Exo;')
+      .disclaimer-email(style='font-weight: bold;')
         | correosospechoso@bancolombia.com.co.&rdquo;
     hr.dotted-line2(style='display: block;margin-left: auto;margin-right: auto;margin-bottom: 0px;width: 150px;border-top: dashed 0px #E0DEDE;height: 0px;')
-    .footer(style='display: block;margin-left: auto;margin-right: auto;text-align: center;width: 540px;background-color: #ffffff;color: #FF6500;font-size: 10px;font-weight: 500;letter-spacing: 0.39px;line-height: 13px;margin-top: 20px; font-family: Exo;')
+    .footer(style='display: block;margin-left: auto;margin-right: auto;text-align: center;width: 540px;background-color: #ffffff;color: #FF6500;font-size: 10px;font-weight: 500;letter-spacing: 0.39px;line-height: 13px;margin-top: 20px;')
       | PLINK es una marca de Bancolombia S.A. Los productos y servicios ofrecidos a trav&eacute;s de PLINK , son otorgados por Bancolombia S.A. Copyright &copy; 2018 GRUPO BANCOLOMBIA.

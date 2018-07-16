@@ -13,6 +13,7 @@ const chai = require('chai'),
   factoryTypeOffer = require('../test/factories/typeOffer').nameFactory,
   factoryOffer = require('../test/factories/offer').nameFactory,
   i18next = require('i18next'),
+  logger = require('../app/logger'),
   factoryCode = require('../test/factories/code').nameFactory;
 
 const offerWithRetail = {
@@ -48,7 +49,7 @@ describe('/offers/:id/code POST', () => {
               .post(`/offers/${before.id}/code`)
               .send({ email: 'julian.molina@wolox.com.ar' })
               .then(json => {
-                json.should.have.status(200);
+                json.should.have.status(201);
                 Offer.getBy({ id: before.id }).then(after => {
                   after.codes.should.eqls(1);
                 });
@@ -74,12 +75,59 @@ describe('/offers/:id/code POST', () => {
             .request(server)
             .post(`/offers/${before.id}/code`)
             .send({ email: 'julian.molina@wolox.com.ar' })
-            .then(() => {
+            .then(json => {
+              json.should.have.status(400);
+              json.should.be.json;
+              json.body.should.have.property('message');
+              json.body.should.have.property('internal_code');
+              json.body.internal_code.should.be.equal('offer_inactive');
               mailer.transporter.sendMail.lastCall.args[0].subject.should.eqls(
                 i18next.t(`offerExpired.subject`)
               );
               mailer.transporter.sendMail.lastCall.args[0].to.should.eqls('julian.molina@wolox.com.ar');
               done();
+            });
+        });
+      });
+    });
+  });
+  it('should be fail because the offer does not exist', done => {
+    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+        chai
+          .request(server)
+          .post(`/offers/23/code`)
+          .send({ email: 'julian.molina@wolox.com.ar' })
+          .then(json => {
+            json.should.have.status(404);
+            json.should.be.json;
+            json.body.should.have.property('message');
+            json.body.should.have.property('internal_code');
+            json.body.internal_code.should.be.equal('offer_not_found');
+            done();
+          });
+      });
+    });
+  });
+  it('should be fail because already exist code for email', done => {
+    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+        factoryManager.create(factoryOffer).then(before => {
+          factoryManager
+            .create(factoryCode, { email: 'julian.molina@wolox.com.ar', offerId: before.dataValues.id })
+            .then(() => {
+              chai
+                .request(server)
+                .post(`/offers/${before.dataValues.id}/code`)
+                .send({ email: 'julian.molina@wolox.com.ar' })
+                .then(json => {
+                  json.should.have.status(400);
+                  json.should.be.json;
+                  json.body.should.have.property('message');
+                  json.body.should.have.property('internal_code');
+                  json.body.internal_code.should.be.equal('existing_mail');
+                  done();
+                });
             });
         });
       });
