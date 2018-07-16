@@ -17,10 +17,6 @@ const AWS = require('aws-sdk'),
     sendingRate: config.common.aws.rate_transport
   });
 
-const NEW_OFFER_NAME_MAIL = '¡ No puedes dejar pasar esta oportunidad !';
-const NEW_CODE_NAME_MAIL = 'Aquí tienes tu código para redimir la oferta.';
-const EXPIRED_NAME_MAIL = 'Ups! Esta oferta ha expirado.';
-
 exports.transporter = transporter;
 exports.ses = ses;
 exports.sendNewCode = (offer, code) => {
@@ -28,7 +24,7 @@ exports.sendNewCode = (offer, code) => {
     offer.retailName = rv.commerce.description;
     offer.retailAddres = rv.address;
     const email = {
-      subject: NEW_CODE_NAME_MAIL,
+      subject: i18n.t(`newCode.subject`),
       html: servicesHtml.newCode(offer, code),
       to: code.email
     };
@@ -41,7 +37,7 @@ exports.sendOfferExpired = (offer, code) => {
     offer.retailName = rv.commerce.description;
     offer.retailAddres = rv.address;
     const email = {
-      subject: EXPIRED_NAME_MAIL,
+      subject: i18n.t(`offerExpired.subject`),
       html: servicesHtml.offerExpired(offer),
       to: code.email
     };
@@ -57,11 +53,10 @@ exports.sendNewOffer = (offer, mail, name = null) => {
     offer.retailAddres = rv.address;
     offer.name = name != null ? name : '';
     offer.nameCategory = offer.nameCategory.toUpperCase();
-    // const subjectEmail =
-    //   name != null
-    //     ? i18n.t(`newOffer.subject`)
-    //     : `IdOferta=${offer.id} Nit=${rv.commerce.nit} Posids=${postIds.join()}`;
-    const subjectEmail = NEW_OFFER_NAME_MAIL;
+    const subjectEmail =
+      name != null
+        ? i18n.t(`newOffer.subject`)
+        : `IdOferta=${offer.id} Nit=${rv.commerce.nit} Posids=${postIds.join()}`;
     const email = {
       subject: subjectEmail,
       html: servicesHtml.newOffer(offer, mail),
@@ -75,7 +70,7 @@ exports.sendEmail = email => {
   return new Promise((resolve, reject) => {
     transporter.sendMail(
       {
-        from: `ofertas@plink.com.co`,
+        from: config.common.server.email_plink,
         to: email.to,
         subject: email.subject,
         html: email.html

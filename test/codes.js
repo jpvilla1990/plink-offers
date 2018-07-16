@@ -91,7 +91,7 @@ describe('/offers/:id/code POST', () => {
       });
     });
   });
-  it('should be fail because the offer isnt exist', done => {
+  it('should be fail because the offer does not exist', done => {
     factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
         chai
