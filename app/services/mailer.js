@@ -57,7 +57,6 @@ exports.sendNewOffer = (offer, mail, name = null) => {
     offer.retailAddres = rv.address;
     offer.name = name != null ? name : '';
     offer.nameCategory = offer.nameCategory.toUpperCase();
-    console.log(`IdOferta=${offer.id} Nit=${rv.commerce.nit} Posids=${postIds.join()}`);
     // const subjectEmail =
     //   name != null
     //     ? i18n.t(`newOffer.subject`)

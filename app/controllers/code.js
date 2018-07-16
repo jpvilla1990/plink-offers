@@ -38,32 +38,21 @@ exports.create = (req, res, next) => {
           return uniqueCode.verify(code).then(newCode => {
             return Offer.incrementField('codes', { id: newCode.offerId }).then(() => {
               return emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
-                res.writeHead(301, {
-                  Location: config.common.server.url_land
-                });
+                res.status(201);
                 res.end();
               });
             });
           });
         } else {
           return emailService.sendOfferExpired(off.dataValues, code).then(() => {
-            res.writeHead(301, {
-              Location: config.common.server.url_land
-            });
-            res.end();
+            throw errors.offerInactive;
           });
         }
       } else {
-        throw errors.nonExistentOffer;
+        throw errors.offerNotFound;
       }
     })
-    .catch(err => {
-      logger.error(`internalCode: ${err.internalCode}, message: ${err.message}`);
-      res.writeHead(301, {
-        Location: config.common.server.url_land
-      });
-      res.end();
-    });
+    .catch(next);
 };
 exports.redeemCode = ({ params }, res, next) =>
   codeService
