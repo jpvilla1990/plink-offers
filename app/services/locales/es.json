@@ -1,14 +1,14 @@
 {
   "newCode": {
-    "subject": "Nuevo código"
+    "subject": "Aquí tienes tu código para redimir la oferta."
   },
   "offerInvalid": {
     "subject": "Oferta inválida"
   },
   "offerExpired": {
-    "subject": "Oferta expirada"
+    "subject": "Ups! Esta oferta ha expirado."
   },
   "newOffer": {
-    "subject": "Nueva oferta"
+    "subject": "¡ No puedes dejar pasar esta oportunidad !"
   }
 }

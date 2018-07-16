@@ -40,12 +40,28 @@ exports.create = (req, res, next) => {
     })
     .catch(err => next(err));
 };
+exports.getOffer = (req, res, next) => {
+  const idOffer = req.params.id_offer;
+  return Offer.getBy({ id: idOffer })
+    .then(off => {
+      if (off) {
+        const send = utils.map(off);
+        res.status(200);
+        res.send(send);
+        res.end();
+      } else {
+        throw errors.offerNotFound;
+      }
+    })
+    .catch(next);
+};
 exports.getAll = (req, res, next) => {
   const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10;
   const offsetQuery = req.query.page === 0 ? 0 : req.query.page * limitQuery;
   return Offer.getAllBy({ retail: req.params.id, offset: offsetQuery, limit: limitQuery })
     .then(list => {
       const listResult = list.rows.map(value => ({
+        id: value.dataValues.id,
         product: value.dataValues.product,
         begin: value.dataValues.begin,
         expires: value.dataValues.expiration,
@@ -82,7 +98,7 @@ exports.getRedemptions = (req, res, next) => {
           createdAt: utils.moment(value.created_at).format('YYYY-MM-DD'),
           dateRedemption: utils.moment(value.dateRedemption).format('YYYY-MM-DD'),
           hourRedemption: utils.moment(value.dateRedemption).format('HH:mm'),
-          mail: value.email
+          mail: utils.mask(value.email)
         })),
         pages = Math.ceil(list.count / limitQuery);
       res.status(200);
