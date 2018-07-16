@@ -2,7 +2,7 @@ doctype html
 head
   link(href='https://fonts.googleapis.com/css?family=Exo' rel='stylesheet')
 .wrapper(style="position: relative;text-align: center;background-color: #f1f2f2;font-family: 'Exo', sans-serif;width: 650px;")
-  article.main(style=`text-align: left;background-image: url(${bg_general_offer});height: 900px;	width: 650px;background-size: cover;align-items: center;`)
+  article.main(style=`text-align: left;background-image: url(${bg_general_offer});height: 895px;	width: 650px;background-size: cover;align-items: center;`)
     img.logo(src=logo_plink style='padding-top: 30px;margin-bottom: 50px;display: block;margin-left: auto;margin-right: auto;')
     p.greetings(style='display: block;margin-left: auto;margin-right: auto;margin-bottom: 0px;height: 27px;	width: 147px;	color: #FDF8F1;	font-family: Exo;	font-size: 20px;	font-weight: bold;	letter-spacing: 0.78px;	line-height: 27px; text-align: center;	') Hola #{name_person} :)
     .subtitle(style='display: block;margin-left: auto;margin-right: auto;margin-top: 0px;height: 19px;	width: 276px;	color: #FFF1DE;	font-family: Exo;	font-size: 14px;	font-weight: 500;	letter-spacing: 0.55px;	line-height: 19px;text-align: center;') Te traemos  esta oferta pensada para ti
@@ -15,9 +15,9 @@ head
     hr.dotted-line(style='display: block;margin-left: auto;margin-right: auto;margin-top: 15px;width: 478px;border-top: dashed 1px #E0DEDE;height: 0px;')
     .brand-info(style='display: block;margin-left: auto;margin-right: auto;height: 56px;width: 260px; padding-top:15px')
       img.brand-logo(src=brand_logo style='height: 54.66px;	float:left; display:inline;')
-      .brand-data(style='margin-left: 10px;color: #9B9B9B;font-family: Exo;font-size: 14px;font-weight: 500;letter-spacing: 0.8px;line-height: 19px;float: left;display: inline;padding-top: 10px;')
+      .brand-data(style='margin-left: 5px;color: #9B9B9B;font-family: Exo;font-size: 14px;font-weight: 500;letter-spacing: 0.8px;line-height: 19px;float: left;display: inline;padding-top: 20px;')
         .brand-name(style='font-weight: bold;') #{name_retail}
-        .brand-adress #{addres} 
+        .brand-adress #{addres}
     form(method='POST' action=`${create_code_url}`)
       div.form-group(style='display:none')
         input#pw.form-control( name='email' value=`${emailTo}`)
