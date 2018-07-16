@@ -49,8 +49,9 @@ exports.newOffer = (offer, emailTo) => {
       addres: offer.retailAddres,
       name_category: offer.nameCategory.toUpperCase(),
       name_person: offer.name,
-      create_code_url: `${config.common.server.base_path}/${offer.id}/code`,
-      emailTo
+      create_code_url: `${config.common.server.base_path}?`,
+      emailTo,
+      offer_id: offer.id
     },
     html = pug.renderFile(templateDir, params);
   return html;
