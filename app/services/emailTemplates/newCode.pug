@@ -4,7 +4,7 @@ html
     link(href="https://fonts.googleapis.com/css?family=Exo" rel="stylesheet")
   body(style="width: 650px;margin: 0;")
     .wrapper(style="position: relative;text-align: center;background-color: #f1f2f2;font-family: 'Exo', sans-serif;width: 650px;")
-      article.main(style=`text-align: left;background-image: url(${bg_general_code});height: 600px;	width: 650px;background-size: cover;align-items: center;`)
+      .main(style=`text-align: left;background-image: url(${bg_general_code});height: 600px;	width: 650px;background-size: cover;align-items: center;`)
         img.logo(src=logo_plink style="padding-top: 95px;margin-bottom: 50px;display: block;margin-left: auto;margin-right: auto;")
         p.greetings(style="display: block;margin-left: auto;margin-right: auto;margin-bottom: 0px;height: 27px;	width: 147px;	color: #FDF8F1;	font-family: Exo;font-size: 20px;font-weight: bold;letter-spacing: 0.78px;	line-height: 27px;	") Felicitaciones!
         .subtitle(style="display: block;margin-left: auto;margin-right: auto;margin-top: 0px;height: 19px;	width: 541px;text-align: center;	color: #FFF1DE;	font-family: Exo;	font-size: 14px;	font-weight: 500;	letter-spacing: 0.55px;	line-height: 19px;") La oferta ya es tuya para que la redimas, recuerda presentar este codigo en el punto de venta al momento de redimir la oferta
@@ -66,19 +66,18 @@ html
           | - Las imágenes de los productos son de referencia.<br />  <br />
       .contact(style=`width: 650px;	height: 125px;background-color: #f1f2f2;	background-image: url(${bg_footer});`)
       .disclaimer(style="background-color: #ffffff;display: block;margin-left: auto;margin-right: auto;")
+        img.superintendence(src=logo_superintendence style="float: left;padding-left: 30px")
         .contact-info(style='display: block;margin-left: auto;margin-right: auto;color: #FF6500;')
           .contact-title(style='font-family: Exo;	font-size: 15px;	letter-spacing: 0.58px;	line-height: 20px;')
             | Manteng&aacute;monos en cont&aacute;cto
-          .contact-email(style='font-family: Exo;font-size: 15px;	font-weight: bold;	letter-spacing: 0.58px;	line-height: 20px;')
+          .contact-email(style='font-family: Exo;font-size: 15px;	font-weight: bold;	letter-spacing: 0.58px;	line-height: 20px;margin-bottom:40px;')
             a(style='color: #FF6500 !important') hello@plink.com.co
-        img.superintendence(src=logo_superintendence style="float: left;padding-left: 30px")
         div
-          .footer-logos(style='display: flex; margin-left: auto;margin-right: auto;margin-top: 25px;height: 75px;margin-left: 200px;')
-            .img_container( style='display: flex; margin-bottom:30px;')
-              img.footer-logo(src=logo_bancocolombia style='display: inline;margin-right: 50px; ')
-              hr.dotted-line2(style='display: block;margin-left: auto;margin-right: auto;margin-bottom: 0px;width: 0px;border-top: dashed 0px #E0DEDE;height: 45px; margin-right: 40px;')
-              img.brand-footer-logo(src=brand_logo style='float: right;display: inline;')
-        hr.dotted-line2(style="display: block;margin-left: auto;margin-right: auto;margin-bottom: 0px;width: 150px;border-top: dashed 0px #E0DEDE;height: 0px;")
+          .logos_container( style='display: flex; justify-content: center;')
+            img.footer-logo(src=logo_bancocolombia style='width:146px;height:45px;margin-left:auto;')
+            img.mail-separator(src=mail_separator style='width:3px;height:45px; margin-right: 50px; margin-left: 50px;')
+            img.brand-footer-logo(src=brand_logo style='height:45px;margin-right:auto;')
+        hr.dotted-line2(style="display: block;margin-left: auto;margin-right: auto;margin-bottom: 0px; margin-top:45px; width: 150px;border-top: dashed 0px #E0DEDE;height: 0px;")
         .disclaimer-conatiner(style="display: block;margin-left: auto;margin-right: auto;height: 65px;width: 602.95px;color: #4A4A4A;font-family: Exo;font-size: 10px;letter-spacing: 0.39px;line-height: 13px;text-align: center;margin-top: 18px;margin-bottom: 18px;")
           .disclaimer-text
             | “Bancolombia nunca le solicitará datos financieros como usuarios, claves, números de tarjetas de crédito con sus códigos de seguridad y fechas de vencimiento mediante vínculos de correo electrónico o llamadas telefónicas.
