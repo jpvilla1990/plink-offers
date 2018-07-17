@@ -99,6 +99,7 @@ module.exports = (sequelize, DataTypes) => {
   Offer.associate = models => {
     Offer.belongsTo(models.category, { as: 'category' });
     Offer.belongsTo(models.type_offer, { as: 'type', foreignKey: 'strategy' });
+    Offer.hasMany(models.code, { as: 'code' });
   };
   return Offer;
 };

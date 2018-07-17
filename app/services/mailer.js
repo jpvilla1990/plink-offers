@@ -68,17 +68,18 @@ exports.sendNewOffer = (offer, mail, name = null) => {
 
 exports.sendEmail = email => {
   return new Promise((resolve, reject) => {
-    transporter.sendMail(
-      {
-        from: config.common.server.email_plink,
-        to: email.to,
-        subject: email.subject,
-        html: email.html
-      },
-      (err, info) => {
-        if (err) reject(err);
-        resolve(info);
-      }
-    );
+    // transporter.sendMail(
+    //   {
+    //     from: config.common.server.email_plink,
+    //     to: email.to,
+    //     subject: email.subject,
+    //     html: email.html
+    //   },
+    //   (err, info) => {
+    //     if (err) reject(err);
+    //     resolve(info);
+    //   }
+    // );
+    resolve();
   });
 };

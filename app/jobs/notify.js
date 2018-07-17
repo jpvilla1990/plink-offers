@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk'),
   config = require('../../config'),
   Offer = require('../models').offer,
-  Category = require('../models').category,
+  EmailUser = require('../models').email_user,
   logger = require('../logger'),
   emailService = require('../services/mailer'),
   CronJob = require('cron').CronJob,
