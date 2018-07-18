@@ -4,7 +4,7 @@ const AWS = require('aws-sdk'),
   requestService = require('../services/request'),
   servicesHtml = require('../services/html'),
   i18n = require('i18next'),
-  i18next = require('../services/i18next'),
+  { MAX_LENGTH_OFFER_DETAIL } = require('../constants'),
   ses = new AWS.SES(
     new AWS.Config({
       accessKeyId: config.common.aws.key,
@@ -17,12 +17,15 @@ const AWS = require('aws-sdk'),
     sendingRate: config.common.aws.rate_transport
   });
 
+const sanitizeMaxString = (string, maxLength = MAX_LENGTH_OFFER_DETAIL) =>
+  string && string.length > maxLength ? `${string.substring(0, maxLength)}...` : string;
+
 exports.transporter = transporter;
 exports.ses = ses;
 exports.sendNewCode = (offer, code) => {
   return requestService.retail(`/points/${offer.retail}`).then(rv => {
-    offer.retailName = rv.commerce.description;
-    offer.retailAddres = rv.address;
+    offer.retailName = sanitizeMaxString(rv.commerce.description);
+    offer.retailAddres = sanitizeMaxString(rv.address);
     const email = {
       subject: i18n.t(`newCode.subject`),
       html: servicesHtml.newCode(offer, code),
@@ -34,8 +37,8 @@ exports.sendNewCode = (offer, code) => {
 
 exports.sendOfferExpired = (offer, code) => {
   return requestService.retail(`/points/${offer.retail}`).then(rv => {
-    offer.retailName = rv.commerce.description;
-    offer.retailAddres = rv.address;
+    offer.retailName = sanitizeMaxString(rv.commerce.description);
+    offer.retailAddres = sanitizeMaxString(rv.address);
     const email = {
       subject: i18n.t(`offerExpired.subject`),
       html: servicesHtml.offerExpired(offer),
@@ -49,8 +52,8 @@ exports.sendNewOffer = (offer, mail, name = null) => {
   return requestService.retail(`/points/${offer.retail}`).then(rv => {
     const postIds = new Array();
     rv.posTerminals.map(value => postIds.push(value.posId));
-    offer.retailName = rv.commerce.description;
-    offer.retailAddres = rv.address;
+    offer.retailName = sanitizeMaxString(rv.commerce.description);
+    offer.retailAddres = sanitizeMaxString(rv.address);
     offer.name = name != null ? name : '';
     offer.nameCategory = offer.nameCategory.toUpperCase();
     const subjectEmail =
