@@ -4,32 +4,24 @@ const utils = require('../utils'),
   Code = require('../models').code;
 
 exports.map = list => {
-  const emailWithOffers = new Array(),
-    retails = new Array();
+  const emailWithOffers = new Array();
   list.rows.forEach(value => {
-    if (!emailWithOffers[value.email]) {
-      emailWithOffers[value.email] = new Array();
-    }
     if (constants.OFFER_ACTIVE === utils.getOfferStatusString(value.offer.dataValues)) {
-      if (!retails[value.offer.dataValues.retail]) {
-        return requestService.retail(`/points/${value.offer.dataValues.retail}`).then(rv => {
-          retails.push({
+      emailWithOffers.push(
+        requestService.retail(`/points/${value.offer.dataValues.retail}`).then(rv => {
+          const offerFormated = {
+            image: value.offer.dataValues.imageUrl,
+            category: value.offer.category.dataValues.name,
+            product: value.offer.dataValues.product,
+            valueStrategy: value.offer.dataValues.valueStrategy,
+            expires: value.offer.dataValues.expiration,
+            code: value.offer.code.length > 0 ? value.offer.code[0].dataValues.code : 0,
             retailName: rv.commerce.description,
             retailAddress: rv.address
-          });
-        });
-      }
-      return Code.getBy({ email: value.email }).then(exist => {
-        const offerFormated = {
-          image: value.offer.dataValues.imageUrl,
-          category: value.offer.category.dataValues.name,
-          product: value.offer.dataValues.product,
-          valueStrategy: value.offer.dataValues.valueStrategy,
-          expires: value.offer.dataValues.expiration,
-          code: exist ? exist.code : 0
-        };
-        emailWithOffers[value.email].push(offerFormated);
-      });
+          };
+          return offerFormated;
+        })
+      );
     }
   });
   return emailWithOffers;

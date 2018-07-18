@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
       .findAndCountAll({
         offset: filter.offset,
         limit: filter.limit,
+        where: { email: filter.email },
         include: [
           {
             model: sequelize.models.offer,
@@ -30,6 +31,10 @@ module.exports = (sequelize, DataTypes) => {
               {
                 model: sequelize.models.category,
                 as: 'category'
+              },
+              {
+                model: sequelize.models.code,
+                as: 'code'
               }
             ]
           }
