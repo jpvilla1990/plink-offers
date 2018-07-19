@@ -5,17 +5,17 @@ const utils = require('../utils'),
 
 exports.map = list => {
   const emailWithOffers = new Array();
-  list.rows.forEach(value => {
+  list.forEach(value => {
     if (constants.OFFER_ACTIVE === utils.getOfferStatusString(value.offer.dataValues)) {
       emailWithOffers.push(
         requestService.retail(`/points/${value.offer.dataValues.retail}`).then(rv => {
           const offerFormated = {
+            idOffer: value.offer.dataValues.id,
             image: value.offer.dataValues.imageUrl,
             category: value.offer.category.dataValues.name,
             product: value.offer.dataValues.product,
             valueStrategy: value.offer.dataValues.valueStrategy,
             expires: value.offer.dataValues.expiration,
-            code: value.offer.code.length > 0 ? value.offer.code[0].dataValues.code : 0,
             retailName: rv.commerce.description,
             retailAddress: rv.address
           };

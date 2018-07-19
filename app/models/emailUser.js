@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
   );
   emailUser.getAll = filter => {
     return emailUser
-      .findAndCountAll({
+      .findAll({
         offset: filter.offset,
         limit: filter.limit,
         where: { email: filter.email },
@@ -31,10 +31,6 @@ module.exports = (sequelize, DataTypes) => {
               {
                 model: sequelize.models.category,
                 as: 'category'
-              },
-              {
-                model: sequelize.models.code,
-                as: 'code'
               }
             ]
           }
