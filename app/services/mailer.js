@@ -22,12 +22,28 @@ const sanitizeMaxString = (string, maxLength = MAX_LENGTH_OFFER_DETAIL) =>
 
 exports.transporter = transporter;
 exports.ses = ses;
-exports.sendNewCode = (offer, code) => {
+
+const getInfoMail = (offer, type, name = null) => {
   return requestService.retail(`/points/${offer.retail}`).then(rv => {
     offer.retailName = sanitizeMaxString(rv.commerce.description);
-    offer.retailAddres = sanitizeMaxString(rv.address);
+    offer.retailAddress = sanitizeMaxString(rv.address);
+    offer.nameCategory = offer.nameCategory ? offer.nameCategory.toUpperCase() : null;
+    offer.name = name != null ? name : '';
+    if (name === null && type !== 'newOffer') {
+      offer.subjectEmail = i18n.t(`${type}.subject`);
+    } else {
+      const postIds = new Array();
+      rv.posTerminals.map(value => postIds.push(value.posId));
+      offer.subjectEmail = `IdOferta=${offer.id} Nit=${rv.commerce.nit} Posids=${postIds.join()}`;
+    }
+    return Promise.resolve();
+  });
+};
+
+exports.sendNewCode = (offer, code) => {
+  return getInfoMail(offer, 'newCode').then(() => {
     const email = {
-      subject: i18n.t(`newCode.subject`),
+      subject: offer.subjectEmail,
       html: servicesHtml.newCode(offer, code),
       to: code.email
     };
@@ -36,12 +52,10 @@ exports.sendNewCode = (offer, code) => {
 };
 
 exports.sendOfferExpired = (offer, code) => {
-  return requestService.retail(`/points/${offer.retail}`).then(rv => {
-    offer.retailName = sanitizeMaxString(rv.commerce.description);
-    offer.retailAddres = sanitizeMaxString(rv.address);
+  return getInfoMail(offer, 'offerExpired').then(() => {
     const email = {
-      subject: i18n.t(`offerExpired.subject`),
-      html: servicesHtml.offerExpired(offer),
+      subject: offer.subjectEmail,
+      html: servicesHtml.offerExpired(offer, code),
       to: code.email
     };
     return exports.sendEmail(email);
@@ -49,19 +63,9 @@ exports.sendOfferExpired = (offer, code) => {
 };
 
 exports.sendNewOffer = (offer, mail, name = null) => {
-  return requestService.retail(`/points/${offer.retail}`).then(rv => {
-    const postIds = new Array();
-    rv.posTerminals.map(value => postIds.push(value.posId));
-    offer.retailName = sanitizeMaxString(rv.commerce.description);
-    offer.retailAddres = sanitizeMaxString(rv.address);
-    offer.name = name != null ? name : '';
-    offer.nameCategory = offer.nameCategory.toUpperCase();
-    const subjectEmail =
-      name != null
-        ? i18n.t(`newOffer.subject`)
-        : `IdOferta=${offer.id} Nit=${rv.commerce.nit} Posids=${postIds.join()}`;
+  return getInfoMail(offer, 'newOffer').then(() => {
     const email = {
-      subject: subjectEmail,
+      subject: offer.subjectEmail,
       html: servicesHtml.newOffer(offer, mail),
       to: mail
     };

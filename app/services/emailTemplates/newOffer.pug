@@ -17,7 +17,7 @@ head
       img.brand-logo(src=brand_logo style='height: 54.66px;	float:left; display:inline;')
       .brand-data(style='margin-left: 5px;color: #9B9B9B;font-family: Exo;font-size: 14px;font-weight: 500;letter-spacing: 0.8px;line-height: 19px;float: left;display: inline;padding-top: 20px;')
         .brand-name(style='font-weight: bold;') #{name_retail}
-        .brand-adress #{addres}
+        .brand-adress #{address}
     form(method='GET' action=`${create_code_url}`)
       div.form-group(style='display:none')
         input#pw.form-control( name='email' value=`${emailTo}`)
@@ -42,7 +42,7 @@ head
 
       | - El beneficio corresponde a #{value_strategy} off en #{name_retail} con #{product}  <br />  <br />
 
-      | - El beneficio aplica en la tienda f&iacute;sica: #{addres}  <br />  <br />
+      | - El beneficio aplica en la tienda f&iacute;sica: #{address}  <br />  <br />
 
       | - Este beneficio no es acumulable con bonos de compra, otros descuentos y/o promociones vigentes en el punto de venta. No aplica para domicilios.  <br />  <br />
 
