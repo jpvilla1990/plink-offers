@@ -26,6 +26,11 @@ exports.init = app => {
     EmailUser.getAll
   );
   app.get(
+    '/offer-app/codes',
+    [auth.requireEmail, validator.checkQuery, validator.validate],
+    EmailUser.getCodes
+  );
+  app.get(
     '/retail/:id/offers/:id_offer/redemptions',
     [auth.requireRetail, validator.checkQuery, validator.validate],
     Offer.getRedemptions
