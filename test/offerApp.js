@@ -102,10 +102,37 @@ describe('/offer-app/offers GET', () => {
     });
   });
   it('should fail because the page was not sent', done => {
+    chai
+      .request(server)
+      .get(`/offer-app/offers?`)
+      .set('authorization', generateToken())
+      .then(response => {
+        response.should.have.status(400);
+        response.body.should.have.property('message');
+        response.body.should.have.property('internal_code');
+        done();
+      });
+  });
+});
+
+describe('/offer-app/codes GET', () => {
+  const generateToken = (email = 'julian.molina@wolox.com.ar') => `bearer ${token.generate({ email })}`,
+    email = 'julian.molina@wolox.com.ar';
+  it('should fail because the page was not sent', done => {
+    chai
+      .request(server)
+      .get(`/offer-app/offers`)
+      .set('authorization', generateToken())
+      .then(response => {
+        response.should.have.status(400);
+        response.body.should.have.property('message');
+        response.body.should.have.property('internal_code');
+        done();
+      });
+  });
+  it('should be success get two codes', done => {
     factoryManager.create(factoryOffer).then(off1 => {
-      const firstId = off1.dataValues.id;
       factoryManager.create(factoryOffer).then(off2 => {
-        const secondId = off2.dataValues.id;
         factoryManager.create(factoryCode, { email, offerId: off1.dataValues.id }).then(() => {
           factoryManager
             .create(factoryCode, {
@@ -113,29 +140,16 @@ describe('/offer-app/offers GET', () => {
               offerId: off2.dataValues.id
             })
             .then(() => {
-              factoryManager
-                .create(factoryEmailUser, {
-                  email,
-                  offerId: firstId
-                })
-                .then(() => {
-                  factoryManager
-                    .create(factoryEmailUser, {
-                      email,
-                      offerId: secondId
-                    })
-                    .then(() => {
-                      chai
-                        .request(server)
-                        .get(`/offer-app/offers?`)
-                        .set('authorization', generateToken())
-                        .then(response => {
-                          response.should.have.status(400);
-                          response.body.should.have.property('message');
-                          response.body.should.have.property('internal_code');
-                          done();
-                        });
-                    });
+              chai
+                .request(server)
+                .get(`/offer-app/codes?page=0`)
+                .set('authorization', generateToken())
+                .then(response => {
+                  response.should.have.status(200);
+                  response.body.count.should.eqls(2);
+                  response.body.codes.length.should.eqls(2);
+                  dictum.chai(response);
+                  done();
                 });
             });
         });

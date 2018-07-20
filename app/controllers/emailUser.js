@@ -27,9 +27,9 @@ exports.getCodes = (req, res, next) => {
   const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10;
   const offsetQuery = req.query.page === 0 ? 0 : req.query.page * limitQuery;
   return Code.getAllBy({ offset: offsetQuery, email: req.email, limit: limitQuery }).then(list => {
-    const offersWithCodes = serviceEmailUser.mapCodes(list);
+    const offersWithCodes = serviceEmailUser.mapCodes(list.rows);
     res.status(200);
-    res.send({ count: offersWithCodes.length, codes: offersWithCodes });
+    res.send({ count: list.count, codes: offersWithCodes });
     res.end();
   });
 };

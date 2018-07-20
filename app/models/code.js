@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
     });
   };
   Code.getAllBy = filter => {
-    return Code.findAll({
+    return Code.findAndCountAll({
       offset: filter.offset,
       where: { email: filter.email },
       limit: filter.limit,
