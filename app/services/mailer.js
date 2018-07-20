@@ -15,7 +15,8 @@ const AWS = require('aws-sdk'),
   transporter = nodemailer.createTransport({
     SES: ses,
     sendingRate: config.common.aws.rate_transport
-  });
+  }),
+  constants = require('../constants');
 
 const sanitizeMaxString = (string, maxLength = MAX_LENGTH_OFFER_DETAIL) =>
   string && string.length > maxLength ? `${string.substring(0, maxLength)}...` : string;
@@ -23,25 +24,22 @@ const sanitizeMaxString = (string, maxLength = MAX_LENGTH_OFFER_DETAIL) =>
 exports.transporter = transporter;
 exports.ses = ses;
 
-const getInfoMail = (offer, type, name = null) => {
-  return requestService.retail(`/points/${offer.retail}`).then(rv => {
+const getInfoMail = (offer, type, name = null) =>
+  requestService.retail(`/points/${offer.retail}`).then(rv => {
     offer.retailName = sanitizeMaxString(rv.commerce.description);
     offer.retailAddress = sanitizeMaxString(rv.address);
     offer.nameCategory = offer.nameCategory ? offer.nameCategory.toUpperCase() : null;
-    offer.name = name != null ? name : '';
-    if (name === null && type !== 'newOffer') {
+    if (type !== constants.NEW_OFFER || (type === constants.NEW_OFFER && name !== null)) {
       offer.subjectEmail = i18n.t(`${type}.subject`);
     } else {
-      const postIds = new Array();
-      rv.posTerminals.map(value => postIds.push(value.posId));
+      const postIds = rv.posTerminals.map(value => value.posId);
       offer.subjectEmail = `IdOferta=${offer.id} Nit=${rv.commerce.nit} Posids=${postIds.join()}`;
     }
+    offer.name = name != null ? name : '';
     return Promise.resolve();
   });
-};
-
-exports.sendNewCode = (offer, code) => {
-  return getInfoMail(offer, 'newCode').then(() => {
+exports.sendNewCode = (offer, code) =>
+  getInfoMail(offer, constants.NEW_CODE).then(() => {
     const email = {
       subject: offer.subjectEmail,
       html: servicesHtml.newCode(offer, code),
@@ -49,10 +47,8 @@ exports.sendNewCode = (offer, code) => {
     };
     return exports.sendEmail(email);
   });
-};
-
-exports.sendOfferExpired = (offer, code) => {
-  return getInfoMail(offer, 'offerExpired').then(() => {
+exports.sendOfferExpired = (offer, code) =>
+  getInfoMail(offer, constants.OFFER_EXPIRED).then(() => {
     const email = {
       subject: offer.subjectEmail,
       html: servicesHtml.offerExpired(offer, code),
@@ -60,10 +56,8 @@ exports.sendOfferExpired = (offer, code) => {
     };
     return exports.sendEmail(email);
   });
-};
-
-exports.sendNewOffer = (offer, mail, name = null) => {
-  return getInfoMail(offer, 'newOffer').then(() => {
+exports.sendNewOffer = (offer, mail, name = null) =>
+  getInfoMail(offer, constants.NEW_OFFER, name).then(() => {
     const email = {
       subject: offer.subjectEmail,
       html: servicesHtml.newOffer(offer, mail),
@@ -71,8 +65,6 @@ exports.sendNewOffer = (offer, mail, name = null) => {
     };
     return exports.sendEmail(email);
   });
-};
-
 exports.sendEmail = email => {
   return new Promise((resolve, reject) => {
     transporter.sendMail(
