@@ -267,3 +267,33 @@ describe('/retail/:id/code/:code GET', () => {
       });
   });
 });
+describe('/offer-app/offers/:id/code POST', () => {
+  const generateTokenApp = (email = 'julian.molina@wolox.com.ar') => `bearer ${token.generate({ email })}`;
+  it('should success', done => {
+    factoryManager.create(factoryOffer).then(off =>
+      chai
+        .request(server)
+        .post(`/offer-app/offers/${off.dataValues.id}/code`)
+        .set('authorization', generateTokenApp())
+        .then(response => {
+          response.should.have.status(201);
+          expect(response.body).to.have.all.keys(['product', 'valueStrategy', 'expires', 'code']);
+          done();
+        })
+    );
+  });
+  it('should fail because the offer doesnt exist', done => {
+    factoryManager.create(factoryOffer).then(off =>
+      chai
+        .request(server)
+        .post(`/offer-app/offers/1345/code`)
+        .set('authorization', generateTokenApp())
+        .then(response => {
+          response.should.have.status(404);
+          response.body.should.have.property('internal_code');
+          response.body.should.have.property('message');
+          done();
+        })
+    );
+  });
+});

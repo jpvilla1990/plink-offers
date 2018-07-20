@@ -1,5 +1,9 @@
 const EmailUser = require('../models').email_user,
-  serviceEmailUser = require('../services/emailUser');
+  Offer = require('../models').offer,
+  serviceEmailUser = require('../services/emailUser'),
+  errors = require('../errors'),
+  uuid = require('uuid'),
+  uniqueCode = require('../services/uniqueCode');
 
 exports.getAll = (req, res, next) => {
   const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10;
