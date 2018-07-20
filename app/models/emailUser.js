@@ -17,8 +17,32 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true
     }
   );
+  emailUser.getAll = filter => {
+    return emailUser
+      .findAll({
+        offset: filter.offset,
+        limit: filter.limit,
+        where: { email: filter.email },
+        include: [
+          {
+            model: sequelize.models.offer,
+            as: 'offer',
+            include: [
+              {
+                model: sequelize.models.category,
+                as: 'category'
+              }
+            ]
+          }
+        ]
+      })
+      .catch(err => {
+        throw errors.databaseError(err.message);
+      });
+  };
   emailUser.associate = models => {
     emailUser.belongsTo(models.offer, { as: 'offer' });
   };
+
   return emailUser;
 };
