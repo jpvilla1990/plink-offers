@@ -269,7 +269,7 @@ describe('/retail/:id/code/:code GET', () => {
 });
 describe('/offer-app/offers/:id/code POST', () => {
   const generateTokenApp = (email = 'julian.molina@wolox.com.ar') => `bearer ${token.generate({ email })}`;
-  it('should success', done => {
+  it('should be success to create a code', done => {
     factoryManager.create(factoryOffer).then(off =>
       chai
         .request(server)

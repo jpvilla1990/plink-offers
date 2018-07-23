@@ -30,5 +30,5 @@ exports.init = app => {
     [auth.requireRetail, validator.checkQuery, validator.validate],
     Offer.getRedemptions
   );
-  app.post('/offer-app/offers/:id/code', [auth.requireEmail, validator.validate], code.createApp);
+  app.post('/offer-app/offers/:id/code', [auth.requireEmail, validator.validate], code.createCodeApp);
 };

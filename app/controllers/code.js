@@ -33,11 +33,9 @@ exports.create = (req, res, next) => {
         if (active) {
           code.code = uuid().slice(0, 8);
           return uniqueCode.verify(code).then(newCode => {
-            return Offer.incrementField('codes', { id: newCode.offerId }).then(() => {
-              return emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
-                res.status(201);
-                res.end();
-              });
+            return emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
+              res.status(201);
+              res.end();
             });
           });
         } else {
@@ -69,7 +67,7 @@ exports.getCode = ({ params }, res, next) =>
       res.end();
     })
     .catch(next);
-exports.createApp = (req, res, next) => {
+exports.createCodeApp = (req, res, next) => {
   const code = {
     offerId: req.params.id,
     email: req.email
@@ -79,16 +77,14 @@ exports.createApp = (req, res, next) => {
       if (off) {
         code.code = uuid().slice(0, 8);
         return uniqueCode.verify(code).then(newCode => {
-          return Offer.incrementField('codes', { id: newCode.offerId }).then(() => {
-            res.status(201);
-            res.send({
-              product: off.dataValues.product,
-              valueStrategy: off.dataValues.valueStrategy,
-              expires: off.dataValues.expiration,
-              code: newCode.dataValues.code
-            });
-            res.end();
+          res.status(201);
+          res.send({
+            product: off.dataValues.product,
+            valueStrategy: off.dataValues.valueStrategy,
+            expires: off.dataValues.expiration,
+            code: newCode.dataValues.code
           });
+          res.end();
         });
       } else {
         throw errors.offerNotFound;
