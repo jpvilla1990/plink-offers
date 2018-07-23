@@ -19,174 +19,96 @@ describe('/offer-app/offers GET', () => {
     posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
   });
   it('should be success get one offers for specific category ( food ) ', done => {
-    factoryManager.create(factoryCategory, { name: 'travel' }).then(() => {
-      factoryManager.create(factoryCategory, { name: 'food' }).then(cat2 => {
-        factoryManager.create(factoryOffer, { categoryId: 1 }).then(off1 => {
-          const firstId = off1.dataValues.id;
-          factoryManager.create(factoryOffer, { categoryId: cat2.dataValues.id }).then(off2 => {
-            const secondId = off2.dataValues.id;
-            factoryManager.create(factoryCode, { email, offerId: off1.dataValues.id }).then(() => {
-              factoryManager
-                .create(factoryCode, {
-                  email,
-                  offerId: off2.dataValues.id
-                })
-                .then(() => {
-                  factoryManager
-                    .create(factoryEmailUser, {
-                      email,
-                      offerId: firstId
-                    })
-                    .then(() => {
-                      factoryManager
-                        .create(factoryEmailUser, {
-                          email,
-                          offerId: secondId
-                        })
-                        .then(() => {
-                          chai
-                            .request(server)
-                            .get(`/offer-app/offers?page=0&category=2`)
-                            .set('authorization', generateToken())
-                            .then(response => {
-                              response.should.have.status(200);
-                              response.body.count.should.eqls(1);
-                              response.body.offers.length.should.eqls(1);
-                              dictum.chai(response);
-                              done();
-                            });
-                        });
-                    });
-                });
-            });
+    Promise.all([
+      factoryManager.create(factoryCategory, { name: 'travel' }),
+      factoryManager.create(factoryCategory, { name: 'food' }),
+      factoryManager.create(factoryOffer, { categoryId: 1 }),
+      factoryManager.create(factoryOffer, { categoryId: 2 })
+    ])
+      .then()
+      .then(() => {
+        Promise.all([
+          factoryManager.create(factoryCode, { email, offerId: 1 }),
+          factoryManager.create(factoryCode, { email, offerId: 2 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+        ])
+          .then()
+          .then(() => {
+            chai
+              .request(server)
+              .get(`/offer-app/offers?page=0&category=2`)
+              .set('authorization', generateToken())
+              .then(response => {
+                response.should.have.status(200);
+                response.body.count.should.eqls(1);
+                response.body.offers.length.should.eqls(1);
+                dictum.chai(response);
+                done();
+              });
           });
-        });
       });
-    });
   });
   it('should be success get two offers', done => {
-    factoryManager.create(factoryOffer).then(off1 => {
-      const firstId = off1.dataValues.id;
-      factoryManager.create(factoryOffer).then(off2 => {
-        const secondId = off2.dataValues.id;
-        factoryManager.create(factoryCode, { email, offerId: off1.dataValues.id }).then(() => {
-          factoryManager
-            .create(factoryCode, {
-              email,
-              offerId: off2.dataValues.id
-            })
-            .then(() => {
-              factoryManager
-                .create(factoryEmailUser, {
-                  email,
-                  offerId: firstId
-                })
-                .then(() => {
-                  factoryManager
-                    .create(factoryEmailUser, {
-                      email,
-                      offerId: secondId
-                    })
-                    .then(() => {
-                      chai
-                        .request(server)
-                        .get(`/offer-app/offers?page=0`)
-                        .set('authorization', generateToken())
-                        .then(response => {
-                          response.should.have.status(200);
-                          response.body.count.should.eqls(2);
-                          response.body.offers.length.should.eqls(2);
-                          dictum.chai(response);
-                          done();
-                        });
-                    });
-                });
-            });
-        });
+    Promise.all([factoryManager.create(factoryOffer), factoryManager.create(factoryOffer)])
+      .then()
+      .then(() => {
+        Promise.all([
+          factoryManager.create(factoryCode, { email, offerId: 1 }),
+          factoryManager.create(factoryCode, { email, offerId: 2 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+        ])
+          .then()
+          .then(() => {
+            chai
+              .request(server)
+              .get(`/offer-app/offers?page=0`)
+              .set('authorization', generateToken())
+              .then(response => {
+                response.should.have.status(200);
+                response.body.count.should.eqls(2);
+                response.body.offers.length.should.eqls(2);
+                done();
+              });
+          });
       });
-    });
   });
   it('should be success get one offer', done => {
     const otherEmail = 'julian.molina+false@wolox.com.ar';
-    factoryManager.create(factoryOffer).then(off1 => {
-      const firstId = off1.dataValues.id;
-      factoryManager.create(factoryOffer).then(off2 => {
-        const secondId = off2.dataValues.id;
-        factoryManager.create(factoryCode, { email, offerId: off1.dataValues.id }).then(() => {
-          factoryManager
-            .create(factoryCode, {
-              email,
-              offerId: off2.dataValues.id
-            })
-            .then(() => {
-              factoryManager
-                .create(factoryEmailUser, {
-                  email,
-                  offerId: firstId
-                })
-                .then(() => {
-                  factoryManager
-                    .create(factoryEmailUser, {
-                      email: otherEmail,
-                      offerId: secondId
-                    })
-                    .then(() => {
-                      chai
-                        .request(server)
-                        .get(`/offer-app/offers?page=0`)
-                        .set('authorization', generateToken())
-                        .then(response => {
-                          response.should.have.status(200);
-                          response.body.count.should.eqls(1);
-                          response.body.offers.length.should.eqls(1);
-                          done();
-                        });
-                    });
-                });
-            });
-        });
+    Promise.all([factoryManager.create(factoryOffer), factoryManager.create(factoryOffer)])
+      .then()
+      .then(() => {
+        Promise.all([
+          factoryManager.create(factoryCode, { email, offerId: 1 }),
+          factoryManager.create(factoryCode, { email, offerId: 2 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
+          factoryManager.create(factoryEmailUser, { email: otherEmail, offerId: 2 })
+        ])
+          .then()
+          .then(() => {
+            chai
+              .request(server)
+              .get(`/offer-app/offers?page=0`)
+              .set('authorization', generateToken())
+              .then(response => {
+                response.should.have.status(200);
+                response.body.count.should.eqls(1);
+                response.body.offers.length.should.eqls(1);
+                done();
+              });
+          });
       });
-    });
   });
   it('should fail because the page was not sent', done => {
-    factoryManager.create(factoryOffer).then(off1 => {
-      const firstId = off1.dataValues.id;
-      factoryManager.create(factoryOffer).then(off2 => {
-        const secondId = off2.dataValues.id;
-        factoryManager.create(factoryCode, { email, offerId: off1.dataValues.id }).then(() => {
-          factoryManager
-            .create(factoryCode, {
-              email,
-              offerId: off2.dataValues.id
-            })
-            .then(() => {
-              factoryManager
-                .create(factoryEmailUser, {
-                  email,
-                  offerId: firstId
-                })
-                .then(() => {
-                  factoryManager
-                    .create(factoryEmailUser, {
-                      email,
-                      offerId: secondId
-                    })
-                    .then(() => {
-                      chai
-                        .request(server)
-                        .get(`/offer-app/offers?`)
-                        .set('authorization', generateToken())
-                        .then(response => {
-                          response.should.have.status(400);
-                          response.body.should.have.property('message');
-                          response.body.should.have.property('internal_code');
-                          done();
-                        });
-                    });
-                });
-            });
-        });
+    chai
+      .request(server)
+      .get(`/offer-app/offers?`)
+      .set('authorization', generateToken())
+      .then(response => {
+        response.should.have.status(200);
+        response.body.offers.length.should.eqls(0);
+        done();
       });
-    });
   });
 });

@@ -3,7 +3,7 @@ const EmailUser = require('../models').email_user,
 
 exports.getAll = (req, res, next) => {
   const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10,
-    offsetQuery = req.query.page === 0 ? 0 : req.query.page * limitQuery,
+    offsetQuery = req.query.page ? req.query.page * limitQuery : 0,
     category = req.query.category ? parseInt(req.query.category) : null;
   return EmailUser.getAll({ offset: offsetQuery, email: req.email, limit: limitQuery, category })
     .then(list => {
