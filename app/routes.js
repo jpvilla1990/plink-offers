@@ -20,16 +20,8 @@ exports.init = app => {
   app.get('/retail/:id/offers/:id_offer', [auth.requireRetail], Offer.getOffer);
   app.post('/test-mail', mail.sendTestMail);
   app.post('/access-offer', [], Offer.accessOffer);
-  app.get(
-    '/offer-app/offers',
-    [auth.requireEmail, validator.checkQuery, validator.validate],
-    EmailUser.getAll
-  );
-  app.get(
-    '/offer-app/codes',
-    [auth.requireEmail, validator.checkQuery, validator.validate],
-    EmailUser.getCodes
-  );
+  app.get('/offer-app/offers', [auth.requireEmail], EmailUser.getAll);
+  app.get('/offer-app/codes', [auth.requireEmail], EmailUser.getCodes);
   app.get(
     '/retail/:id/offers/:id_offer/redemptions',
     [auth.requireRetail, validator.checkQuery, validator.validate],

@@ -101,15 +101,14 @@ describe('/offer-app/offers GET', () => {
       });
     });
   });
-  it('should fail because the page was not sent', done => {
+  it('should be success but the page was not sent', done => {
     chai
       .request(server)
       .get(`/offer-app/offers?`)
       .set('authorization', generateToken())
       .then(response => {
-        response.should.have.status(400);
-        response.body.should.have.property('message');
-        response.body.should.have.property('internal_code');
+        response.should.have.status(200);
+        response.body.offers.length.should.eqls(0);
         done();
       });
   });
@@ -118,15 +117,14 @@ describe('/offer-app/offers GET', () => {
 describe('/offer-app/codes GET', () => {
   const generateToken = (email = 'julian.molina@wolox.com.ar') => `bearer ${token.generate({ email })}`,
     email = 'julian.molina@wolox.com.ar';
-  it('should fail because the page was not sent', done => {
+  it('should be success but the page was not sent', done => {
     chai
       .request(server)
-      .get(`/offer-app/offers`)
+      .get(`/offer-app/codes`)
       .set('authorization', generateToken())
       .then(response => {
-        response.should.have.status(400);
-        response.body.should.have.property('message');
-        response.body.should.have.property('internal_code');
+        response.should.have.status(200);
+        response.body.codes.length.should.eqls(0);
         done();
       });
   });

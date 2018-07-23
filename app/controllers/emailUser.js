@@ -4,32 +4,33 @@ const EmailUser = require('../models').email_user,
 
 exports.getAll = (req, res, next) => {
   const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10;
-  const offsetQuery = req.query.page === 0 ? 0 : req.query.page * limitQuery;
+  const offsetQuery = req.query.page ? req.query.page * limitQuery : 0;
   return EmailUser.getAll({ offset: offsetQuery, email: req.email, limit: limitQuery })
-    .then(list => {
-      const listPromise = serviceEmailUser.mapOffers(list),
-        listResult = new Array();
-      Promise.all(listPromise)
+    .then(offersByUser => {
+      const listOffers = new Array();
+      Promise.all(serviceEmailUser.getDataFromOffers(offersByUser))
         .then(offers => {
-          offers.forEach(value => {
-            listResult.push(value);
+          offers.forEach(data => {
+            listOffers.push(data);
           });
         })
         .then(() => {
           res.status(200);
-          res.send({ count: listResult.length, offers: listResult });
+          res.send({ count: listOffers.length, offers: listOffers });
           res.end();
         });
     })
-    .catch(err => next(err));
+    .catch(next);
 };
 exports.getCodes = (req, res, next) => {
   const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10;
-  const offsetQuery = req.query.page === 0 ? 0 : req.query.page * limitQuery;
-  return Code.getAllBy({ offset: offsetQuery, email: req.email, limit: limitQuery }).then(list => {
-    const offersWithCodes = serviceEmailUser.mapCodes(list.rows);
-    res.status(200);
-    res.send({ count: list.count, codes: offersWithCodes });
-    res.end();
-  });
+  const offsetQuery = req.query.page ? req.query.page * limitQuery : 0;
+  return Code.getAllBy({ offset: offsetQuery, email: req.email, limit: limitQuery })
+    .then(codes => {
+      const offersWithCodes = serviceEmailUser.getDataFromCodes(codes.rows);
+      res.status(200);
+      res.send({ count: codes.count, codes: offersWithCodes });
+      res.end();
+    })
+    .catch(next);
 };
