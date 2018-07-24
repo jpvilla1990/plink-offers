@@ -3,6 +3,7 @@ const codeService = require('../services/code'),
   errors = require('../errors'),
   Offer = require('../models').offer,
   uniqueCode = require('../services/uniqueCode'),
+  UserEmail = require('../models').email_user,
   emailService = require('../services/mailer'),
   uuid = require('uuid');
 
@@ -31,14 +32,20 @@ exports.create = (req, res, next) => {
       if (off) {
         const active = utils.getOfferStatus(off.dataValues);
         if (active) {
-          code.code = uuid().slice(0, 8);
-          return uniqueCode.verify(code).then(newCode => {
-            return Offer.incrementField('codes', { id: newCode.offerId }).then(() => {
-              return emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
-                res.status(201);
-                res.end();
+          return UserEmail.getBy({ email: code.email, offer_id: code.offerId }).then(userEmail => {
+            if (userEmail) {
+              code.code = uuid().slice(0, 8);
+              return uniqueCode.verify(code).then(newCode => {
+                return Offer.incrementField('codes', { id: newCode.offerId }).then(() => {
+                  return emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
+                    res.status(201);
+                    res.end();
+                  });
+                });
               });
-            });
+            } else {
+              throw errors.userNotFound;
+            }
           });
         } else {
           return emailService.sendOfferExpired(off.dataValues, code).then(() => {

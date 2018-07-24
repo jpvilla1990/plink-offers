@@ -79,6 +79,5 @@ exports.sendEmail = email => {
         resolve(info);
       }
     );
-    resolve();
   });
 };
