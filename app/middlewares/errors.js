@@ -12,6 +12,7 @@ const statusCodes = {
   [errors.EXISTING_MAIL]: 400,
   [errors.CODE_REDEEMED]: 400,
   [errors.NONEXISTENTOFFER]: 400,
+  [errors.EXISTING_USER]: 400,
   [errors.SAVING_ERROR]: 400,
   [errors.DATABASE_ERROR]: 503,
   [errors.USER_UNAUTHORIZED]: 401,
