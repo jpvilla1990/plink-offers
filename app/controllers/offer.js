@@ -57,7 +57,7 @@ exports.getOffer = (req, res, next) => {
 };
 exports.getAll = (req, res, next) => {
   const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10;
-  const offsetQuery = req.query.page === 0 ? 0 : req.query.page * limitQuery;
+  const offsetQuery = req.query.page ? req.query.page * limitQuery : 0;
   return Offer.getAllBy({ retail: req.params.id, offset: offsetQuery, limit: limitQuery })
     .then(list => {
       const listResult = list.rows.map(value => ({
@@ -88,7 +88,7 @@ exports.accessOffer = (req, res, next) => {
 };
 exports.getRedemptions = (req, res, next) => {
   const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10,
-    offsetQuery = req.query.page === 0 ? 0 : req.query.page * limitQuery,
+    offsetQuery = req.query.page ? req.query.page * limitQuery : 0,
     idOffer = req.params.id_offer;
   return codeService
     .getRedemptions({ id: idOffer, offset: offsetQuery, limit: limitQuery })

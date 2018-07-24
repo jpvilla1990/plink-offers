@@ -159,10 +159,9 @@ describe('/retail/:id/offers GET', () => {
       .request(server)
       .get('/retail/1222/offers?')
       .set(headerName, tokenExample)
-      .then(json => {
-        json.should.have.status(400);
-        json.body.should.have.property('message');
-        json.body.should.have.property('internal_code');
+      .then(res => {
+        res.should.have.status(200);
+        res.body.offers.length.should.eqls(0);
         done();
       });
   });
