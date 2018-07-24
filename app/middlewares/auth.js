@@ -20,11 +20,11 @@ const validateToken = (request, next) => {
 };
 exports.requireRetail = (req, res, next) => {
   const user = validateToken(req, next);
-  if (!user.points.includes(req.params.id)) {
-    next(errors.userUnauthorized);
-  } else {
+  if (user.points && user.points.includes(req.params.id) && user.offers) {
     req.retail = req.params.id;
     next();
+  } else {
+    next(errors.userUnauthorized);
   }
 };
 exports.requireEmail = (req, res, next) => {
