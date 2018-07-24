@@ -5,21 +5,34 @@ const errors = require('../errors'),
   headerName = config.header_name,
   algorithm = config.algorithm;
 
-exports.requireToken = (req, res, next) => {
-  if (req.headers && req.headers[headerName]) {
+const validateToken = (request, next) => {
+  if (request.headers && request.headers[headerName]) {
     try {
-      const token = req.headers[headerName].split(' ')[1];
+      const token = request.headers[headerName].split(' ')[1];
       const user = jwt.decode(token, null, true, algorithm);
-      if (!user.points.includes(req.params.id)) {
-        next(errors.userUnauthorized);
-      } else {
-        req.retail = req.params.id;
-        next();
-      }
+      return user;
     } catch (err) {
       next(errors.userUnauthorized);
     }
   } else {
     next(errors.userUnauthorized);
+  }
+};
+exports.requireRetail = (req, res, next) => {
+  const user = validateToken(req, next);
+  if (!user.points.includes(req.params.id)) {
+    next(errors.userUnauthorized);
+  } else {
+    req.retail = req.params.id;
+    next();
+  }
+};
+exports.requireEmail = (req, res, next) => {
+  const user = validateToken(req, next);
+  if (!user.email) {
+    next(errors.userUnauthorized);
+  } else {
+    req.email = user.email;
+    next();
   }
 };
