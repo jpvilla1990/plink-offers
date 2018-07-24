@@ -32,12 +32,12 @@ exports.create = (req, res, next) => {
         const active = utils.getOfferStatus(off.dataValues);
         if (active) {
           code.code = uuid().slice(0, 8);
-          return uniqueCode.verify(code).then(newCode => {
-            return emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
+          return uniqueCode.verify(code).then(newCode =>
+            emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
               res.status(201);
               res.end();
-            });
-          });
+            })
+          );
         } else {
           return emailService.sendOfferExpired(off.dataValues, code).then(() => {
             throw errors.offerInactive;

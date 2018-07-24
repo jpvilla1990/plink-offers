@@ -224,7 +224,7 @@ describe('job notify', () => {
       setTimeout(() => {
         mailer.transporter.sendMail.callCount.should.eqls(3);
         done();
-      }, 3000);
+      }, 2000);
     });
   });
 });

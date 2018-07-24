@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   emailUser.getAll = filter => {
+    const where = filter.category ? { categoryId: filter.category } : null;
     return emailUser
       .findAll({
         offset: filter.offset,
@@ -27,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
           {
             model: sequelize.models.offer,
             as: 'offer',
+            where,
             include: [
               {
                 model: sequelize.models.category,
