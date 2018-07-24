@@ -5,6 +5,7 @@ const chai = require('chai'),
   moment = require('moment'),
   requestService = require('../app/services/request'),
   Offer = require('../app/models').offer,
+  Code = require('../app/models').code,
   mailer = require('../app/services/mailer'),
   simple = require('simple-mock'),
   token = require('../test/factories/token'),
@@ -13,7 +14,6 @@ const chai = require('chai'),
   factoryTypeOffer = require('../test/factories/typeOffer').nameFactory,
   factoryOffer = require('../test/factories/offer').nameFactory,
   i18next = require('i18next'),
-  logger = require('../app/logger'),
   factoryCode = require('../test/factories/code').nameFactory;
 
 const offerWithRetail = {
@@ -277,6 +277,9 @@ describe('/offer-app/offers/:id/code POST', () => {
         .set('authorization', generateTokenApp())
         .then(response => {
           response.should.have.status(201);
+          Offer.getBy({ id: 1 }).then(after => {
+            after.codes.should.eqls(1);
+          });
           expect(response.body).to.have.all.keys(['product', 'valueStrategy', 'expires', 'code']);
           done();
         })
