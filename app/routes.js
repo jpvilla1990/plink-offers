@@ -4,7 +4,6 @@ const Offer = require('./controllers/offer'),
   typeOffer = require('./controllers/typeOffer'),
   EmailUser = require('./controllers/emailUser'),
   code = require('./controllers/code'),
-  mail = require('./controllers/mail'),
   auth = require('./middlewares/auth'),
   validator = require('./middlewares/validator');
 
@@ -18,8 +17,6 @@ exports.init = app => {
   app.patch('/retail/:id/code/:code/redeem', [auth.requireRetail], code.redeemCode);
   app.get('/retail/:id/code/:code', [auth.requireRetail], code.getCode);
   app.get('/retail/:id/offers/:id_offer', [auth.requireRetail], Offer.getOffer);
-  app.post('/test-mail', mail.sendTestMail);
-  app.post('/access-offer', [], Offer.accessOffer);
   app.get('/offer-app/offers', [auth.requireEmail], EmailUser.getAll);
   app.get(
     '/retail/:id/offers/:id_offer/redemptions',
