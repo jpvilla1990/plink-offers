@@ -8,16 +8,16 @@ exports.getAll = (req, res, next) => {
     category = req.query.category ? parseInt(req.query.category) : null;
   return EmailUser.getAll({ offset: offsetQuery, email: req.email, limit: limitQuery, category })
     .then(offersByUser => {
-      const listOffers = new Array();
+      const offers = new Array();
       Promise.all(serviceEmailUser.getDataFromOffers(offersByUser))
-        .then(offers => {
-          offers.forEach(data => {
-            listOffers.push(data);
+        .then(off => {
+          off.forEach(data => {
+            offers.push(data);
           });
         })
         .then(() => {
           res.status(200);
-          res.send({ count: listOffers.length, offers: listOffers });
+          res.send({ count: offers.length, offers });
           res.end();
         });
     })
