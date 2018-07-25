@@ -77,7 +77,6 @@ exports.getAll = (req, res, next) => {
     })
     .catch(err => next(err));
 };
-
 exports.accessOffer = (req, res, next) => {
   if (req.body.code && req.body.code === config.common.access_offer) {
     res.status(200);

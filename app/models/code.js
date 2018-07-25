@@ -18,8 +18,8 @@ module.exports = (sequelize, DataTypes) => {
       indexes: [{ unique: true, fields: ['email', 'offer_id'] }]
     }
   );
-  Code.createModel = off => {
-    return Code.create(off);
+  Code.createModel = (off, transaction) => {
+    return Code.create(off, { transaction });
   };
   Code.getBy = filter => {
     return Code.findOne({ where: filter }).catch(err => {
