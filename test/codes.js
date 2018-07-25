@@ -5,6 +5,7 @@ const chai = require('chai'),
   moment = require('moment'),
   requestService = require('../app/services/request'),
   Offer = require('../app/models').offer,
+  Code = require('../app/models').code,
   mailer = require('../app/services/mailer'),
   simple = require('simple-mock'),
   token = require('../test/factories/token'),
@@ -14,7 +15,6 @@ const chai = require('chai'),
   factoryOffer = require('../test/factories/offer').nameFactory,
   factoryEmailUser = require('../test/factories/emailUser').nameFactory,
   i18next = require('i18next'),
-  logger = require('../app/logger'),
   factoryCode = require('../test/factories/code').nameFactory;
 
 const offerWithRetail = {
@@ -297,5 +297,38 @@ describe('/retail/:id/code/:code GET', () => {
         response.should.have.status(401);
         done();
       });
+  });
+});
+describe('/offer-app/offers/:id/code POST', () => {
+  const generateTokenApp = (email = 'julian.molina@wolox.com.ar') => `bearer ${token.generate({ email })}`;
+  it('should be success to create a code', done => {
+    factoryManager.create(factoryOffer).then(off =>
+      chai
+        .request(server)
+        .post(`/offer-app/offers/${off.dataValues.id}/code`)
+        .set('authorization', generateTokenApp())
+        .then(response => {
+          response.should.have.status(201);
+          Offer.getBy({ id: 1 }).then(after => {
+            after.codes.should.eqls(1);
+          });
+          expect(response.body).to.have.all.keys(['product', 'valueStrategy', 'expires', 'code']);
+          done();
+        })
+    );
+  });
+  it('should fail because the offer doesnt exist', done => {
+    factoryManager.create(factoryOffer).then(off =>
+      chai
+        .request(server)
+        .post(`/offer-app/offers/1345/code`)
+        .set('authorization', generateTokenApp())
+        .then(response => {
+          response.should.have.status(404);
+          response.body.should.have.property('internal_code');
+          response.body.should.have.property('message');
+          done();
+        })
+    );
   });
 });

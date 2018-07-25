@@ -35,14 +35,12 @@ exports.create = (req, res, next) => {
           return UserEmail.getBy({ email: code.email, offer_id: code.offerId }).then(userEmail => {
             if (userEmail) {
               code.code = uuid().slice(0, 8);
-              return uniqueCode.verify(code).then(newCode => {
-                return Offer.incrementField('codes', { id: newCode.offerId }).then(() => {
-                  return emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
-                    res.status(201);
-                    res.end();
-                  });
-                });
-              });
+              return uniqueCode.verify(code).then(newCode =>
+                emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
+                  res.status(201);
+                  res.end();
+                })
+              );
             } else {
               throw errors.userNotFound;
             }
@@ -58,6 +56,7 @@ exports.create = (req, res, next) => {
     })
     .catch(next);
 };
+
 exports.redeemCode = ({ params }, res, next) =>
   codeService
     .redeemCode({ retailId: params.id, code: params.code })
@@ -76,3 +75,28 @@ exports.getCode = ({ params }, res, next) =>
       res.end();
     })
     .catch(next);
+exports.createCodeApp = (req, res, next) => {
+  const code = {
+    offerId: req.params.id,
+    email: req.email
+  };
+  return Offer.getBy({ id: code.offerId })
+    .then(off => {
+      if (off) {
+        code.code = uuid().slice(0, 8);
+        return uniqueCode.verify(code).then(newCode => {
+          res.status(201);
+          res.send({
+            product: off.dataValues.product,
+            valueStrategy: off.dataValues.valueStrategy,
+            expires: off.dataValues.expiration,
+            code: newCode.dataValues.code
+          });
+          res.end();
+        });
+      } else {
+        throw errors.offerNotFound;
+      }
+    })
+    .catch(next);
+};

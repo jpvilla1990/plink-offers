@@ -82,8 +82,8 @@ module.exports = (sequelize, DataTypes) => {
       throw errors.databaseError(err.message);
     });
   };
-  Offer.incrementField = (field, filter) => {
-    return Offer.increment(field, { where: filter }).catch(err => {
+  Offer.incrementField = (field, filter, transaction) => {
+    return Offer.increment(field, { where: filter, transaction }).catch(err => {
       throw errors.databaseError(err.detail);
     });
   };

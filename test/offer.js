@@ -236,7 +236,7 @@ describe('job notify', () => {
       setTimeout(() => {
         mailer.transporter.sendMail.callCount.should.eqls(1);
         done();
-      }, 3000);
+      }, 2000);
     });
   });
   it('should be successful but the user already exist ', done => {
@@ -267,8 +267,10 @@ describe('job notify', () => {
     factoryManager.create(factoryEmailUser, { email: 'julian.molina@wolox.com.ar', offerId: 1 }).then(() => {
       jobNotify.notify().then(() => {
         setTimeout(() => {
-          EmailUser.getBy({ offerId: 1, email: 'julian.molina@wolox.com.ar' }).then(() => {
-            done();
+          EmailUser.getBy({ offerId: 1, email: 'julian.molina@wolox.com.ar' }).then(user => {
+            if (user) {
+              done();
+            }
           });
         }, 2000);
       });
