@@ -100,7 +100,7 @@ describe('/offer-app/offers GET', () => {
           });
       });
   });
-  it('should fail because the page was not sent', done => {
+  it('should be success but the page was not sent', done => {
     chai
       .request(server)
       .get(`/offer-app/offers?`)
@@ -110,5 +110,47 @@ describe('/offer-app/offers GET', () => {
         response.body.offers.length.should.eqls(0);
         done();
       });
+  });
+});
+
+describe('/offer-app/codes GET', () => {
+  const generateToken = (email = 'julian.molina@wolox.com.ar') => `bearer ${token.generate({ email })}`,
+    email = 'julian.molina@wolox.com.ar';
+  it('should be success but the page was not sent', done => {
+    chai
+      .request(server)
+      .get(`/offer-app/codes`)
+      .set('authorization', generateToken())
+      .then(response => {
+        response.should.have.status(200);
+        response.body.codes.length.should.eqls(0);
+        done();
+      });
+  });
+  it('should be success get two codes', done => {
+    factoryManager.create(factoryOffer).then(off1 => {
+      factoryManager.create(factoryOffer).then(off2 => {
+        factoryManager.create(factoryCode, { email, offerId: off1.dataValues.id }).then(() => {
+          factoryManager
+            .create(factoryCode, {
+              email,
+              offerId: off2.dataValues.id
+            })
+            .then(() => {
+              chai
+                .request(server)
+                .get(`/offer-app/codes?page=0`)
+                .set('authorization', generateToken())
+                .then(response => {
+                  response.should.have.status(200);
+                  response.body.count.should.eqls(2);
+                  response.body.codes.length.should.eqls(2);
+                  dictum.chai(response);
+                  done();
+                });
+            });
+        });
+      });
+    });
   });
 });

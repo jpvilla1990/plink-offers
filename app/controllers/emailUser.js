@@ -1,29 +1,37 @@
 const EmailUser = require('../models').email_user,
-  Offer = require('../models').offer,
   serviceEmailUser = require('../services/emailUser'),
-  errors = require('../errors'),
-  uuid = require('uuid'),
-  uniqueCode = require('../services/uniqueCode');
+  Code = require('../models').code;
 
 exports.getAll = (req, res, next) => {
   const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10,
     offsetQuery = req.query.page ? req.query.page * limitQuery : 0,
     category = req.query.category ? parseInt(req.query.category) : null;
   return EmailUser.getAll({ offset: offsetQuery, email: req.email, limit: limitQuery, category })
-    .then(list => {
-      const listPromise = serviceEmailUser.map(list),
-        listResult = new Array();
-      Promise.all(listPromise)
-        .then(offers => {
-          offers.forEach(value => {
-            listResult.push(value);
+    .then(offersByUser => {
+      const offers = new Array();
+      Promise.all(serviceEmailUser.getDataFromOffers(offersByUser))
+        .then(off => {
+          off.forEach(data => {
+            offers.push(data);
           });
         })
         .then(() => {
           res.status(200);
-          res.send({ count: listResult.length, offers: listResult });
+          res.send({ count: offers.length, offers });
           res.end();
         });
     })
-    .catch(err => next(err));
+    .catch(next);
+};
+exports.getCodes = (req, res, next) => {
+  const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10;
+  const offsetQuery = req.query.page ? req.query.page * limitQuery : 0;
+  return Code.getAllBy({ offset: offsetQuery, email: req.email, limit: limitQuery })
+    .then(codes => {
+      const offersWithCodes = serviceEmailUser.getDataFromCodes(codes.rows);
+      res.status(200);
+      res.send({ count: codes.count, codes: offersWithCodes });
+      res.end();
+    })
+    .catch(next);
 };
