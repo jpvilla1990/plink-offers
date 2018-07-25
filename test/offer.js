@@ -268,9 +268,8 @@ describe('job notify', () => {
       jobNotify.notify().then(() => {
         setTimeout(() => {
           EmailUser.getBy({ offerId: 1, email: 'julian.molina@wolox.com.ar' }).then(user => {
-            if (user) {
-              done();
-            }
+            expect(user).to.not.equal(null);
+            done();
           });
         }, 2000);
       });
