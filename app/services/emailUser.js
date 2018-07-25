@@ -27,16 +27,13 @@ exports.getDataFromOffers = list => {
 };
 
 exports.getDataFromCodes = codes => {
-  const emailWithCodes = new Array();
-  codes.map(code =>
-    emailWithCodes.push({
-      product: code.offer.dataValues.product,
-      valueStrategy: code.offer.dataValues.valueStrategy,
-      expires: code.offer.dataValues.expiration,
-      code: code.dataValues.code,
-      dateRedemption: code.dataValues.dateRedemption,
-      status: utils.getOfferStatusString(code.offer.dataValues)
-    })
-  );
+  const emailWithCodes = codes.map(code => ({
+    product: code.offer.dataValues.product,
+    valueStrategy: code.offer.dataValues.valueStrategy,
+    expires: code.offer.dataValues.expiration,
+    code: code.dataValues.code,
+    dateRedemption: code.dataValues.dateRedemption,
+    status: utils.getOfferStatusString(code.offer.dataValues)
+  }));
   return emailWithCodes;
 };
