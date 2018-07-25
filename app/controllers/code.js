@@ -32,14 +32,12 @@ exports.create = (req, res, next) => {
         const active = utils.getOfferStatus(off.dataValues);
         if (active) {
           code.code = uuid().slice(0, 8);
-          return uniqueCode.verify(code).then(newCode => {
-            return Offer.incrementField('codes', { id: newCode.offerId }).then(() => {
-              return emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
-                res.status(201);
-                res.end();
-              });
-            });
-          });
+          return uniqueCode.verify(code).then(newCode =>
+            emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
+              res.status(201);
+              res.end();
+            })
+          );
         } else {
           return emailService.sendOfferExpired(off.dataValues, code).then(() => {
             throw errors.offerInactive;
@@ -69,3 +67,28 @@ exports.getCode = ({ params }, res, next) =>
       res.end();
     })
     .catch(next);
+exports.createCodeApp = (req, res, next) => {
+  const code = {
+    offerId: req.params.id,
+    email: req.email
+  };
+  return Offer.getBy({ id: code.offerId })
+    .then(off => {
+      if (off) {
+        code.code = uuid().slice(0, 8);
+        return uniqueCode.verify(code).then(newCode => {
+          res.status(201);
+          res.send({
+            product: off.dataValues.product,
+            valueStrategy: off.dataValues.valueStrategy,
+            expires: off.dataValues.expiration,
+            code: newCode.dataValues.code
+          });
+          res.end();
+        });
+      } else {
+        throw errors.offerNotFound;
+      }
+    })
+    .catch(next);
+};
