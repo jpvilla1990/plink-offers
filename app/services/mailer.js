@@ -66,6 +66,11 @@ exports.sendNewOffer = (offer, mail, name = null) =>
     return exports.sendEmail(email);
   });
 exports.sendEmail = email => {
+  email.html = email.html.replace(/(<!--\[endif\]-->)/g, '<![endif]-->');
+  email.html = email.html.replace(/(<!--\[if gte mso 9\]-->)/g, '<!--[if gte mso 9]>');
+  email.html = email.html.replace(/(fffff\")/g, 'fffff"/');
+  email.html = email.html.replace(/(<\/v:fill>)/g, '');
+
   return new Promise((resolve, reject) => {
     transporter.sendMail(
       {
