@@ -224,40 +224,8 @@ describe('job notify', () => {
       setTimeout(() => {
         mailer.transporter.sendMail.callCount.should.eqls(3);
         done();
-      }, 3000);
+      }, 2000);
     });
-  });
-});
-
-describe('/access-offer POST', () => {
-  it('should be success', done => {
-    chai
-      .request(server)
-      .post('/access-offer')
-      .send({ code: config.common.access_offer })
-      .then(json => {
-        json.should.have.status(200);
-        done();
-      });
-  });
-  it('should be fail because the code was not sent ', done => {
-    chai
-      .request(server)
-      .post('/access-offer')
-      .then(json => {
-        json.should.have.status(401);
-        done();
-      });
-  });
-  it('should be fail because the code is incorrect ', done => {
-    chai
-      .request(server)
-      .post('/access-offer')
-      .send({ code: 'code123' })
-      .then(json => {
-        json.should.have.status(401);
-        done();
-      });
   });
 });
 
