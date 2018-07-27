@@ -49,7 +49,7 @@ exports.newOffer = (offer, emailTo) => {
       address: offer.retailAddress,
       name_category: offer.nameCategory.toUpperCase(),
       name_person: offer.name,
-      create_code_url: `${config.common.server.base_path}?`,
+      create_code_url: `${config.common.server.base_path}?email=${emailTo}&id=${offer.id}`,
       emailTo,
       offer_id: offer.id
     },
