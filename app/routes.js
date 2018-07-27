@@ -27,5 +27,4 @@ exports.init = app => {
     Offer.getRedemptions
   );
   app.post('/offer-app/offers/:id/code', [auth.requireEmail], code.createCodeApp);
-  app.get('/points/:id', [], Offer.info);
 };
