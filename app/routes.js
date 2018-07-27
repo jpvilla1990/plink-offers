@@ -10,7 +10,7 @@ const Offer = require('./controllers/offer'),
 exports.init = app => {
   app.post('/retail/:id/offers', [auth.requireRetail, validator.checkAll, validator.validate], Offer.create);
   app.get('/image-offer', Offer.getImageUrl);
-  app.get('/retail/:id/offers', [auth.requireRetail, validator.checkQuery, validator.validate], Offer.getAll);
+  app.get('/retail/:id/offers', [auth.requireRetail], Offer.getAll);
   app.post('/offers/:id/code', [validator.checkEmail, validator.validate], Code.create);
   app.get('/categories', category.getAllCategories);
   app.get('/type-offers', typeOffer.getAllTypes);
