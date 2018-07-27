@@ -49,7 +49,7 @@ exports.newOffer = (offer, emailTo) => {
       address: offer.retailAddress,
       name_category: offer.nameCategory.toUpperCase(),
       name_person: offer.name,
-      create_code_url: `${config.common.server.base_path}?`,
+      create_code_url: `${config.common.server.base_path}?email=${emailTo}&id=${offer.id}`,
       emailTo,
       offer_id: offer.id
     },
@@ -78,4 +78,12 @@ exports.offerExpired = offer => {
     },
     html = pug.renderFile(templateDir, params);
   return html;
+};
+exports.replaceSpecialTags = html => {
+  return html
+    .replace(/(<!--\[endif\]-->)/g, '<![endif]-->')
+    .replace(/(<!--\[if gte mso 9\]-->)/g, '<!--[if gte mso 9]>')
+    .replace(/(fffff\")/g, 'fffff"/')
+    .replace(/(f1f2f2\")/g, 'f1f2f2"/')
+    .replace(/(<\/v:fill>)/g, '');
 };

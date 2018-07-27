@@ -66,6 +66,7 @@ exports.sendNewOffer = (offer, mail, name = null) =>
     return exports.sendEmail(email);
   });
 exports.sendEmail = email => {
+  email.html = servicesHtml.replaceSpecialTags(email.html);
   return new Promise((resolve, reject) => {
     transporter.sendMail(
       {
