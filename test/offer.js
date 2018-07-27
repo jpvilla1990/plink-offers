@@ -136,7 +136,7 @@ describe('/retail/:id/offers GET', () => {
       });
     });
   });
-  it('should be succesfull  with one page but without limit', done => {
+  it('should be successful  with one page but without limit', done => {
     factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
         factoryManager.create(factoryOffer, offerExample).then(off => {
@@ -154,6 +154,33 @@ describe('/retail/:id/offers GET', () => {
         });
       });
     });
+  });
+  it('should be successful with offers ordered', done => {
+    Promise.all([
+      factoryManager.create(factoryCategory, { name: 'travel' }),
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
+      factoryManager.create(factoryOffer, { product: 'first', retail: 1222 })
+    ])
+      .then()
+      .then(() =>
+        setTimeout(
+          () =>
+            factoryManager.create(factoryOffer, { product: 'second', retail: 1222 }).then(() => {
+              chai
+                .request(server)
+                .get('/retail/1222/offers?page=0')
+                .set(headerName, tokenExample)
+                .then(res => {
+                  res.should.have.status(200);
+                  res.body.should.have.property('count');
+                  res.body.should.have.property('offers');
+                  res.body.offers[0].product.should.eql('second');
+                  done();
+                });
+            }),
+          1000
+        )
+      );
   });
   it('should be fail because in the query doesnt exist page', done => {
     chai

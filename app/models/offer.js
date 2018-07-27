@@ -91,7 +91,8 @@ module.exports = (sequelize, DataTypes) => {
     return Offer.findAndCountAll({
       offset: filter.offset,
       where: { retail: filter.retail },
-      limit: filter.limit
+      limit: filter.limit,
+      order: [['created_at', 'DESC']]
     }).catch(err => {
       throw errors.databaseError(err.message);
     });
