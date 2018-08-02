@@ -1,9 +1,8 @@
 const utils = require('../utils'),
   constants = require('../constants'),
-  requestService = require('../services/request'),
-  Code = require('../models').code;
+  requestService = require('../services/request');
 
-exports.map = list => {
+exports.getDataFromOffers = list => {
   const emailWithOffers = new Array();
   list.forEach(value => {
     if (constants.OFFER_ACTIVE === utils.getOfferStatusString(value.offer.dataValues)) {
@@ -25,4 +24,16 @@ exports.map = list => {
     }
   });
   return emailWithOffers;
+};
+
+exports.getDataFromCodes = codes => {
+  const emailWithCodes = codes.map(code => ({
+    product: code.offer.dataValues.product,
+    valueStrategy: code.offer.dataValues.valueStrategy,
+    expires: code.offer.dataValues.expiration,
+    code: code.dataValues.code,
+    dateRedemption: code.dataValues.dateRedemption,
+    status: utils.getOfferStatusString(code.offer.dataValues)
+  }));
+  return emailWithCodes;
 };

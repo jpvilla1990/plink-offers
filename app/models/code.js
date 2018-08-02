@@ -26,6 +26,21 @@ module.exports = (sequelize, DataTypes) => {
       throw errors.databaseError(err.message);
     });
   };
+  Code.getAllBy = filter => {
+    return Code.findAndCountAll({
+      offset: filter.offset,
+      where: { email: filter.email },
+      limit: filter.limit,
+      include: [
+        {
+          model: sequelize.models.offer,
+          as: 'offer'
+        }
+      ]
+    }).catch(err => {
+      throw errors.databaseError(err.message);
+    });
+  };
   Code.associate = models => {
     Code.belongsTo(models.offer, { as: 'offer' });
   };
