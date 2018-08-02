@@ -16,7 +16,8 @@ const AWS = require('aws-sdk'),
     SES: ses,
     sendingRate: config.common.aws.rate_transport
   }),
-  constants = require('../constants');
+  constants = require('../constants'),
+  { moment } = require('../utils');
 
 const sanitizeMaxString = (string, maxLength = MAX_LENGTH_OFFER_DETAIL) =>
   string && string.length > maxLength ? `${string.substring(0, maxLength)}...` : string;
@@ -47,8 +48,11 @@ exports.sendNewCode = (offer, code) =>
     };
     return exports.sendEmail(email);
   });
-exports.sendOfferExpired = (offer, code) =>
-  getInfoMail(offer, constants.OFFER_EXPIRED).then(() => {
+exports.sendOfferExpired = (offer, code) => {
+  const beforeBegin = moment().isBefore(moment(offer.begin).startOf('day')),
+    status = beforeBegin ? constants.BEFORE_BEGIN : constants.OFFER_EXPIRED;
+  offer.beforeBegin = beforeBegin;
+  return getInfoMail(offer, status).then(() => {
     const email = {
       subject: offer.subjectEmail,
       html: servicesHtml.offerExpired(offer, code),
@@ -56,6 +60,7 @@ exports.sendOfferExpired = (offer, code) =>
     };
     return exports.sendEmail(email);
   });
+};
 exports.sendNewOffer = (offer, mail, name = null) =>
   getInfoMail(offer, constants.NEW_OFFER, name).then(() => {
     const email = {
