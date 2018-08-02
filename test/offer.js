@@ -9,15 +9,16 @@ const chai = require('chai'),
   factoryTypeOffer = require('../test/factories/typeOffer').nameFactory,
   factoryOffer = require('../test/factories/offer').nameFactory,
   factoryCode = require('../test/factories/code').nameFactory,
+  factoryEmailUser = require('../test/factories/emailUser').nameFactory,
   requestService = require('../app/services/request'),
   simple = require('simple-mock'),
   token = require('./factories/token'),
   jobNotify = require('../app/jobs/notify'),
-  should = chai.should(),
   mailer = require('../app/services/mailer'),
   headerName = config.common.session.header_name,
   Offer = require('../app/models').offer,
-  Category = require('../app/models').category,
+  EmailUser = require('../app/models').email_user,
+  should = chai.should(),
   expect = chai.expect,
   offerExample = {
     product: '2x1 en McDuo',
@@ -207,6 +208,17 @@ describe('job notify', () => {
     });
   });
   it('should be successful ', done => {
+    simple.mock(jobNotify.sqs, 'receiveMessage').returnWith({
+      promise: () =>
+        Promise.resolve({
+          Messages: [
+            {
+              Attributes: { MessageDeduplicationId: 1 },
+              Body: '{"mails":[{"mail":"julian.molina@wolox.com.ar","name":"julian"}]}'
+            }
+          ]
+        })
+    });
     simple.restore(jobNotify.ses, 'getSendQuota');
     simple.mock(jobNotify.ses, 'getSendQuota').callFn((obj, callback) => {
       callback(undefined, {
@@ -222,9 +234,45 @@ describe('job notify', () => {
     });
     jobNotify.notify().then(() => {
       setTimeout(() => {
-        mailer.transporter.sendMail.callCount.should.eqls(3);
+        mailer.transporter.sendMail.callCount.should.eqls(1);
         done();
       }, 2000);
+    });
+  });
+  it('should be successful but the user already exist ', done => {
+    simple.mock(jobNotify.sqs, 'receiveMessage').returnWith({
+      promise: () =>
+        Promise.resolve({
+          Messages: [
+            {
+              Attributes: { MessageDeduplicationId: 1 },
+              Body: '{"mails":[{"mail":"julian.molina@wolox.com.ar","name":"julian"}]}'
+            }
+          ]
+        })
+    });
+    simple.restore(jobNotify.ses, 'getSendQuota');
+    simple.mock(jobNotify.ses, 'getSendQuota').callFn((obj, callback) => {
+      callback(undefined, {
+        Max24HourSend: 50,
+        SentLast24Hours: 1
+      });
+    });
+    simple.mock(jobNotify.sqs, 'deleteMessage').returnWith({
+      promise: () => Promise.resolve({})
+    });
+    simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
+      callback(undefined, true);
+    });
+    factoryManager.create(factoryEmailUser, { email: 'julian.molina@wolox.com.ar', offerId: 1 }).then(() => {
+      jobNotify.notify().then(() => {
+        setTimeout(() => {
+          EmailUser.getBy({ offerId: 1, email: 'julian.molina@wolox.com.ar' }).then(user => {
+            expect(user).to.not.equal(null);
+            done();
+          });
+        }, 2000);
+      });
     });
   });
 });

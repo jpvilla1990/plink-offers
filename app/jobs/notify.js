@@ -48,6 +48,19 @@ exports.notify = () => {
               } else {
                 off.dataValues.nameCategory = off.category.dataValues.name;
                 emails.forEach(element => {
+                  EmailUser.createModel({ email: element.mail, offerId: off.dataValues.id })
+                    .then(() => {
+                      logger.info(
+                        `The user was created with email: ${element.mail} associated with the offer id: ${
+                          off.dataValues.id
+                        }`
+                      );
+                    })
+                    .catch(error => {
+                      logger.error(
+                        `The user was not create with email : ${element.mail} because ${error.message}`
+                      );
+                    });
                   emailService
                     .sendNewOffer(off.dataValues, element.mail, element.name)
                     .catch(error => {
