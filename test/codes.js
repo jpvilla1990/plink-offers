@@ -76,21 +76,28 @@ describe('/offers/:id/code POST', () => {
     factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
         factoryManager.create(factoryOffer, offerWithRetail).then(before => {
-          chai
-            .request(server)
-            .post(`/offers/${before.id}/code`)
-            .send({ email: 'julian.molina@wolox.com.ar' })
-            .then(json => {
-              json.should.have.status(400);
-              json.should.be.json;
-              json.body.should.have.property('message');
-              json.body.should.have.property('internal_code');
-              json.body.internal_code.should.be.equal('offer_inactive');
-              mailer.transporter.sendMail.lastCall.args[0].subject.should.eqls(
-                i18next.t(`offerExpired.subject`)
-              );
-              mailer.transporter.sendMail.lastCall.args[0].to.should.eqls('julian.molina@wolox.com.ar');
-              done();
+          factoryManager
+            .create(factoryEmailUser, {
+              email: 'julian.molina@wolox.com.ar',
+              offer_id: before.id
+            })
+            .then(() => {
+              chai
+                .request(server)
+                .post(`/offers/${before.id}/code`)
+                .send({ email: 'julian.molina@wolox.com.ar' })
+                .then(json => {
+                  json.should.have.status(400);
+                  json.should.be.json;
+                  json.body.should.have.property('message');
+                  json.body.should.have.property('internal_code');
+                  json.body.internal_code.should.be.equal('offer_inactive');
+                  mailer.transporter.sendMail.lastCall.args[0].subject.should.eqls(
+                    i18next.t(`offerExpired.subject`)
+                  );
+                  mailer.transporter.sendMail.lastCall.args[0].to.should.eqls('julian.molina@wolox.com.ar');
+                  done();
+                });
             });
         });
       });

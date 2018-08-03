@@ -30,10 +30,10 @@ exports.create = (req, res, next) => {
   return Offer.getBy({ id: code.offerId })
     .then(off => {
       if (off) {
-        const active = utils.getOfferStatus(off.dataValues);
-        if (active) {
-          return UserEmail.getBy({ email: code.email, offer_id: code.offerId }).then(userEmail => {
-            if (userEmail) {
+        return UserEmail.getBy({ email: code.email, offer_id: code.offerId }).then(userEmail => {
+          if (userEmail) {
+            const active = utils.getOfferStatus(off.dataValues);
+            if (active) {
               code.code = uuid().slice(0, 8);
               return uniqueCode.verify(code).then(newCode =>
                 emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
@@ -42,21 +42,20 @@ exports.create = (req, res, next) => {
                 })
               );
             } else {
-              throw errors.userNotFound;
+              return emailService.sendOfferExpired(off.dataValues, code).then(() => {
+                throw errors.offerInactive;
+              });
             }
-          });
-        } else {
-          return emailService.sendOfferExpired(off.dataValues, code).then(() => {
-            throw errors.offerInactive;
-          });
-        }
+          } else {
+            throw errors.userNotFound;
+          }
+        });
       } else {
         throw errors.offerNotFound;
       }
     })
     .catch(next);
 };
-
 exports.redeemCode = ({ params }, res, next) =>
   codeService
     .redeemCode({ retailId: params.id, code: params.code })
