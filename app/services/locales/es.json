@@ -8,6 +8,9 @@
   "offerExpired": {
     "subject": "Ups! Esta oferta ha expirado."
   },
+  "offerBeforeBegin":{
+    "subject": "Ups! Esta oferta no ha comenzado."
+  },
   "newOffer": {
     "subject": "¡ No puedes dejar pasar esta oportunidad !"
   }

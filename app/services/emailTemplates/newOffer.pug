@@ -1,91 +1,176 @@
-doctype html
+doctype transitional
 head
-  link(href='https://fonts.googleapis.com/css?family=Exo' rel='stylesheet')
-.wrapper(style="position: relative;text-align: center;background-color: #f1f2f2;font-family: 'Exo', sans-serif;width: 650px;")
-  .main(style=`text-align: left;background-image: url(${bg_general_offer});height: 895px;	width: 650px;background-size: cover;align-items: center;`)
-    img.logo(src=logo_plink style='padding-top: 30px;margin-bottom: 50px;display: block;margin-left: auto;margin-right: auto;')
-    p.greetings(style='display: block;margin-left: auto;margin-right: auto;margin-bottom: 0px;height: 27px;	width: 147px;	color: #FDF8F1;	font-family: Exo;	font-size: 20px;	font-weight: bold;	letter-spacing: 0.78px;	line-height: 27px; text-align: center;	') Hola #{name_person} :)
-    .subtitle(style='display: block;margin-left: auto;margin-right: auto;margin-top: 0px;height: 19px;	width: 276px;	color: #FFF1DE;	font-family: Exo;	font-size: 14px;	font-weight: 500;	letter-spacing: 0.55px;	line-height: 19px;text-align: center;') Te traemos  esta oferta pensada para ti
-    img.main-image(src=img_offer style='display: block;margin-left: auto;margin-right: auto;margin-top: 22px;height: 303.6px;width: 475.71px;zborder-radius: 10px;background-color: #FFFFFF;')
-    .main-button(style='display: block;margin-left: auto;margin-right: auto;margin-top: 20px;width: 91.18px;border: 1.5px solid #0D63F9;opacity: 0.9;border-radius: 5px;align-items: center;color: #0D63F9;font-family: Exo;font-size: 12px;font-weight: bold;letter-spacing: 0.68px;line-height: 16px;padding: 5px;text-align: center;')
-      .info(style='display: block;margin: auto;') #{name_category}
-    .main-info(style='display: block;margin-left: auto;margin-right: auto;margin-top: 10px;width: 460.5px;color: #5C5C5C;font-family: Exo;font-size: 18px;font-weight: 600;letter-spacing: 1.14px;line-height: 25px;text-align: center;')
-      | #{value_strategy} en #{product} con tus tarjetas Bancolombia
-    .offer(style='display: block;margin-left: auto;margin-right: auto;margin-top: 10px;height: 19px;width: 231px;color: #FF6500;font-family: Exo;font-size: 14px;font-weight: 500;letter-spacing: 0.86px;line-height: 19px;text-align: center;') Oferta valida hasta: #{expiration}
-    hr.dotted-line(style='display: block;margin-left: auto;margin-right: auto;margin-top: 15px;width: 478px;border-top: dashed 1px #E0DEDE;height: 0px;')
-    .brand-info(style='display: block;margin-left: auto;margin-right: auto;height: 56px;width: 260px; padding-top:15px')
-      img.brand-logo(src=brand_logo style='height: 54.66px;	float:left; display:inline;')
-      .brand-data(style='margin-left: 5px;color: #9B9B9B;font-family: Exo;font-size: 14px;font-weight: 500;letter-spacing: 0.8px;line-height: 19px;float: left;display: inline;padding-top: 20px;')
-        .brand-name(style='font-weight: bold;') #{name_retail}
-        .brand-adress #{address}
-    form(method='GET' action=`${create_code_url}`)
-      div.form-group(style='display:none')
-        input#pw.form-control( name='email' value=`${emailTo}`)
-        input#pw.form-control( name='id' value=`${offer_id}`)
-      button.cta-button(type='submit', style='display: block;margin-left: auto;margin-right: auto;height: 47.18px;width: 293.98px;border-radius: 5px;background-color: #FF6500;   margin-top: 25px; ')
-        .button-text(style='height: 21px;color: #FFFFFF;font-family: Exo;font-size: 16px;font-weight: bold;letter-spacing: 0.62px;	line-height: 21px;text-align: center;')
-          | QUIERO ESTA OFERTA
-      .button-disclaimer(style='display: block;margin-left: auto;margin-right: auto;height: 13px;width: 399px;color: #9B9B9B;font-family: Exo;font-size: 10px;font-weight: 500;letter-spacing: 0.66px;line-height: 13px;text-align: center;margin-top: 30px;margin-bottom: 30px;')
-        | Al presionar este bot&oacute;n te enviaremos un correo con el c&oacute;digo de redenci&oacute;n
-  .tyc-section(style='display: block;margin-left: auto;margin-right: auto;width: 523.3px;color: #757575;font-family: Exo;font-size: 12px;font-weight: 500;letter-spacing: 0.74px;line-height: 16px;background-color: #f1f2f2;margin-top: 20px;')
-    .tyc-title(style='height: 19px;width: 162px;color: #424242;font-family: Exo;font-size: 14px;font-weight: 600;letter-spacing: 0.8px;line-height: 19px;')
-      | Condiciones generales
-    .tyc-text(style='width: 523.3px;color: #757575;font-family: Exo;font-size: 12px;font-weight: 500;letter-spacing: 0.74px;line-height: 16px;margin-top: 15px;text-align: left;')
-
-      | - BANCOLOMBIA S.A. s&oacute;lo es el emisor de los medios de pago a trav&eacute;s de los
-      | cuales se puede acceder a los beneficios mencionados. Los beneficios aqu&iacute;
-      | descritos son ofrecidos y asumidos por Hamburguesas #{name_retail} lo tanto, son ellos los responsables de la oferta, la venta,
-      | la entrega, el funcionamiento y la garant&iacute;a de los mismos.  <br />  <br />
-
-      | - Los Productos y Servicios Financieros son ofrecidos por Bancolombia.
-      | Producto de cr&eacute;dito sujeto a reglamento.  <br />  <br />
-
-      | - El beneficio corresponde a #{value_strategy} off en #{name_retail} con #{product}  <br />  <br />
-
-      | - El beneficio aplica en la tienda f&iacute;sica: #{address}  <br />  <br />
-
-      | - Este beneficio no es acumulable con bonos de compra, otros descuentos y/o promociones vigentes en el punto de venta. No aplica para domicilios.  <br />  <br />
-
-      | - Bancolombia podr&aacute; realizar modificaciones, adiciones o eliminaciones a los
-      | presentes t&eacute;rminos y condiciones en caso de considerarlo necesario.  <br />  <br />
-
-      | - La calidad, idoneidad, seguridad y garant&iacute;a de los productos y servicios
-      | ofrecidos son responsabilidad exclusiva de #{name_retail}.  <br />  <br />
-
-      | - Es indispensable mencionar la actividad promocional al momento de realizar el
-      | pedido, y &uacute;nicamente para clientes que realicen el pago con tarjetas
-      | Bancolombia.  <br />
-
-      | - Descuento v&aacute;lido hasta #{expiration}  <br />  <br />
-
-      | - Aplica &uacute;nicamente para la totalidad de compras hechas tarjetas Bancolombia.  <br />  <br />
-
-      | - El beneficio es personal e intransferible, y no es canjeable por efectivo u otros
-      | bienes y/o servicios. El cumplimiento de las normas de comercializaci&oacute;n de los
-      | productos y/o servicios es total y exclusiva responsabilidad de #{name_retail}.  <br />  <br />
-
-      | - Las im&aacute;genes de los productos son de referencia.
-
-  .contact(style=`width: 650px;	height: 125px;background-color: #f1f2f2;	background-image: url(${bg_footer});`)
-  .disclaimer(style='background-color: #ffffff;display: block;margin-left: auto;margin-right: auto;')
-    img.superintendence(src=logo_superintendence style='float: left;padding-left: 30px')
-    .contact-info(style='display: block;margin-left: auto;margin-right: auto;color: #FF6500;')
-      .contact-title(style='font-family: Exo;	font-size: 15px;	letter-spacing: 0.58px;	line-height: 20px;')
-        | Manteng&aacute;monos en cont&aacute;cto
-      .contact-email(style='font-family: Exo;font-size: 15px;	font-weight: bold;	letter-spacing: 0.58px;	line-height: 20px;margin-bottom:40px')
-        a(style='color: #FF6500 !important') hello@plink.com.co
-    .logos-container(style='display: flex; justify-content: center; ')
-      img.footer-logo(src=logo_bancocolombia style='width:146px;height:45px;margin-left:auto;')
-      img.mail-separator(src=mail_separator style='width:3px;height:45px; margin-right: 50px; margin-left: 50px; ')
-      img.brand-footer-logo(src=brand_logo style='height:45px; margin-right:auto;')
-    hr.dotted-line2(style='display: block;margin-left: auto;margin-right: auto;margin-bottom: 0px; margin-top:45px;width: 150px;border-top: dashed 0px #E0DEDE;height: 0px;')
-    .disclaimer-conatiner(style='display: block;margin-left: auto;margin-right: auto;height: 65px;width: 602.95px;color: #4A4A4A;font-family: Exo;font-size: 10px;letter-spacing: 0.39px;line-height: 13px;text-align: center;margin-top: 18px;margin-bottom: 18px;')
-      .disclaimer-text
-        | &ldquo;Bancolombia nunca le solicitar&aacute; datos financieros como usuarios, claves, n&uacute;meros de tarjetas de cr&eacute;dito con sus c&oacute;digos de seguridad y fechas de vencimiento mediante v&iacute;nculos de correo electr&oacute;nico o llamadas telef&oacute;nicas.
-      .disclaimer-text2(style='margin-top: 10px;')
-        | Para verificar la autenticidad de este correo electr&oacute;nico puede reenviarlo a
-      .disclaimer-email(style='font-weight: bold;')
-        | correosospechoso@bancolombia.com.co.&rdquo;
-    hr.dotted-line2(style='display: block;margin-left: auto;margin-right: auto;margin-bottom: 0px;width: 150px;border-top: dashed 0px #E0DEDE;height: 0px;')
-    .footer(style='display: block;margin-left: auto;margin-right: auto;text-align: center;width: 540px;background-color: #ffffff;color: #FF6500;font-size: 10px;font-weight: 500;letter-spacing: 0.39px;line-height: 13px;margin-top: 20px;')
-      | PLINK es una marca de Bancolombia S.A. Los productos y servicios ofrecidos a trav&eacute;s de PLINK , son otorgados por Bancolombia S.A. Copyright &copy; 2018 GRUPO BANCOLOMBIA.
+  meta(charset='UTF-8')
+  title Plink
+style.
+  @import url('https://fonts.googleapis.com/css?family=Exo:400,700');
+table(cellpadding='0' cellspacing='0' style='max-width:650px;margin:0 auto;background:#fff;width:650px;height:100%;border-collapse:collapse;')
+  tr
+    td(background=bg_general_offer bgcolor='#f1f2f2' width='650' height='897' valign='top')
+      //[if gte mso 9]
+      v:rect(xmlns:v='urn:schemas-microsoft-com:vml' fill='true' stroke='false' style='width:650px;height:897px;')
+        v:fill(type='tile' src=bg_general_offer color='#f1f2f2')
+          v:textbox(inset='0,0,0,0')
+            //[endif]
+            div
+              table(cellpadding='0' cellspacing='0' style='max-width:650px;margin:0 auto;width:650px;height:100%;border-collapse:collapse;')
+                tr
+                  td(style='text-align: center;padding:40px 90px 50px;')
+                    img(width='115' height='56' src=logo_plink)
+                tr
+                  td(style="color: #fff;text-align: center;font-size: 20px;font-weight: bold;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px;padding:0 90px;")
+                    | Hola #{name_person}!
+                tr
+                  td(style="color: #fff;text-align: center;font-size: 14px;font-weight: normal;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px;padding:0 75px;line-height: 1.2;")
+                    | Te traemos esta oferta pensada para ti
+                tr
+                  td(style='text-align: center;padding:40px 90px 20px;')
+                    img(width='470' height='297' style='width: 470px; border-radius: 10px;'  src=img_offer)
+                tr
+                  td(style="color: #0d63f9;text-align: center;font-size: 12px;font-weight: bold;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px;padding:0 75px 20px;line-height: 1.2;")
+                    span(style='border:2px solid #0d63f9; padding: 5px 10px;border-radius: 5px;') #{name_category}
+                tr
+                  td(style='color: #5c5c5c;text-align: center;font-family: Arial, Helvetica, sans-serif;font-size: 18px;font-weight: bold;letter-spacing: 0.97px;line-height: 1.6;padding:0 100px 15px;')
+                    | #{value_strategy} en #{product} pagando con tus tarjetas Bancolombia
+                tr
+                  td(style='color: #ff6500;text-align: center;font-family: Arial, Helvetica, sans-serif;font-size: 14px;font-weight: normal;letter-spacing: 0.97px;line-height: 1.3;')
+                    | Oferta valida hasta: #{expiration}
+                    br
+                    hr(style='width: 510px;margin:15px auto 20px;border: 1px dashed #e0dede;')
+                tr
+                  td(style='text-align: center;padding:0;')
+                    table(cellpadding='0' cellspacing='0' style='max-width:650px;width:650px;height:43px;border-collapse:collapse;')
+                      tr
+                        td(width='200' style='width: 200px;') &nbsp;
+                        td(width='47' style='width: 47px; padding-right: 10px;')
+                          img(width='47' height='43' style='width: 47px;' src=brand_logo)
+                        td
+                          table(cellpadding='0' cellspacing='0' style='max-width:180px;margin:0 auto;width:180px;height:100%;border-collapse:collapse;text-align: left;')
+                            tr
+                              td(style='color: #5c5c5c;font-family: Arial, Helvetica, sans-serif;font-size: 12px;font-weight: normal;letter-spacing: 0.97px;line-height: 1.3;')
+                                |  #{name_retail}
+                            tr
+                              td(style='color: #9b9b9b;font-family: Arial, Helvetica, sans-serif;font-size: 12px;font-weight: normal;letter-spacing: 0.97px;line-height: 1.3;')
+                                | #{address}
+                        td(width='200' style='width: 200px;') &nbsp;
+                tr
+                  td(style="color: #ffffff;text-align: center;font-size: 14px;font-weight: bold;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px;padding:20px 0 10px;line-height: 1.2;")
+                    table(role='presentation' cellspacing='0' cellpadding='0' border='0' width='650' height='47')
+                      tr
+                        td(width='175' style='width: 175px;') &nbsp;
+                        td(width='300' style='border-radius: 3px; background: #ff6500; text-align: center;width: 300px;')
+                          a(href=create_code_url style="background: #ff6500; padding: 15px; border: 1px solid #ff6500; font-family: Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.1; text-align: center; text-decoration: none; display: block; font-weight: bold;")
+                            span(style='color:#ffffff;') QUIERO ESTA OFERTA
+                        td(width='175' style='width: 175px;') &nbsp;
+                tr
+                  td(style='color: #9b9b9b;text-align: center;font-family: Arial, Helvetica, sans-serif;font-size: 10px;font-weight: normal;letter-spacing: 0.97px;line-height: 1.3;padding-bottom: 15px;')
+                    | Al presionar este bot&oacute;n te enviaremos un correo con el c&oacute;digo de redenci&oacute;n
+            //[if gte mso 9]
+      //[endif]
+  tr
+    td(bgcolor='#f1f2f2' style='padding: 20px 0;')
+      table(cellpadding='0' cellspacing='0' style='max-width:650px;margin:0 auto;width:650px;height:100%;border-collapse:collapse;')
+        tr
+          td(style="padding: 0 72px 15px;color: #424242;font-size: 14px;font-weight: bold;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px;")
+            | Condiciones generales
+        tr
+          td(style="padding: 0 72px;color: #757575;font-size: 12px;font-weight: normal;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px;")
+            | - BANCOLOMBIA S.A. s&oacute;lo es el emisor de los medios de pago a trav&eacute;s de los cuales se puede acceder a los beneficios mencionados.
+            | Los beneficios aqu&iacute; descritos son ofrecidos y asumidos por #{name_retail} lo tanto, son ellos los responsables
+            | de la oferta, la venta, la entrega, el funcionamiento y la garant&iacute;a de los mismos.
+            br
+            br
+            |  - Los Productos y Servicios Financieros son ofrecidos por Bancolombia.
+            br
+            br
+            |  - Producto de cr&eacute;dito sujeto a reglamento.
+            br
+            br
+            |- El beneficio corresponde a #{value_strategy} off en   #{name_retail} con #{product}.
+            br
+            br
+            |  - El beneficio aplica en la tienda f&iacute;sica: #{address}
+            br
+            br
+            |  - Este beneficio no es acumulable con bonos de compra, otros descuentos y/o promociones vigentes en el punto
+            |                 de venta. No aplica para domicilios.
+            br
+            br
+            |  - Bancolombia podr&aacute; realizar modificaciones, adiciones o eliminaciones a los presentes t&eacute;rminos y condiciones
+            |                 en caso de considerarlo necesario.
+            br
+            br
+            |  - La calidad, idoneidad, seguridad y garant&iacute;a de los productos y servicios ofrecidos son responsabilidad
+            |                 exclusiva de #{name_retail}.
+            br
+            br
+            |  - Es indispensable mencionar la actividad promocional al momento de realizar el pedido, y &uacute;nicamente para
+            |                 clientes que realicen el pago con tarjetas Bancolombia.
+            br
+            br
+            |  - Descuento v&aacute;lido hasta #{expiration}.
+            br
+            br
+            |  - Aplica &uacute;nicamente para la totalidad de compras hechas tarjetas Bancolombia.
+            br
+            br
+            |  - El beneficio es personal e intransferible, y no es canjeable por efectivo u otros bienes y/o servicios.
+            |                 El cumplimiento de las normas de comercializaci&oacute;n de los productos y/o servicios es total y exclusiva responsabilidad
+            |                 de #{name_retail}.
+            br
+            br
+            |  - Las im&aacute;genes de los productos son de referencia.
+  tr
+    td(background=bg_footer bgcolor='#ffffff' width='684' height='296' valign='top')
+      //[if gte mso 9]
+      v:rect(xmlns:v='urn:schemas-microsoft-com:vml' fill='true' stroke='false' style='width:650px;height:296px;')
+        v:fill(type='tile' src=bg_footer color='#ffffff')
+          v:textbox(inset='0,0,0,0')
+            //[endif]
+            div
+              table(cellpadding='0' cellspacing='0' style='max-width:650px;margin:0 auto;width:650px;height:300px;border-collapse:collapse;')
+                tr
+                  td &nbsp;
+                tr
+                  td &nbsp;
+                tr
+                  td &nbsp;
+                tr
+                  td(valign='top' rowspan='5' style='width: 50px;padding-left: 30px;')
+                    img(width='19' height='196' src=logo_superintendence alt='')
+                  td &nbsp;
+                tr
+                  td &nbsp;
+                tr
+                  td &nbsp;
+                tr
+                  td(valign='top' style="padding: 0 72px;color: #ff6500;font-size: 14px;font-weight: normal;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px; text-align: center;")
+                    | Manteng&aacute;monos en cont&aacute;cto
+                    br
+                    a(href='mailto:hello@plink.com.co' style='color: #ff6500;text-decoration: none; font-weight: bold;') hello@plink.com.co
+                tr
+                  td(valign='middle' style='text-align: center;')
+                    img(width='146' height='35' src=logo_bancocolombia alt='')
+                    span &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    img(width='3' height='34' src=mail_separator alt='')
+                    span &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    img(width='47' height='43' src=brand_logo alt='')
+            //[if gte mso 9]
+      //[endif]
+  tr
+    td(style="text-align:center;padding: 0 80px 15px; font-size: 11px; color: #4a4a4a;font-weight: normal;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px;")
+      hr(style='width: 160px;border: 2px dashed #e0dede;margin-bottom: 25px;')
+      |  Bancolombia nunca le solicitar&aacute; datos financieros como usuarios, claves, n&uacute;meros de tarjetas de cr&eacute;dito con sus
+      |           c&oacute;digos de seguridad y fechas de vencimiento mediante v&iacute;nculos de correo electr&oacute;nico o llamadas telef&oacute;nicas.
+      br
+      br
+      | Para verificar la autenticidad de este correo electr&oacute;nico puede reenviarlo a
+      br
+      a(style="font-size: 11px; color: #4a4a4a;font-weight: bold;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px; text-decoration: none;" href='mailto:correosospechoso@bancolombia.com.co') correosospechoso@bancolombia.com.co
+  tr
+    td(style="text-align:center;padding: 0 80px; font-size: 11px; color: #ff6500;font-weight: normal;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px; padding-bottom: 50px;")
+      hr(style='width: 160px;border: 2px dashed #e0dede;margin-bottom: 25px;')
+      |  PLINK es una marca de Bancolombia S.A. Los productos y servicios ofrecidos a trav&eacute;s de PLINK , son otorgados por
+      |           Bancolombia S.A. Copyright &copy; 2018 GRUPO BANCOLOMBIA.
+// fix for Gmail auto-resize
+div(style='display:none;font:15px courier;font-family:avenir, Helvetica, Arial, sans-serif;line-height:0;margin:0;padding:0;white-space:nowrap;')
