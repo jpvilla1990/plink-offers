@@ -1,5 +1,6 @@
 const moment = require('moment-timezone'),
   { OFFER_ACTIVE, OFFER_INACTIVE } = require('./constants'),
+  { HIDE_EMAIL } = require('./constants'),
   config = require('../config');
 
 moment.tz.setDefault(config.common.timezone);
@@ -30,15 +31,13 @@ exports.map = off => {
 exports.moment = moment;
 
 exports.mask = email => {
-  const userName = email.split('@'),
-    count = parseInt(userName[0].length * 0.6),
-    countDomain = parseInt(userName[1].length * 0.4);
+  const userName = email.split('@');
   if (userName[0].length <= 8) {
     return `${'*'.repeat(5)}@${userName[1]}`;
   } else {
-    return `${userName[0].slice(0, 4)}${'*'.repeat(count)}@${'*'.repeat(countDomain)}${userName[1].slice(
-      countDomain,
-      userName[1].length
-    )}`;
+    return `${userName[0].slice(0, HIDE_EMAIL)}${'*'.repeat(4)}@${userName[1].slice(
+      0,
+      HIDE_EMAIL
+    )}${'*'.repeat(4)}`;
   }
 };

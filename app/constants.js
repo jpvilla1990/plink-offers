@@ -5,3 +5,4 @@ exports.OFFER_EXPIRED = 'offerExpired';
 exports.NEW_CODE = 'newCode';
 exports.BEFORE_BEGIN = 'offerBeforeBegin';
 exports.MAX_LENGTH_OFFER_DETAIL = 17;
+exports.HIDE_EMAIL = 3;
