@@ -273,7 +273,7 @@ describe('/retail/:id/code/:code GET', () => {
             'status',
             'product'
           ]);
-          response.body.email.should.eqls('juli*******@****x.com.ar');
+          response.body.email.should.eqls('jul****@wol****');
           dictum.chai(response);
           done();
         });
