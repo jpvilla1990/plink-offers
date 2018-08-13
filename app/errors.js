@@ -15,6 +15,7 @@ exports.EXISTING_MAIL = 'existing_mail';
 exports.USER_NOT_FOUND = 'user_not_found';
 exports.EXISTING_USER = 'existing_user';
 exports.NONEXISTENTOFFER = 'nonexistent_offer';
+exports.OFFER_DISABLED = 'offer_disabled';
 exports.defaultError = message => internalError(message, exports.DEFAULT_ERROR);
 exports.userUnauthorized = internalError('User is not authorized', exports.USER_UNAUTHORIZED);
 exports.badRequest = message => internalError(message, exports.BAD_REQUEST);
@@ -27,3 +28,4 @@ exports.existingMail = internalError('Already exist a code for this email', expo
 exports.existingUser = internalError('Already exist a user for this email', exports.EXISTING_USER);
 exports.nonExistentOffer = internalError('The offer does not exist', exports.NONEXISTENTOFFER);
 exports.userNotFound = internalError('User not found', exports.USER_NOT_FOUND);
+exports.offerDisabled = internalError('Offer Disabled', exports.OFFER_DISABLED);

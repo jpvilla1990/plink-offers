@@ -69,7 +69,7 @@ exports.getAll = (req, res, next) => {
         image: value.dataValues.imageUrl,
         codes: value.dataValues.codes ? value.dataValues.codes : 0,
         redemptions: value.dataValues.redemptions ? value.dataValues.redemptions : 0,
-        status: utils.getOfferStatusString(value.dataValues)
+        status: utils.getOfferStatus(value.dataValues)
       }));
       res.status(200);
       res.send({ count: list.count, offers: listResult });
@@ -106,3 +106,15 @@ exports.getRedemptions = (req, res, next) => {
     })
     .catch(err => next(err));
 };
+exports.changeActive = (req, res, next) =>
+  Offer.getBy({ id: parseInt(req.params.id_offer) })
+    .then(offer => {
+      if (offer) {
+        return offer.update({ active: !offer.dataValues.active }).then(() => {
+          res.status(200).end();
+        });
+      } else {
+        throw errors.offerNotFound;
+      }
+    })
+    .catch(next);

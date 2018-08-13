@@ -444,4 +444,57 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
       )
     );
   });
+  describe('/retail/:id/offers/:id_offer PATCH', () => {
+    beforeEach(() =>
+      Promise.all([factoryManager.create(factoryCategory), factoryManager.create(factoryTypeOffer)]).then(
+        () => Promise.all([factoryManager.create(factoryOffer, { retail: 11 })])
+      )
+    );
+    it('should be successful to disable offer', done => {
+      chai
+        .request(server)
+        .patch(`/retail/11/offers/1`)
+        .set('authorization', generateToken())
+        .then(res => {
+          res.should.have.status(200);
+          Offer.getBy({ retail: 11 }).then(exist => {
+            exist.dataValues.active.should.eqls(false);
+            done();
+          });
+        });
+    });
+    it('should be successful to enable offer', done => {
+      chai
+        .request(server)
+        .patch(`/retail/11/offers/1`)
+        .set('authorization', generateToken())
+        .then(() =>
+          chai
+            .request(server)
+            .patch(`/retail/11/offers/1`)
+            .set('authorization', generateToken())
+            .then(res => {
+              res.should.have.status(200);
+              Offer.getBy({ retail: 11 }).then(exist => {
+                exist.dataValues.active.should.eqls(true);
+                done();
+              });
+            })
+        );
+    });
+    it('should be fail because the offer does not exist', done => {
+      chai
+        .request(server)
+        .patch(`/retail/11/offers/1254`)
+        .set('authorization', generateToken())
+        .then(res => {
+          res.should.have.status(404);
+          res.body.should.have.property('message');
+          expect(res.body.message).to.equal('Offer Not Found');
+          res.body.should.have.property('internal_code');
+          expect(res.body.internal_code).to.equal('offer_not_found');
+          done();
+        });
+    });
+  });
 });

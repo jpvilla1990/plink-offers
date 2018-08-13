@@ -46,6 +46,9 @@ module.exports = (sequelize, DataTypes) => {
       },
       redemptions: {
         type: DataTypes.INTEGER
+      },
+      active: {
+        type: DataTypes.BOOLEAN
       }
     },
     {
@@ -97,6 +100,7 @@ module.exports = (sequelize, DataTypes) => {
       throw errors.databaseError(err.message);
     });
   };
+
   Offer.associate = models => {
     Offer.belongsTo(models.category, { as: 'category' });
     Offer.belongsTo(models.type_offer, { as: 'type', foreignKey: 'strategy' });

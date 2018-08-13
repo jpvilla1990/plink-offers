@@ -2,6 +2,7 @@ const Code = require('../models').code,
   Offer = require('../models').offer,
   moment = require('moment'),
   { getOfferStatus } = require('../utils'),
+  { OFFER_ACTIVE, OFFER_INACTIVE } = require('../constants'),
   sequelize = require('../models').sequelize,
   Op = sequelize.Op,
   errors = require('../errors');
@@ -51,8 +52,8 @@ exports.redeemCode = ({ retailId, code }) =>
     }).then(result => {
       if (result) {
         if (result.dateRedemption === null) {
-          const statusOffer = getOfferStatus(result.offer.dataValues);
-          if (statusOffer) {
+          const status = getOfferStatus(result.offer.dataValues);
+          if (status === OFFER_ACTIVE) {
             return result.offer
               .increment({ redemptions: 1 }, { transaction })
               .then(() => result.update({ dateRedemption: moment() }, { transaction }))
@@ -60,7 +61,8 @@ exports.redeemCode = ({ retailId, code }) =>
                 throw errors.databaseError(err.message);
               });
           } else {
-            throw errors.offerInactive;
+            if (status === OFFER_INACTIVE) throw errors.offerInactive;
+            else throw errors.offerDisabled;
           }
         } else {
           throw errors.codeRedeemed;

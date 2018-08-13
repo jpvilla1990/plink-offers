@@ -1,17 +1,20 @@
 const moment = require('moment-timezone'),
-  { OFFER_ACTIVE, OFFER_INACTIVE } = require('./constants'),
+  { OFFER_ACTIVE, OFFER_INACTIVE, OFFER_DISABLED } = require('./constants'),
   { HIDE_EMAIL } = require('./constants'),
   config = require('../config');
 
 moment.tz.setDefault(config.common.timezone);
 
 exports.getOfferStatus = offer => {
-  const afterExpires = moment().isSameOrBefore(moment(offer.expiration).endOf('day')),
-    beforeBegin = moment().isSameOrAfter(moment(offer.begin).startOf('day'));
-  return afterExpires && beforeBegin && offer.redemptions < offer.maxRedemptions;
+  if (offer.active) {
+    const afterExpires = moment().isSameOrBefore(moment(offer.expiration).endOf('day')),
+      beforeBegin = moment().isSameOrAfter(moment(offer.begin).startOf('day'));
+    return afterExpires && beforeBegin && offer.redemptions < offer.maxRedemptions
+      ? OFFER_ACTIVE
+      : OFFER_INACTIVE;
+  }
+  return OFFER_DISABLED;
 };
-
-exports.getOfferStatusString = offer => (exports.getOfferStatus(offer) ? OFFER_ACTIVE : OFFER_INACTIVE);
 
 exports.map = off => {
   const send = {
@@ -21,7 +24,7 @@ exports.map = off => {
     expires: off.dataValues.expiration,
     maxRedemptions: off.dataValues.maxRedemptions,
     redemptions: off.dataValues.redemptions,
-    status: exports.getOfferStatusString(off.dataValues),
+    status: exports.getOfferStatus(off.dataValues),
     category: off.category.name,
     typeOffer: off.type.description.toUpperCase(),
     valueStrategy: off.dataValues.valueStrategy

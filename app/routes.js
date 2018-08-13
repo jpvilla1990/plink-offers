@@ -20,11 +20,11 @@ exports.init = app => {
   app.post('/access-offer', Offer.accessOffer);
   app.get('/offer-app/offers', [auth.requireEmail], EmailUser.getAll);
   app.get('/offer-app/codes', [auth.requireEmail], EmailUser.getCodes);
-  app.get('/offer-app/offers', [auth.requireEmail], EmailUser.getAll);
+  app.post('/offer-app/offers/:id/code', [auth.requireEmail], code.createCodeApp);
   app.get(
     '/retail/:id/offers/:id_offer/redemptions',
     [auth.requireRetail, validator.checkQuery, validator.validate],
     Offer.getRedemptions
   );
-  app.post('/offer-app/offers/:id/code', [auth.requireEmail], code.createCodeApp);
+  app.patch('/retail/:id/offers/:id_offer', [auth.requireRetail], Offer.changeActive);
 };

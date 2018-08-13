@@ -5,7 +5,7 @@ const utils = require('../utils'),
 exports.getDataFromOffers = list => {
   const emailWithOffers = new Array();
   list.forEach(value => {
-    if (constants.OFFER_ACTIVE === utils.getOfferStatusString(value.offer.dataValues)) {
+    if (constants.OFFER_ACTIVE === utils.getOfferStatus(value.offer.dataValues)) {
       emailWithOffers.push(
         requestService.retail(`/points/${value.offer.dataValues.retail}`).then(rv => {
           const offerFormated = {
@@ -33,7 +33,7 @@ exports.getDataFromCodes = codes => {
     expires: code.offer.dataValues.expiration,
     code: code.dataValues.code,
     dateRedemption: code.dataValues.dateRedemption,
-    status: utils.getOfferStatusString(code.offer.dataValues)
+    status: utils.getOfferStatus(code.offer.dataValues)
   }));
   return emailWithCodes;
 };

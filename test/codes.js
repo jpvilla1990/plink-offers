@@ -35,39 +35,35 @@ describe('/offers/:id/code POST', () => {
     simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
       callback(undefined, true);
     });
-    simple
-      .mock(requestService, 'retail')
-      .resolveWith({ address: 'Cochabamba 3254', commerce: { description: 'McDonalds' } });
+    simple.mock(requestService, 'getPoints').resolveWith({
+      address: 'Cochabamba 3254',
+      commerce: { description: 'McDonalds', nit: 1234 },
+      posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
+    });
   });
   it('should be successful', done => {
     Promise.all([
       factoryManager.create(factoryCategory, { name: 'travel' }),
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
       factoryManager.create(factoryOffer, { retail: 1222 })
-    ])
-      .then()
-      .then(() =>
-        factoryManager
-          .create(factoryEmailUser, { email: 'julian.molina@wolox.com.ar', offerId: 1 })
-          .then(() =>
-            chai
-              .request(server)
-              .post(`/offers/1/code`)
-              .send({ email: 'julian.molina@wolox.com.ar' })
-              .then(json => {
-                json.should.have.status(201);
-                Offer.getBy({ id: 1 }).then(after => {
-                  after.codes.should.eqls(1);
-                });
-                mailer.transporter.sendMail.lastCall.args[0].subject.should.equal(
-                  i18next.t(`newCode.subject`)
-                );
-                mailer.transporter.sendMail.lastCall.args[0].to.should.equal('julian.molina@wolox.com.ar');
-                dictum.chai(json);
-                done();
-              })
-          )
-      );
+    ]).then(() =>
+      factoryManager.create(factoryEmailUser, { email: 'julian.molina@wolox.com.ar', offerId: 1 }).then(() =>
+        chai
+          .request(server)
+          .post(`/offers/1/code`)
+          .send({ email: 'julian.molina@wolox.com.ar' })
+          .then(json => {
+            json.should.have.status(201);
+            Offer.getBy({ id: 1 }).then(after => {
+              after.codes.should.eqls(1);
+            });
+            mailer.transporter.sendMail.lastCall.args[0].subject.should.equal(i18next.t(`newCode.subject`));
+            mailer.transporter.sendMail.lastCall.args[0].to.should.equal('julian.molina@wolox.com.ar');
+            dictum.chai(json);
+            done();
+          })
+      )
+    );
   });
   it('should be fail because the offer expired', done => {
     offerWithRetail.expiration = moment()
@@ -150,6 +146,32 @@ describe('/offers/:id/code POST', () => {
           )
       );
   });
+
+  it('should be fail because the offer was disabled', done => {
+    Promise.all([
+      factoryManager.create(factoryCategory, { name: 'travel' }),
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
+      factoryManager.create(factoryOffer, { retail: 1222, active: false })
+    ]).then(() =>
+      Promise.all([
+        factoryManager.create(factoryEmailUser, { email: 'julian.molina@wolox.com.ar', offerId: 1 })
+      ]).then(() =>
+        chai
+          .request(server)
+          .post(`/offers/1/code`)
+          .send({ email: 'julian.molina@wolox.com.ar' })
+          .then(json => {
+            json.should.have.status(400);
+            json.should.be.json;
+            json.body.should.have.property('message');
+            json.body.should.have.property('internal_code');
+            json.body.internal_code.should.be.equal('offer_disabled');
+            done();
+          })
+      )
+    );
+  });
+
   it('should be fail because the user does not exist', done => {
     Promise.all([
       factoryManager.create(factoryCategory, { name: 'travel' }),
@@ -253,6 +275,23 @@ describe('/retail/:id/code/:code/redeem PATCH', () => {
             });
         })
       );
+  });
+  it('should fail redeem of code because offer was disabled', done => {
+    factoryManager.create(factoryOffer, { retail: 11, active: false }).then(offer =>
+      factoryManager.create(factoryCode, { offerId: offer.id }).then(code => {
+        chai
+          .request(server)
+          .patch(`/retail/11/code/${code.code}/redeem`)
+          .set('authorization', generateToken())
+          .then(response => {
+            response.should.have.status(400);
+            response.body.should.have.property('internal_code');
+            response.body.should.have.property('message');
+            response.body.internal_code.should.be.equal('offer_disabled');
+            done();
+          });
+      })
+    );
   });
 });
 

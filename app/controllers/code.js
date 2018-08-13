@@ -4,7 +4,9 @@ const codeService = require('../services/code'),
   Offer = require('../models').offer,
   uniqueCode = require('../services/uniqueCode'),
   UserEmail = require('../models').email_user,
+  { OFFER_DISABLED, OFFER_ACTIVE } = require('../constants'),
   emailService = require('../services/mailer'),
+  { getOfferStatus } = require('../utils'),
   uuid = require('uuid');
 
 const changeCode = code => {
@@ -14,11 +16,10 @@ const changeCode = code => {
     dateRedemption: code.dateRedemption
       ? utils.moment(code.dateRedemption).format('YYYY-MM-DD HH:mm:ss')
       : null,
-    status: utils.getOfferStatusString(code.offer.dataValues),
+    status: utils.getOfferStatus(code.offer.dataValues),
     product: code.offer.product,
     image: code.offer.dataValues.imageUrl
   };
-
   return result;
 };
 
@@ -30,26 +31,30 @@ exports.create = (req, res, next) => {
   return Offer.getBy({ id: code.offerId })
     .then(off => {
       if (off) {
-        return UserEmail.getBy({ email: code.email, offer_id: code.offerId }).then(userEmail => {
-          if (userEmail) {
-            const active = utils.getOfferStatus(off.dataValues);
-            if (active) {
-              code.code = uuid().slice(0, 8);
-              return uniqueCode.verify(code).then(newCode =>
-                emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
-                  res.status(201);
-                  res.end();
-                })
-              );
+        const status = getOfferStatus(off.dataValues);
+        if (status !== OFFER_DISABLED) {
+          return UserEmail.getBy({ email: code.email, offer_id: code.offerId }).then(userEmail => {
+            if (userEmail) {
+              if (status === OFFER_ACTIVE) {
+                code.code = uuid().slice(0, 8);
+                return uniqueCode.verify(code).then(newCode =>
+                  emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
+                    res.status(201);
+                    res.end();
+                  })
+                );
+              } else {
+                return emailService.sendOfferExpired(off.dataValues, code).then(() => {
+                  throw errors.offerInactive;
+                });
+              }
             } else {
-              return emailService.sendOfferExpired(off.dataValues, code).then(() => {
-                throw errors.offerInactive;
-              });
+              throw errors.userNotFound;
             }
-          } else {
-            throw errors.userNotFound;
-          }
-        });
+          });
+        } else {
+          throw errors.offerDisabled;
+        }
       } else {
         throw errors.offerNotFound;
       }
@@ -82,17 +87,21 @@ exports.createCodeApp = (req, res, next) => {
   return Offer.getBy({ id: code.offerId })
     .then(off => {
       if (off) {
-        code.code = uuid().slice(0, 8);
-        return uniqueCode.verify(code).then(newCode => {
-          res.status(201);
-          res.send({
-            product: off.dataValues.product,
-            valueStrategy: off.dataValues.valueStrategy,
-            expires: off.dataValues.expiration,
-            code: newCode.dataValues.code
+        if (OFFER_ACTIVE === getOfferStatus(off.dataValues)) {
+          code.code = uuid().slice(0, 8);
+          return uniqueCode.verify(code).then(newCode => {
+            res.status(201);
+            res.send({
+              product: off.dataValues.product,
+              valueStrategy: off.dataValues.valueStrategy,
+              expires: off.dataValues.expiration,
+              code: newCode.dataValues.code
+            });
+            res.end();
           });
-          res.end();
-        });
+        } else {
+          throw errors.offerInactive;
+        }
       } else {
         throw errors.offerNotFound;
       }
