@@ -1,11 +1,12 @@
 const Offer = require('../models').offer,
-  logger = require('../logger'),
-  errors = require('../errors'),
   Category = require('../models').category,
+  errors = require('../errors'),
   codeService = require('../services/code'),
+  offerService = require('../services/offer'),
+  { sendNewOffer } = require('../services/mailer'),
   serviceS3 = require('../services/s3'),
   config = require('../../config'),
-  emailService = require('../services/mailer'),
+  requestService = require('../services/request'),
   utils = require('../utils');
 
 exports.getImageUrl = (req, res, next) =>
@@ -29,12 +30,21 @@ exports.create = (req, res, next) => {
     imageUrl: req.body.url
   };
   offer.retail = req.retail;
-  return Offer.createModel(offer)
-    .then(off => {
-      return Category.getBy({ id: offer.categoryId }).then(category => {
-        off.nameCategory = category.dataValues.name;
-        return emailService.sendNewOffer(off, config.common.server.email_new_offer).then(() => {
-          res.status(201).end();
+  return requestService
+    .getPoints(offer.retail)
+    .then(dataCommerce => {
+      offer.nit = dataCommerce.commerce.nit;
+      return Offer.create(offer).then(newOff => {
+        return Category.getBy({ id: offer.categoryId }).then(category => {
+          return sendNewOffer({
+            offer: newOff.dataValues,
+            mail: config.common.server.email_new_offer,
+            dataCommerce,
+            nameCategory: category.dataValues.name
+          }).then(() => {
+            res.status(201);
+            res.end();
+          });
         });
       });
     })
@@ -58,7 +68,7 @@ exports.getOffer = (req, res, next) => {
 exports.getAll = (req, res, next) => {
   const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10;
   const offsetQuery = req.query.page ? req.query.page * limitQuery : 0;
-  return Offer.getAllBy({ retail: req.params.id, offset: offsetQuery, limit: limitQuery })
+  return Offer.getAllDashboardBy({ retail: req.params.id, offset: offsetQuery, limit: limitQuery })
     .then(list => {
       const listResult = list.rows.map(value => ({
         id: value.dataValues.id,
@@ -102,6 +112,21 @@ exports.getRedemptions = (req, res, next) => {
         pages = Math.ceil(list.count / limitQuery);
       res.status(200);
       res.send({ pages, redemptions: listRedemptions });
+      res.end();
+    })
+    .catch(err => next(err));
+};
+
+exports.getOffersBack = (req, res, next) => {
+  const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10,
+    offsetQuery = req.query.page ? req.query.page * limitQuery : 0;
+  return offerService
+    .getAllBack({ limit: limitQuery, offset: offsetQuery, filter: req.query.filter })
+    .then(resultQuery => {
+      const offers = utils.getDataForBack(resultQuery.rows),
+        pages = Math.ceil(resultQuery.count / limitQuery);
+      res.status(200);
+      res.send({ pages, offers });
       res.end();
     })
     .catch(err => next(err));

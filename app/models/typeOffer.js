@@ -14,11 +14,9 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  typeOffer.findAllTypes = () => {
-    return typeOffer.findAll().catch(err => {
+  typeOffer.findAllTypes = () =>
+    typeOffer.findAll().catch(err => {
       throw errors.databaseError(err.message);
     });
-  };
-
   return typeOffer;
 };

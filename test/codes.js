@@ -171,28 +171,74 @@ describe('/offers/:id/code POST', () => {
       )
     );
   });
-
   it('should be fail because the user does not exist', done => {
     Promise.all([
       factoryManager.create(factoryCategory, { name: 'travel' }),
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
-      factoryManager.create(factoryOffer, { retail: 1222 })
-    ])
-      .then()
-      .then(() =>
+      factoryManager.create(factoryOffer, { retail: 1222, active: false })
+    ]).then(() =>
+      Promise.all([
+        factoryManager.create(factoryEmailUser, { email: 'julian.molina@wolox.com.ar', offerId: 1 })
+      ]).then(() =>
         chai
           .request(server)
           .post(`/offers/1/code`)
           .send({ email: 'julian.molina@wolox.com.ar' })
           .then(json => {
-            json.should.have.status(404);
+            json.should.have.status(400);
             json.should.be.json;
             json.body.should.have.property('message');
             json.body.should.have.property('internal_code');
-            json.body.internal_code.should.be.equal('user_not_found');
+            json.body.internal_code.should.be.equal('offer_disabled');
             done();
           })
-      );
+      )
+    );
+  });
+  it('should be fail because the user does not exist', done => {
+    Promise.all([
+      factoryManager.create(factoryCategory, { name: 'travel' }),
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
+      factoryManager.create(factoryOffer)
+    ]).then(() =>
+      chai
+        .request(server)
+        .post(`/offers/1/code`)
+        .send({ email: 'julian.molina@wolox.com.ar' })
+        .then(json => {
+          json.should.have.status(404);
+          json.should.be.json;
+          json.body.should.have.property('message');
+          json.body.should.have.property('internal_code');
+          json.body.internal_code.should.be.equal('user_not_found');
+          done();
+        })
+    );
+  });
+  it('should be fail because getPoints does not work', done => {
+    simple.restore(requestService, 'getPoints');
+    Promise.all([
+      factoryManager.create(factoryCategory, { name: 'travel' }),
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
+      factoryManager.create(factoryOffer, { retail: 1222 })
+    ]).then(() =>
+      factoryManager.create(factoryEmailUser, { email: 'julian.molina@wolox.com.ar', offerId: 1 }).then(() =>
+        chai
+          .request(server)
+          .post(`/offers/1/code`)
+          .send({ email: 'julian.molina@wolox.com.ar' })
+          .then(json => {
+            json.should.have.status(201);
+            Offer.getBy({ id: 1 }).then(after => {
+              after.codes.should.eqls(1);
+            });
+            mailer.transporter.sendMail.lastCall.args[0].subject.should.equal(i18next.t(`newCode.subject`));
+            mailer.transporter.sendMail.lastCall.args[0].to.should.equal('julian.molina@wolox.com.ar');
+            dictum.chai(json);
+            done();
+          })
+      )
+    );
   });
 });
 

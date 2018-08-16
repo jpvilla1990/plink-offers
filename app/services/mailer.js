@@ -1,7 +1,6 @@
 const AWS = require('aws-sdk'),
   nodemailer = require('nodemailer'),
   config = require('../../config'),
-  requestService = require('../services/request'),
   servicesHtml = require('../services/html'),
   i18n = require('i18next'),
   { MAX_LENGTH_OFFER_DETAIL } = require('../constants'),
@@ -22,54 +21,52 @@ const AWS = require('aws-sdk'),
 const sanitizeMaxString = (string, maxLength = MAX_LENGTH_OFFER_DETAIL) =>
   string && string.length > maxLength ? `${string.substring(0, maxLength)}...` : string;
 
+const getDataFromCommerce = (offer, dataCommerce, nameCategory) => ({
+  ...offer,
+  retailName: sanitizeMaxString(dataCommerce.commerce.description),
+  retailAddress: sanitizeMaxString(dataCommerce.address),
+  nameCategory: nameCategory.toUpperCase()
+});
 exports.transporter = transporter;
 exports.ses = ses;
 
-const getInfoMail = (offer, type, name = null) =>
-  requestService.retail(`/points/${offer.retail}`).then(rv => {
-    offer.retailName = sanitizeMaxString(rv.commerce.description);
-    offer.retailAddress = sanitizeMaxString(rv.address);
-    offer.nameCategory = offer.nameCategory ? offer.nameCategory.toUpperCase() : null;
-    if (type !== constants.NEW_OFFER || (type === constants.NEW_OFFER && name !== null)) {
-      offer.subjectEmail = i18n.t(`${type}.subject`);
-    } else {
-      const postIds = rv.posTerminals.map(value => value.posId);
-      offer.subjectEmail = `IdOferta=${offer.id} Nit=${rv.commerce.nit} Posids=${postIds.join()}`;
-    }
-    offer.name = name != null ? name : '';
-    return Promise.resolve();
-  });
-exports.sendNewCode = (offer, code) =>
-  getInfoMail(offer, constants.NEW_CODE).then(() => {
-    const email = {
-      subject: offer.subjectEmail,
-      html: servicesHtml.newCode(offer, code),
+exports.sendNewCode = ({ offer, code, dataCommerce, nameCategory }) => {
+  const infoMail = getDataFromCommerce(offer, dataCommerce, nameCategory),
+    email = {
+      subject: i18n.t(`${constants.NEW_CODE}.subject`),
+      html: servicesHtml.newCode(infoMail, code),
       to: code.email
     };
-    return exports.sendEmail(email);
-  });
-exports.sendOfferExpired = (offer, code) => {
-  const beforeBegin = moment().isBefore(moment(offer.begin).startOf('day')),
-    status = beforeBegin ? constants.BEFORE_BEGIN : constants.OFFER_EXPIRED;
-  offer.beforeBegin = beforeBegin;
-  return getInfoMail(offer, status).then(() => {
-    const email = {
-      subject: offer.subjectEmail,
-      html: servicesHtml.offerExpired(offer, code),
-      to: code.email
-    };
-    return exports.sendEmail(email);
-  });
+  return exports.sendEmail(email);
 };
-exports.sendNewOffer = (offer, mail, name = null) =>
-  getInfoMail(offer, constants.NEW_OFFER, name).then(() => {
-    const email = {
-      subject: offer.subjectEmail,
-      html: servicesHtml.newOffer(offer, mail),
-      to: mail
-    };
-    return exports.sendEmail(email);
-  });
+exports.sendOfferExpired = ({ offer, code, dataCommerce, nameCategory }) => {
+  const beforeBegin = moment().isBefore(moment(offer.begin).startOf('day')),
+    status = beforeBegin ? constants.BEFORE_BEGIN : constants.OFFER_EXPIRED,
+    infoMail = getDataFromCommerce(offer, dataCommerce, nameCategory);
+  infoMail.beforeBegin = beforeBegin;
+  const email = {
+    subject: i18n.t(`${status}.subject`),
+    html: servicesHtml.offerExpired(infoMail, code),
+    to: code.email
+  };
+  return exports.sendEmail(email);
+};
+exports.sendNewOffer = ({ offer, mail, name, dataCommerce, nameCategory }) => {
+  const infoMail = getDataFromCommerce(offer, dataCommerce, nameCategory);
+  if (!name) {
+    const postIds = dataCommerce.posTerminals.map(value => value.posId);
+    infoMail.subject = `IdOferta=${offer.id} Nit=${offer.nit} Posids=${postIds.join()}`;
+  } else {
+    infoMail.name = name;
+    infoMail.subject = i18n.t(`${constants.NEW_OFFER}.subject`);
+  }
+  const email = {
+    subject: infoMail.subject,
+    html: servicesHtml.newOffer(infoMail, mail),
+    to: mail
+  };
+  return exports.sendEmail(email);
+};
 exports.sendEmail = email => {
   email.html = servicesHtml.replaceSpecialTags(email.html);
   return new Promise((resolve, reject) => {

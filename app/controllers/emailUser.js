@@ -9,7 +9,7 @@ exports.getAll = (req, res, next) => {
   return EmailUser.getAll({ offset: offsetQuery, email: req.email, limit: limitQuery, category })
     .then(offersByUser => {
       const offers = new Array();
-      Promise.all(serviceEmailUser.getDataFromOffers(offersByUser))
+      return Promise.all(serviceEmailUser.getDataFromOffers(offersByUser))
         .then(off => {
           off.forEach(data => {
             offers.push(data);

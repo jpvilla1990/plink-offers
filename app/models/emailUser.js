@@ -43,20 +43,18 @@ module.exports = (sequelize, DataTypes) => {
         throw errors.databaseError(err.message);
       });
   };
-  emailUser.createModel = newEmailUser => {
-    return emailUser.create(newEmailUser).catch(err => {
+  emailUser.createModel = newEmailUser =>
+    emailUser.create(newEmailUser).catch(err => {
       if (err instanceof Sequelize.UniqueConstraintError && err.fields.email_users_email_offer_id) {
         throw errors.existingUser;
       } else {
         throw errors.databaseError(err.message);
       }
     });
-  };
-  emailUser.getBy = filter => {
-    return emailUser.findOne({ where: filter }).catch(err => {
+  emailUser.getBy = filter =>
+    emailUser.findOne({ where: filter }).catch(err => {
       throw errors.databaseError(err.message);
     });
-  };
   emailUser.associate = models => {
     emailUser.belongsTo(models.offer, { as: 'offer' });
   };

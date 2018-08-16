@@ -58,9 +58,9 @@ describe('/retail/:id/offers POST', () => {
   const offerWithRetail = offerExample;
   offerWithRetail.retail = 1222;
   beforeEach(() => {
-    simple.mock(requestService, 'retail').resolveWith({
-      addres: 'Cochabamba 3254',
-      commerce: { description: 'McDonalds' },
+    simple.mock(requestService, 'getPoints').resolveWith({
+      address: 'Cochabamba 3254',
+      commerce: { description: 'McDonalds', nit: 1234 },
       posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
     });
     simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
@@ -75,12 +75,12 @@ describe('/retail/:id/offers POST', () => {
           .post('/retail/1222/offers')
           .set(headerName, tokenExample)
           .send(offerExample)
-          .then(json => {
-            json.should.have.status(201);
+          .then(res => {
+            res.should.have.status(201);
             Offer.getBy({ retail: 1222 }).then(exist => {
               const off = !!exist;
               off.should.eql(true);
-              dictum.chai(json);
+              dictum.chai(res);
               done();
             });
           });
@@ -372,10 +372,10 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
             .request(server)
             .get(`/retail/1333/offers/${off.dataValues.id}/redemptions?`)
             .set(headerName, tokenExample)
-            .then(json => {
-              json.should.have.status(400);
-              json.body.should.have.property('message');
-              json.body.should.have.property('internal_code');
+            .then(res => {
+              res.should.have.status(400);
+              res.body.should.have.property('message');
+              res.body.should.have.property('internal_code');
               done();
             });
         })
@@ -443,6 +443,74 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
         )
       )
     );
+  });
+  describe('/back/offers GET', () => {
+    beforeEach(() =>
+      Promise.all([factoryManager.create(factoryCategory), factoryManager.create(factoryTypeOffer)]).then(
+        () =>
+          Promise.all([
+            factoryManager.create(factoryOffer, { product: 'hamburguer', nit: 12 }),
+            factoryManager.create(factoryOffer, { product: 'hamburguer with cheese', nit: 34 }),
+            factoryManager.create(factoryOffer, { nit: 1333 }),
+            factoryManager.create(factoryOffer, { nit: 1234 })
+          ])
+      )
+    );
+    it('should be successful with filter ', done => {
+      chai
+        .request(server)
+        .get(`/back/offers?filter=34`)
+        .then(res => {
+          res.should.have.status(200);
+          res.body.pages.should.eqls(1);
+          res.body.offers.length.should.eqls(2);
+          done();
+        });
+    });
+    it('should be successful with page and limit but without filter ', done => {
+      chai
+        .request(server)
+        .get(`/back/offers?page=1&limit=2`)
+        .then(res => {
+          res.should.have.status(200);
+          res.body.pages.should.eqls(2);
+          res.body.offers.length.should.eqls(2);
+          done();
+        });
+    });
+    it('should be successful with page,limit and filter ', done => {
+      chai
+        .request(server)
+        .get(`/back/offers?page=1&limit=1&filter=12`)
+        .then(res => {
+          res.should.have.status(200);
+          res.body.pages.should.eqls(2);
+          res.body.offers.length.should.eqls(1);
+          done();
+        });
+    });
+    it('should be successful with page and filter by product but without offers ', done => {
+      chai
+        .request(server)
+        .get(`/back/offers?page=0&limit=5&filter=20% en hamburguer`)
+        .then(res => {
+          res.should.have.status(200);
+          res.body.pages.should.eqls(0);
+          res.body.offers.length.should.eqls(0);
+          done();
+        });
+    });
+    it('should be successful with filter by product ', done => {
+      chai
+        .request(server)
+        .get(`/back/offers?filter=hamburguer`)
+        .then(res => {
+          res.should.have.status(200);
+          res.body.pages.should.eqls(1);
+          res.body.offers.length.should.eqls(2);
+          done();
+        });
+    });
   });
   describe('/retail/:id/offers/:id_offer PATCH', () => {
     beforeEach(() =>

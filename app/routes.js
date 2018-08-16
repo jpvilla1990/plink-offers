@@ -26,5 +26,7 @@ exports.init = app => {
     [auth.requireRetail, validator.checkQuery, validator.validate],
     Offer.getRedemptions
   );
+  app.post('/offer-app/offers/:id/code', [auth.requireEmail], code.createCodeApp);
+  app.get('/back/offers', Offer.getOffersBack);
   app.patch('/retail/:id/offers/:id_offer', [auth.requireRetail], Offer.changeActive);
 };

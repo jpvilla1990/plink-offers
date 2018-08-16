@@ -16,7 +16,8 @@ factory.define(exports.nameFactory, Offer, {
     'Offer.image',
     n => `'https://s3.amazonaws.com/plink-email-assets/plink_offers/${n}.jpg`
   ),
-  valueStrategy: '30%',
+  valueStrategy: '10%',
   categoryId: factory.assoc('Category', 'id'),
+  nit: 12345,
   active: true
 });

@@ -44,3 +44,15 @@ exports.mask = email => {
     )}${'*'.repeat(4)}`;
   }
 };
+
+exports.getDataForBack = offers =>
+  offers.map(value => ({
+    id: value.id,
+    retail: value.retail,
+    nit: value.nit,
+    image: value.imageUrl,
+    begin: value.begin,
+    expires: value.expiration,
+    status: exports.getOfferStatus(value),
+    title: `${value.valueStrategy} en ${value.product}`
+  }));

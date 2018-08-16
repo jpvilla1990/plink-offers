@@ -29,3 +29,4 @@ exports.existingUser = internalError('Already exist a user for this email', expo
 exports.nonExistentOffer = internalError('The offer does not exist', exports.NONEXISTENTOFFER);
 exports.userNotFound = internalError('User not found', exports.USER_NOT_FOUND);
 exports.offerDisabled = internalError('Offer Disabled', exports.OFFER_DISABLED);
+exports.points = internalError('Error when tried to obtain data from commerce', exports.DEFAULT_ERROR);

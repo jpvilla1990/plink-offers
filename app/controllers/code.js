@@ -3,9 +3,10 @@ const codeService = require('../services/code'),
   errors = require('../errors'),
   Offer = require('../models').offer,
   uniqueCode = require('../services/uniqueCode'),
+  { sendNewCode, sendOfferExpired } = require('../services/mailer'),
   UserEmail = require('../models').email_user,
   { OFFER_DISABLED, OFFER_ACTIVE } = require('../constants'),
-  emailService = require('../services/mailer'),
+  requestService = require('../services/request'),
   { getOfferStatus } = require('../utils'),
   uuid = require('uuid');
 
@@ -35,19 +36,34 @@ exports.create = (req, res, next) => {
         if (status !== OFFER_DISABLED) {
           return UserEmail.getBy({ email: code.email, offer_id: code.offerId }).then(userEmail => {
             if (userEmail) {
-              if (status === OFFER_ACTIVE) {
-                code.code = uuid().slice(0, 8);
-                return uniqueCode.verify(code).then(newCode =>
-                  emailService.sendNewCode(off.dataValues, newCode.dataValues).then(() => {
-                    res.status(201);
-                    res.end();
-                  })
-                );
-              } else {
-                return emailService.sendOfferExpired(off.dataValues, code).then(() => {
-                  throw errors.offerInactive;
-                });
-              }
+              return requestService
+                .getPoints(off.dataValues.retail)
+                .then(dataCommerce => {
+                  if (status === OFFER_ACTIVE) {
+                    code.code = uuid().slice(0, 8);
+                    return uniqueCode.verify(code).then(newCode =>
+                      sendNewCode({
+                        offer: off.dataValues,
+                        code: newCode.dataValues,
+                        dataCommerce,
+                        nameCategory: off.category.dataValues.name
+                      }).then(() => {
+                        res.status(201);
+                        res.end();
+                      })
+                    );
+                  } else {
+                    return sendOfferExpired({
+                      offer: off.dataValues,
+                      code,
+                      dataCommerce,
+                      nameCategory: off.category.dataValues.name
+                    }).then(() => {
+                      throw errors.offerInactive;
+                    });
+                  }
+                })
+                .catch(err => next(err));
             } else {
               throw errors.userNotFound;
             }

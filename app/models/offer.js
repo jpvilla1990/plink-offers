@@ -47,6 +47,9 @@ module.exports = (sequelize, DataTypes) => {
       redemptions: {
         type: DataTypes.INTEGER
       },
+      nit: {
+        type: DataTypes.INTEGER
+      },
       active: {
         type: DataTypes.BOOLEAN
       }
@@ -56,20 +59,20 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true
     }
   );
-  Offer.createModel = off => {
-    return Offer.create(off, {
+  Offer.createModel = (off, transaction) =>
+    Offer.create(off, {
       include: [
         {
           model: sequelize.models.category,
           as: 'category'
         }
-      ]
+      ],
+      transaction
     }).catch(err => {
       throw errors.databaseError(err.message);
     });
-  };
-  Offer.getBy = filter => {
-    return Offer.findOne({
+  Offer.getBy = filter =>
+    Offer.findOne({
       where: filter,
       include: [
         {
@@ -84,14 +87,12 @@ module.exports = (sequelize, DataTypes) => {
     }).catch(err => {
       throw errors.databaseError(err.message);
     });
-  };
-  Offer.incrementField = (field, filter, transaction) => {
-    return Offer.increment(field, { where: filter, transaction }).catch(err => {
+  Offer.incrementField = (field, filter, transaction) =>
+    Offer.increment(field, { where: filter, transaction }).catch(err => {
       throw errors.databaseError(err.detail);
     });
-  };
-  Offer.getAllBy = filter => {
-    return Offer.findAndCountAll({
+  Offer.getAllDashboardBy = filter =>
+    Offer.findAndCountAll({
       offset: filter.offset,
       where: { retail: filter.retail },
       limit: filter.limit,
@@ -99,8 +100,6 @@ module.exports = (sequelize, DataTypes) => {
     }).catch(err => {
       throw errors.databaseError(err.message);
     });
-  };
-
   Offer.associate = models => {
     Offer.belongsTo(models.category, { as: 'category' });
     Offer.belongsTo(models.type_offer, { as: 'type', foreignKey: 'strategy' });

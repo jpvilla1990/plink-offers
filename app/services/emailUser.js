@@ -1,5 +1,6 @@
 const utils = require('../utils'),
   constants = require('../constants'),
+  errors = require('../errors'),
   requestService = require('../services/request');
 
 exports.getDataFromOffers = list => {
@@ -7,7 +8,7 @@ exports.getDataFromOffers = list => {
   list.forEach(value => {
     if (constants.OFFER_ACTIVE === utils.getOfferStatus(value.offer.dataValues)) {
       emailWithOffers.push(
-        requestService.retail(`/points/${value.offer.dataValues.retail}`).then(rv => {
+        requestService.getPoints(value.offer.dataValues.retail).then(rv => {
           const offerFormated = {
             idOffer: value.offer.dataValues.id,
             image: value.offer.dataValues.imageUrl,

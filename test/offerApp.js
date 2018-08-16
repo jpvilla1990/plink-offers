@@ -3,6 +3,7 @@ const chai = require('chai'),
   server = require('./../app'),
   requestService = require('../app/services/request'),
   simple = require('simple-mock'),
+  expect = chai.expect,
   token = require('../test/factories/token'),
   factoryManager = require('../test/factories/factoryManager'),
   factoryOffer = require('../test/factories/offer').nameFactory,
@@ -110,6 +111,25 @@ describe('/offer-app/offers GET', () => {
         response.body.offers.length.should.eqls(0);
         done();
       });
+  });
+  it('should be fail because getPoints does not work', done => {
+    simple.restore();
+    Promise.all([factoryManager.create(factoryOffer, { retail: 4635 })]).then(() =>
+      Promise.all([factoryManager.create(factoryEmailUser, { email, offerId: 1 })]).then(() =>
+        chai
+          .request(server)
+          .get(`/offer-app/offers`)
+          .set('authorization', generateToken())
+          .then(response => {
+            response.should.have.status(500);
+            response.body.should.have.property('message');
+            expect(response.body.message).to.equal('Error when tried to obtain data from commerce');
+            response.body.should.have.property('internal_code');
+            expect(response.body.internal_code).to.equal('default_error');
+            done();
+          })
+      )
+    );
   });
 });
 

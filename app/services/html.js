@@ -78,7 +78,7 @@ exports.offerExpired = offer => {
       subtitle: offer.beforeBegin ? '' : 'La siguiente oferta ya no está disponible',
       statusDates: offer.beforeBegin
         ? `La oferta comienza: ${offer.begin}`
-        : `Oferta caduc&oacute;: ${offer.expiration}`,
+        : `Oferta caducó: ${offer.expiration}`,
       address: offer.retailAddress
     },
     html = pug.renderFile(templateDir, params);

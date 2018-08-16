@@ -18,16 +18,13 @@ module.exports = (sequelize, DataTypes) => {
       indexes: [{ unique: true, fields: ['email', 'offer_id'] }]
     }
   );
-  Code.createModel = (off, transaction) => {
-    return Code.create(off, { transaction });
-  };
-  Code.getBy = filter => {
-    return Code.findOne({ where: filter }).catch(err => {
+  Code.createModel = (off, transaction) => Code.create(off, { transaction });
+  Code.getBy = filter =>
+    Code.findOne({ where: filter }).catch(err => {
       throw errors.databaseError(err.message);
     });
-  };
-  Code.getAllBy = filter => {
-    return Code.findAndCountAll({
+  Code.getAllBy = filter =>
+    Code.findAndCountAll({
       offset: filter.offset,
       where: { email: filter.email },
       limit: filter.limit,
@@ -40,7 +37,6 @@ module.exports = (sequelize, DataTypes) => {
     }).catch(err => {
       throw errors.databaseError(err.message);
     });
-  };
   Code.associate = models => {
     Code.belongsTo(models.offer, { as: 'offer' });
   };

@@ -20,11 +20,9 @@ module.exports = (sequelize, DataTypes) => {
       throw errors.databaseError(err.message);
     });
   };
-  category.getBy = filter => {
-    return category.findOne({ where: filter }).catch(err => {
+  category.getBy = (filter, transaction = null) =>
+    category.findOne({ where: filter, transaction }).catch(err => {
       throw errors.databaseError(err.message);
     });
-  };
-
   return category;
 };

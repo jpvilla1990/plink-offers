@@ -4,6 +4,7 @@ const AWS = require('aws-sdk'),
   EmailUser = require('../models').email_user,
   logger = require('../logger'),
   emailService = require('../services/mailer'),
+  requestService = require('../services/request'),
   CronJob = require('cron').CronJob,
   sqs = new AWS.SQS(
     new AWS.Config({
@@ -46,47 +47,59 @@ exports.notify = () => {
               if (emails.length > available) {
                 logger.warn(`The count of emails is greater than daily quota limit`);
               } else {
-                off.dataValues.nameCategory = off.category.dataValues.name;
-                emails.forEach(element => {
-                  EmailUser.createModel({ email: element.mail, offerId: off.dataValues.id })
-                    .then(() => {
-                      logger.info(
-                        `The user was created with email: ${element.mail} associated with the offer id: ${
-                          off.dataValues.id
-                        }`
-                      );
-                    })
-                    .catch(error => {
-                      logger.error(
-                        `The user was not create with email : ${element.mail} because ${error.message}`
-                      );
+                return requestService
+                  .getPoints(off.dataValues.retail)
+                  .then(dataCommerce => {
+                    emails.forEach(element => {
+                      EmailUser.createModel({ email: element.mail, offerId: off.dataValues.id })
+                        .then(() => {
+                          logger.info(
+                            `The user was created with email: ${element.mail} associated with the offer id: ${
+                              off.dataValues.id
+                            }`
+                          );
+                        })
+                        .catch(error => {
+                          logger.error(
+                            `The user was not create with email : ${element.mail} because ${error.message}`
+                          );
+                        });
+                      emailService
+                        .sendNewOffer({
+                          dataCommerce,
+                          offer: off.dataValues,
+                          mail: element.mail,
+                          name: element.name,
+                          nameCategory: off.category.dataValues.name
+                        })
+                        .catch(error => {
+                          logger.error(
+                            `Didnt send offer with id: ${off.id} to ${element.name} ( ${
+                              element.mail
+                            } ) because ${error}`
+                          );
+                        })
+                        .then(() => {
+                          logger.info(`Sent offer with id: ${off.id} to ${element.name} ( ${element.mail} )`);
+                        });
                     });
-                  emailService
-                    .sendNewOffer(off.dataValues, element.mail, element.name)
-                    .catch(error => {
-                      logger.error(
-                        `Didnt send offer with id: ${off.id} to ${element.name} ( ${
-                          element.mail
-                        } ) because ${error}`
-                      );
-                    })
-                    .then(() => {
-                      logger.info(`Sent offer with id: ${off.id} to ${element.name} ( ${element.mail} )`);
-                    });
-                });
-                const deleteParams = {
-                  QueueUrl: config.common.aws.queue_url,
-                  ReceiptHandle: data.Messages[0].ReceiptHandle
-                };
-                return sqs
-                  .deleteMessage(deleteParams)
-                  .promise()
-                  .then(() => {
-                    logger.error(`Message deleted`);
-                    logger.info('End process');
+                    const deleteParams = {
+                      QueueUrl: config.common.aws.queue_url,
+                      ReceiptHandle: data.Messages[0].ReceiptHandle
+                    };
+                    return sqs
+                      .deleteMessage(deleteParams)
+                      .promise()
+                      .then(() => {
+                        logger.error(`Message deleted`);
+                        logger.info('End process');
+                      })
+                      .catch(e => {
+                        logger.error(`Error while deleting message from the queue, reason: ${e}`);
+                      });
                   })
                   .catch(e => {
-                    logger.error(`Error while deleting message from the queue, reason: ${e}`);
+                    logger.error(`Error while getting the information of the commerce, reason ${e.message}`);
                   });
               }
             });
