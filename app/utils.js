@@ -54,5 +54,6 @@ exports.getDataForBack = offers =>
     begin: value.begin,
     expires: value.expiration,
     status: exports.getOfferStatus(value),
+    creationDate: moment(value.dataValues.created_at).format('YYYY-MM-DD'),
     title: `${value.valueStrategy} en ${value.product}`
   }));

@@ -124,9 +124,10 @@ exports.getOffersBack = (req, res, next) => {
     .getAllBack({ limit: limitQuery, offset: offsetQuery, filter: req.query.filter })
     .then(resultQuery => {
       const offers = utils.getDataForBack(resultQuery.rows),
+        count = resultQuery.count,
         pages = Math.ceil(resultQuery.count / limitQuery);
       res.status(200);
-      res.send({ pages, offers });
+      res.send({ count, pages, offers });
       res.end();
     })
     .catch(err => next(err));

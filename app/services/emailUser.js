@@ -18,7 +18,7 @@ exports.getDataFromOffers = list => {
               valueStrategy: value.offer.dataValues.valueStrategy,
               expires: value.offer.dataValues.expiration,
               retailName: rv.commerce.description,
-              retailAddress: rv.addressS
+              retailAddress: rv.address
             };
           return code ? { ...offerFormated, code } : offerFormated;
         })
