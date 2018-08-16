@@ -34,6 +34,12 @@ module.exports = (sequelize, DataTypes) => {
               {
                 model: sequelize.models.category,
                 as: 'category'
+              },
+              {
+                model: sequelize.models.code,
+                as: 'code',
+                where: { email: filter.email },
+                required: false
               }
             ]
           }

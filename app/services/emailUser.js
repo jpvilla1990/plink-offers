@@ -9,17 +9,18 @@ exports.getDataFromOffers = list => {
     if (constants.OFFER_ACTIVE === utils.getOfferStatus(value.offer.dataValues)) {
       emailWithOffers.push(
         requestService.getPoints(value.offer.dataValues.retail).then(rv => {
-          const offerFormated = {
-            idOffer: value.offer.dataValues.id,
-            image: value.offer.dataValues.imageUrl,
-            category: value.offer.category.dataValues.name,
-            product: value.offer.dataValues.product,
-            valueStrategy: value.offer.dataValues.valueStrategy,
-            expires: value.offer.dataValues.expiration,
-            retailName: rv.commerce.description,
-            retailAddress: rv.address
-          };
-          return offerFormated;
+          const code = value.offer.code.length > 0 ? value.offer.code[0].code : null,
+            offerFormated = {
+              idOffer: value.offer.dataValues.id,
+              image: value.offer.dataValues.imageUrl,
+              category: value.offer.category.dataValues.name,
+              product: value.offer.dataValues.product,
+              valueStrategy: value.offer.dataValues.valueStrategy,
+              expires: value.offer.dataValues.expiration,
+              retailName: rv.commerce.description,
+              retailAddress: rv.addressS
+            };
+          return code ? { ...offerFormated, code } : offerFormated;
         })
       );
     }
