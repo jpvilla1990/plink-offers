@@ -18,13 +18,10 @@ const AWS = require('aws-sdk'),
   constants = require('../constants'),
   { moment } = require('../utils');
 
-const sanitizeMaxString = (string, maxLength = MAX_LENGTH_OFFER_DETAIL) =>
-  string && string.length > maxLength ? `${string.substring(0, maxLength)}...` : string;
-
 const getDataFromCommerce = (offer, dataCommerce, nameCategory) => ({
   ...offer,
-  retailName: sanitizeMaxString(dataCommerce.commerce.description),
-  retailAddress: sanitizeMaxString(dataCommerce.address),
+  retailName: dataCommerce.commerce.description,
+  retailAddress: dataCommerce.address,
   nameCategory: nameCategory.toUpperCase()
 });
 exports.transporter = transporter;
