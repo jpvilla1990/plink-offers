@@ -7,20 +7,27 @@ pipelines:
           - node
         script:
           - export NODE_ENV=testing DB_NAME_TEST=plink-offers-test
-          - export DB_HOST_TEST=127.0.0.1 DB_PORT_TEST=3306 
+          - export DB_HOST_TEST=127.0.0.1 DB_PORT_TEST=3306
           - export DB_USERNAME_TEST=root DB_PASSWORD_TEST=plink
           - export KEY_AWS=11112 SECRET_AWS=21333 BUCKET_AWS=bucket-test REGION_AWS=us-east-1
+          - export KEY_AWS=11112 SECRET_AWS=21333 BUCKET_AWS=bucket-test REGION_AWS=us-east-1
+          - export URL_LAND=http://plink-landing-development.s3-website-us-east-1.amazonaws.com/
+          - export GROUP_ID=1 SENDING_RATE=1 QUEUE_URL=https://sqs.us-east-1.amazonaws.com/082149138148/plink-offers-development.fifo
+          - export EMAIL_OFFER=julian.molina@wolox.com.ar URL_INFO_RETAIL=http://localhost:8080 BUCKET_EMAIL=plink-email-assets
+          - export URL_S3_EMAIL=https://s3.amazonaws.com FOLDER_BUCKET_EMAIL=plink_offers TIME_MSG=60
+          - export URL_SERVER_API=http://localhost:8080/offers CODE_ACCESS=1234 EMAIL_PLINK=ofertas@plink.com.co
+          - export TIME_NODECRON='10 * * * * *'
           - npm install
           - npm run migrations
           - npm test
 
-        services: 
+        services:
           - mysql
 
-definitions: 
-  services: 
-    mysql: 
+definitions:
+  services:
+    mysql:
       image: mysql:5.7
-      environment: 
-        MYSQL_DATABASE: 'plink-offers-test' 
+      environment:
+        MYSQL_DATABASE: 'plink-offers-test'
         MYSQL_ROOT_PASSWORD: 'plink'
