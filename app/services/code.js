@@ -1,6 +1,6 @@
 const Code = require('../models').code,
   Offer = require('../models').offer,
-  moment = require('moment'),
+  { moment } = require('../utils'),
   { getOfferStatus } = require('../utils'),
   { OFFER_ACTIVE, OFFER_INACTIVE } = require('../constants'),
   sequelize = require('../models').sequelize,

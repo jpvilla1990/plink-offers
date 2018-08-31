@@ -18,6 +18,7 @@ const chai = require('chai'),
   headerName = config.common.session.header_name,
   Offer = require('../app/models').offer,
   EmailUser = require('../app/models').email_user,
+  { OFFER_ACTIVE, OFFER_INACTIVE, OFFER_DISABLED, OFFER_FINISHED } = require('../app/constants'),
   should = chai.should(),
   expect = chai.expect,
   offerExample = {
@@ -193,6 +194,98 @@ describe('/retail/:id/offers GET', () => {
         done();
       });
   });
+
+  it('should be successful with not began offer (inactive)', done => {
+    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+        factoryManager.create('NotBeganOffer').then(off => {
+          chai
+            .request(server)
+            .get('/retail/1222/offers?page=0')
+            .set(headerName, tokenExample)
+            .then(res => {
+              res.should.have.status(200);
+              res.body.should.have.property('count');
+              res.body.should.have.property('offers');
+              res.body.offers.length.should.eql(1);
+              res.body.offers[0].should.have.property('status');
+              res.body.offers[0].status.should.equal(OFFER_INACTIVE);
+              dictum.chai(res);
+              done();
+            });
+        });
+      });
+    });
+  });
+
+  it('should be successful with one active offer (active)', done => {
+    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+        factoryManager.create('ActiveOffer').then(off => {
+          chai
+            .request(server)
+            .get('/retail/1222/offers?page=0')
+            .set(headerName, tokenExample)
+            .then(res => {
+              res.should.have.status(200);
+              res.body.should.have.property('count');
+              res.body.should.have.property('offers');
+              res.body.offers.length.should.eql(1);
+              res.body.offers[0].should.have.property('status');
+              res.body.offers[0].status.should.equal(OFFER_ACTIVE);
+              dictum.chai(res);
+              done();
+            });
+        });
+      });
+    });
+  });
+
+  it('should be successful with one expired offer (finished)', done => {
+    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+        factoryManager.create('ExpiredOffer').then(off => {
+          chai
+            .request(server)
+            .get('/retail/1222/offers?page=0')
+            .set(headerName, tokenExample)
+            .then(res => {
+              res.should.have.status(200);
+              res.body.should.have.property('count');
+              res.body.should.have.property('offers');
+              res.body.offers.length.should.eql(1);
+              res.body.offers[0].should.have.property('status');
+              res.body.offers[0].status.should.equal(OFFER_FINISHED);
+              dictum.chai(res);
+              done();
+            });
+        });
+      });
+    });
+  });
+});
+
+it('should be successful with one disabled offer (disabled)', done => {
+  factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+    factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+      factoryManager.create('DisabledOffer').then(off => {
+        chai
+          .request(server)
+          .get('/retail/1222/offers?page=0')
+          .set(headerName, tokenExample)
+          .then(res => {
+            res.should.have.status(200);
+            res.body.should.have.property('count');
+            res.body.should.have.property('offers');
+            res.body.offers.length.should.eql(1);
+            res.body.offers[0].should.have.property('status');
+            res.body.offers[0].status.should.equal(OFFER_DISABLED);
+            dictum.chai(res);
+            done();
+          });
+      });
+    });
+  });
 });
 
 describe('job notify', () => {
@@ -233,6 +326,46 @@ describe('job notify', () => {
       done();
     });
   });
+
+  it('Should not send email, due to offer is expired', done => {
+    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+        factoryManager.create('DisabledOffer').then(off => {
+          simple.mock(jobNotify.sqs, 'receiveMessage').returnWith({
+            promise: () =>
+              Promise.resolve({
+                Messages: [
+                  {
+                    Attributes: { MessageDeduplicationId: off.id },
+                    Body: '{"mails":[{"mail":"julian.molina@wolox.com.ar","name":"julian"}]}'
+                  }
+                ]
+              })
+          });
+          simple.restore(jobNotify.ses, 'getSendQuota');
+          simple.mock(jobNotify.sqs, 'deleteMessage').returnWith({
+            promise: () => Promise.resolve({})
+          });
+          simple.mock(jobNotify.ses, 'getSendQuota').callFn((obj, callback) => {
+            callback(undefined, {
+              Max24HourSend: 50,
+              SentLast24Hours: 1
+            });
+          });
+          simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
+            callback(undefined, true);
+          });
+          warning = simple.mock(logger.warn);
+
+          jobNotify.notify().then(() => {
+            mailer.transporter.sendMail.callCount.should.eqls(0);
+            done();
+          });
+        });
+      });
+    });
+  });
+
   it('should be successful ', done => {
     simple.mock(jobNotify.sqs, 'receiveMessage').returnWith({
       promise: () =>

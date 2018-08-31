@@ -3,6 +3,7 @@ exports.OFFER_INACTIVE = 'inactive';
 exports.OFFER_DISABLED = 'disabled';
 exports.NEW_OFFER = 'newOffer';
 exports.OFFER_EXPIRED = 'offerExpired';
+exports.OFFER_FINISHED = 'finished';
 exports.NEW_CODE = 'newCode';
 exports.BEFORE_BEGIN = 'offerBeforeBegin';
 exports.HIDE_EMAIL = 3;

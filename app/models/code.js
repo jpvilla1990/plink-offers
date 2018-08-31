@@ -1,7 +1,8 @@
 'use strict';
 
-const Sequelize = require('sequelize'),
-  errors = require('../errors');
+const op = require('sequelize').Op,
+  errors = require('../errors'),
+  { moment } = require('../utils');
 
 module.exports = (sequelize, DataTypes) => {
   const Code = sequelize.define(
@@ -26,12 +27,38 @@ module.exports = (sequelize, DataTypes) => {
   Code.getAllBy = filter =>
     Code.findAndCountAll({
       offset: filter.offset,
-      where: { email: filter.email },
+      where: {
+        email: filter.email,
+        dateRedemption: sequelize.where(
+          sequelize.fn(
+            'datediff',
+            moment()
+              .utc()
+              .format('YYYY-MM-DD HH:mm:ss'),
+            sequelize.col('date_redemption')
+          ),
+          {
+            [op.or]: {
+              [op.eq]: null,
+              [op.and]: {
+                [op.lte]: 3,
+                [op.gte]: 0
+              }
+            }
+          }
+        )
+      },
       limit: filter.limit,
       include: [
         {
           model: sequelize.models.offer,
-          as: 'offer'
+          as: 'offer',
+          where: sequelize.where(
+            sequelize.fn('datediff', moment().format('YYYY-MM-DD'), sequelize.col('expiration')),
+            {
+              [op.lte]: 3
+            }
+          )
         }
       ]
     }).catch(err => {

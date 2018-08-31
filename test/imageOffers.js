@@ -10,6 +10,7 @@ describe('/image-offers GET', () => {
       .then(response => {
         response.should.have.status(200);
         response.body.should.have.property('url');
+        response.body.should.have.property('cdn');
         dictum.chai(response);
         done();
       });

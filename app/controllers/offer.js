@@ -7,13 +7,18 @@ const Offer = require('../models').offer,
   serviceS3 = require('../services/s3'),
   config = require('../../config'),
   requestService = require('../services/request'),
+  urlParse = require('url').parse,
   utils = require('../utils');
 
 exports.getImageUrl = (req, res, next) =>
   serviceS3
     .getSignedUrlPut()
     .then(url => {
-      res.send({ url });
+      const parsedUrl = urlParse(url);
+      res.send({
+        url,
+        cdn: `${parsedUrl.protocol}//${config.common.aws.offers_images_cdn}${parsedUrl.pathname}`
+      });
     })
     .catch(next);
 
