@@ -5,7 +5,13 @@
   "offerInvalid": {
     "subject": "Oferta inválida"
   },
-  "offerExpired": {
+  "inactive": {
+    "subject": "Ups! Esta oferta aun no ha comenzado"
+  },
+  "disabled": {
+    "subject": "Ups! Esta oferta no esta disponible."
+  },
+  "finished": {
     "subject": "Ups! Esta oferta ha expirado."
   },
   "offerBeforeBegin":{

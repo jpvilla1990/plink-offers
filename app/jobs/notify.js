@@ -24,6 +24,22 @@ const AWS = require('aws-sdk'),
 exports.sqs = sqs;
 exports.ses = ses;
 
+const deleteMessage = data => {
+  const deleteParams = {
+    QueueUrl: config.common.aws.queue_url,
+    ReceiptHandle: data.Messages[0].ReceiptHandle
+  };
+  return sqs
+    .deleteMessage(deleteParams)
+    .promise()
+    .then(() => {
+      logger.error(`Message deleted`);
+      logger.info('End process');
+    })
+    .catch(e => {
+      logger.error(`Error while deleting message from the queue, reason: ${e}`);
+    });
+};
 exports.notify = () => {
   const params = {
     QueueUrl: config.common.aws.queue_url,
@@ -41,10 +57,11 @@ exports.notify = () => {
         return Offer.getBy({ id: data.Messages[0].Attributes.MessageDeduplicationId })
           .then(off => {
             if (off.active) {
-              logger.info(`Values associated with the offer obtained`);
+              logger.info(`Values associated with the offer (id : ${off.dataValues.id}) obtained`);
               const emails = JSON.parse(data.Messages[0].Body).mails;
               ses.getSendQuota({}, function(errQuota, quota) {
                 const available = quota.Max24HourSend - quota.SentLast24Hours;
+                logger.info(`quota available : ${available}`);
                 if (emails.length > available) {
                   logger.warn(`The count of emails is greater than daily quota limit`);
                 } else {
@@ -80,33 +97,23 @@ exports.notify = () => {
                             );
                           })
                           .then(() => {
-                            logger.info(`Sent offer with id: ${off.id}
-                                         to ${element.name} ( ${element.mail} )`);
+                            logger.info(
+                              `Sent offer with id: ${off.id} to ${element.name} ( ${element.mail} )`
+                            );
                           });
                       });
-                      const deleteParams = {
-                        QueueUrl: config.common.aws.queue_url,
-                        ReceiptHandle: data.Messages[0].ReceiptHandle
-                      };
-                      return sqs
-                        .deleteMessage(deleteParams)
-                        .promise()
-                        .then(() => {
-                          logger.error(`Message deleted`);
-                          logger.info('End process');
-                        })
-                        .catch(e => {
-                          logger.error(`Error while deleting message from the queue, reason: ${e}`);
-                        });
+                      return deleteMessage(data);
                     })
                     .catch(e => {
-                      logger.error(`Error while getting the information of the commerce,
-                                    reason ${e.message}`);
+                      logger.error(
+                        `Error while getting the information of the commerce, reason ${e.message}`
+                      );
                     });
                 }
               });
             } else {
               logger.warn(`Email was not sent due to not active offer`);
+              return deleteMessage(data);
             }
           })
           .catch(e => {
