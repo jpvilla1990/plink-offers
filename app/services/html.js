@@ -1,7 +1,8 @@
 const pug = require('pug'),
   path = require('path'),
   config = require('../../config'),
-  serviceS3 = require('../services/s3');
+  serviceS3 = require('../services/s3'),
+  constants = require('../constants');
 
 exports.newCode = (offer, code) => {
   const templateDir = path.join(__dirname, `/emailTemplates/newCode.pug`),
@@ -11,7 +12,7 @@ exports.newCode = (offer, code) => {
       bg_general_code: serviceS3.getUrlEmail('bg_general_code'),
       logo_bancocolombia: serviceS3.getUrlEmail('logo_bancocolombia'),
       logo_superintendence: serviceS3.getUrlEmail('logo_superintendencia'),
-      brand_logo: serviceS3.getUrlEmail('ic_default_comercio'),
+      brand_logo: offer.retailImageUrl || serviceS3.getUrlEmail('ic_default_comercio'),
       ticket: serviceS3.getUrlEmail('ticket'),
       mail_separator: serviceS3.getUrlEmail('mail_separator'),
       img_offer: offer.imageUrl,
@@ -36,7 +37,7 @@ exports.newOffer = (offer, emailTo) => {
       bg_general_offer: serviceS3.getUrlEmail('bg_general_offer'),
       logo_bancocolombia: serviceS3.getUrlEmail('logo_bancocolombia'),
       logo_superintendence: serviceS3.getUrlEmail('logo_superintendencia'),
-      brand_logo: serviceS3.getUrlEmail('ic_default_comercio'),
+      brand_logo: offer.retailImageUrl || serviceS3.getUrlEmail('ic_default_comercio'),
       ticket: serviceS3.getUrlEmail('ticket'),
       mail_separator: serviceS3.getUrlEmail('mail_separator'),
       img_offer: offer.imageUrl,
@@ -65,7 +66,7 @@ exports.offerExpired = offer => {
       bg_general_code: serviceS3.getUrlEmail('bg_general_code'),
       logo_bancocolombia: serviceS3.getUrlEmail('logo_bancocolombia'),
       logo_superintendence: serviceS3.getUrlEmail('logo_superintendencia'),
-      brand_logo: serviceS3.getUrlEmail('ic_default_comercio'),
+      brand_logo: offer.retailImageUrl || serviceS3.getUrlEmail('ic_default_comercio'),
       ticket: serviceS3.getUrlEmail('ticket'),
       ic_error_mail: serviceS3.getUrlEmail('ic_error_mail'),
       mail_separator: serviceS3.getUrlEmail('mail_separator'),
@@ -74,11 +75,21 @@ exports.offerExpired = offer => {
       product: offer.product,
       expiration: offer.expiration,
       name_retail: offer.retailName,
-      title: offer.beforeBegin ? 'La oferta todavía no comenzó' : 'La oferta ya caducó',
-      subtitle: offer.beforeBegin ? '' : 'La siguiente oferta ya no está disponible',
-      statusDates: offer.beforeBegin
-        ? `La oferta comienza: ${offer.begin}`
-        : `Oferta caducó: ${offer.expiration}`,
+      title: {
+        [constants.OFFER_DISABLED]: 'Oferta no disponible',
+        [constants.OFFER_FINISHED]: 'Oferta caducada',
+        [constants.OFFER_INACTIVE]: 'Oferta no comenzada'
+      }[offer.status],
+      subtitle: {
+        [constants.OFFER_DISABLED]: 'La siguiente oferta ya no está disponible',
+        [constants.OFFER_FINISHED]: 'La siguiente oferta ha caducado',
+        [constants.OFFER_INACTIVE]: 'La siguiente oferta aun no ha comenzado'
+      }[offer.status],
+      statusDates: {
+        [constants.OFFER_DISABLED]: '',
+        [constants.OFFER_FINISHED]: `La oferta caducó: ${offer.expiration}`,
+        [constants.OFFER_INACTIVE]: `La oferta comienza: ${offer.begin}`
+      }[offer.status],
       address: offer.retailAddress
     },
     html = pug.renderFile(templateDir, params);

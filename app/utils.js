@@ -1,5 +1,5 @@
 const moment = require('moment-timezone'),
-  { OFFER_ACTIVE, OFFER_INACTIVE, OFFER_DISABLED } = require('./constants'),
+  { OFFER_ACTIVE, OFFER_INACTIVE, OFFER_DISABLED, OFFER_FINISHED } = require('./constants'),
   { HIDE_EMAIL } = require('./constants'),
   config = require('../config');
 
@@ -7,11 +7,16 @@ moment.tz.setDefault(config.common.timezone);
 
 exports.getOfferStatus = offer => {
   if (offer.active) {
-    const afterExpires = moment().isSameOrBefore(moment(offer.expiration).endOf('day')),
-      beforeBegin = moment().isSameOrAfter(moment(offer.begin).startOf('day'));
-    return afterExpires && beforeBegin && offer.redemptions < offer.maxRedemptions
-      ? OFFER_ACTIVE
-      : OFFER_INACTIVE;
+    const beforeBegin = moment().isBefore(moment(offer.begin).startOf('day'));
+    const afterBegin = moment().isSameOrAfter(moment(offer.begin).startOf('day'));
+    const beforeExpires = moment().isSameOrBefore(moment(offer.expiration).endOf('day'));
+    if (beforeBegin) {
+      return OFFER_INACTIVE;
+    } else if (afterBegin && beforeExpires) {
+      return OFFER_ACTIVE;
+    } else {
+      return OFFER_FINISHED;
+    }
   }
   return OFFER_DISABLED;
 };

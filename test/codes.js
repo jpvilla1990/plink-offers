@@ -87,9 +87,9 @@ describe('/offers/:id/code POST', () => {
                   json.should.be.json;
                   json.body.should.have.property('message');
                   json.body.should.have.property('internal_code');
-                  json.body.internal_code.should.be.equal('offer_inactive');
+                  json.body.internal_code.should.be.equal('offer_expire');
                   mailer.transporter.sendMail.lastCall.args[0].subject.should.eqls(
-                    i18next.t(`offerExpired.subject`)
+                    i18next.t(`finished.subject`)
                   );
                   mailer.transporter.sendMail.lastCall.args[0].to.should.eqls('julian.molina@wolox.com.ar');
                   done();

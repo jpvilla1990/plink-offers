@@ -3,6 +3,9 @@
 const errors = require('../errors'),
   Sequelize = require('sequelize');
 
+const Op = Sequelize.Op;
+const utils = require('../utils');
+
 module.exports = (sequelize, DataTypes) => {
   const emailUser = sequelize.define(
     'email_user',
@@ -19,17 +22,32 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   emailUser.getAll = filter => {
-    const where = filter.category ? { categoryId: filter.category } : null;
+    const today = utils.moment();
+    const offerFiltering = {
+      begin: {
+        [Op.lte]: today
+      },
+      expiration: {
+        [Op.gte]: today
+      },
+      redemptions: {
+        [Op.lt]: sequelize.col('offer.max_redemptions')
+      },
+      active: true
+    };
+    if (filter.category) offerFiltering.categoryId = filter.category;
     return emailUser
       .findAll({
         offset: filter.offset,
         limit: filter.limit,
-        where: { email: filter.email },
+        where: {
+          email: filter.email
+        },
         include: [
           {
             model: sequelize.models.offer,
             as: 'offer',
-            where,
+            where: offerFiltering,
             include: [
               {
                 model: sequelize.models.category,

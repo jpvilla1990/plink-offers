@@ -6,6 +6,7 @@ const DEFAULT_STATUS_CODE = 500;
 const statusCodes = {
   [errors.BAD_REQUEST]: 400,
   [errors.OFFER_INACTIVE]: 400,
+  [errors.OFFER_EXPIRE]: 400,
   [errors.CODE_NOT_FOUND]: 404,
   [errors.OFFER_NOT_FOUND]: 404,
   [errors.USER_NOT_FOUND]: 404,

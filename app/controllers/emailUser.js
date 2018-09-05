@@ -30,7 +30,7 @@ exports.getCodes = (req, res, next) => {
     .then(codes => {
       const offersWithCodes = serviceEmailUser.getDataFromCodes(codes.rows);
       res.status(200);
-      res.send({ count: codes.count, codes: offersWithCodes });
+      res.send({ count: offersWithCodes.length, codes: offersWithCodes });
       res.end();
     })
     .catch(next);

@@ -1,4 +1,4 @@
-const utils = require('../utils'),
+const { getOfferStatus, moment } = require('../utils'),
   constants = require('../constants'),
   errors = require('../errors'),
   requestService = require('../services/request');
@@ -6,7 +6,7 @@ const utils = require('../utils'),
 exports.getDataFromOffers = list => {
   const emailWithOffers = new Array();
   list.forEach(value => {
-    if (constants.OFFER_ACTIVE === utils.getOfferStatus(value.offer.dataValues)) {
+    if (constants.OFFER_ACTIVE === getOfferStatus(value.offer.dataValues)) {
       emailWithOffers.push(
         requestService.getPoints(value.offer.dataValues.retail).then(rv => {
           const code = value.offer.code.length > 0 ? value.offer.code[0].code : null,
@@ -17,6 +17,8 @@ exports.getDataFromOffers = list => {
               product: value.offer.dataValues.product,
               valueStrategy: value.offer.dataValues.valueStrategy,
               expires: value.offer.dataValues.expiration,
+              maxRedemptions: value.offer.dataValues.maxRedemptions,
+              begin: value.offer.dataValues.begin,
               retailName: rv.commerce.description,
               retailAddress: rv.address
             };
@@ -34,8 +36,22 @@ exports.getDataFromCodes = codes => {
     valueStrategy: code.offer.dataValues.valueStrategy,
     expires: code.offer.dataValues.expiration,
     code: code.dataValues.code,
-    dateRedemption: code.dataValues.dateRedemption,
-    status: utils.getOfferStatus(code.offer.dataValues)
+    dateRedemption: code.dataValues.dateRedemption
+      ? moment(code.dataValues.dateRedemption).format('YYYY-MM-DD')
+      : null,
+    status: getOfferStatus(code.offer.dataValues)
   }));
   return emailWithCodes;
 };
+const checkAfterThreeDays = value =>
+  moment().isAfter(moment(value)) ? moment().diff(moment(value), 'days') < 3 : true;
+
+exports.deleteAfterThreeDays = codes =>
+  codes.filter(value => {
+    const expirationAfterThreeDays = checkAfterThreeDays(value.offer.dataValues.expiration);
+    if (value.dateRedemption) {
+      const dateRedemptionAfterThreeDays = checkAfterThreeDays(value.dateRedemption);
+      return expirationAfterThreeDays && dateRedemptionAfterThreeDays;
+    }
+    return expirationAfterThreeDays;
+  });

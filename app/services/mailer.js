@@ -2,6 +2,7 @@ const AWS = require('aws-sdk'),
   nodemailer = require('nodemailer'),
   config = require('../../config'),
   servicesHtml = require('../services/html'),
+  utils = require('../utils'),
   i18n = require('i18next'),
   { MAX_LENGTH_OFFER_DETAIL } = require('../constants'),
   ses = new AWS.SES(
@@ -22,6 +23,7 @@ const getDataFromCommerce = (offer, dataCommerce, nameCategory) => ({
   ...offer,
   retailName: dataCommerce.commerce.description,
   retailAddress: dataCommerce.address,
+  retailImageUrl: dataCommerce.commerce.imageUrl,
   nameCategory: nameCategory.toUpperCase()
 });
 exports.transporter = transporter;
@@ -37,12 +39,10 @@ exports.sendNewCode = ({ offer, code, dataCommerce, nameCategory }) => {
   return exports.sendEmail(email);
 };
 exports.sendOfferExpired = ({ offer, code, dataCommerce, nameCategory }) => {
-  const beforeBegin = moment().isBefore(moment(offer.begin).startOf('day')),
-    status = beforeBegin ? constants.BEFORE_BEGIN : constants.OFFER_EXPIRED,
-    infoMail = getDataFromCommerce(offer, dataCommerce, nameCategory);
-  infoMail.beforeBegin = beforeBegin;
+  const infoMail = getDataFromCommerce(offer, dataCommerce, nameCategory);
+  infoMail.status = utils.getOfferStatus(offer);
   const email = {
-    subject: i18n.t(`${status}.subject`),
+    subject: i18n.t(`${infoMail.status}.subject`),
     html: servicesHtml.offerExpired(infoMail, code),
     to: code.email
   };

@@ -1,5 +1,6 @@
 const chai = require('chai'),
   dictum = require('dictum.js'),
+  moment = require('moment'),
   server = require('./../app'),
   requestService = require('../app/services/request'),
   simple = require('simple-mock'),
@@ -75,6 +76,88 @@ describe('/offer-app/offers GET', () => {
           });
       });
   });
+
+  it('should be success get no offers, because they are expired', done => {
+    Promise.all([factoryManager.create('ExpiredOffer'), factoryManager.create('ExpiredOffer')])
+      .then()
+      .then(() => {
+        Promise.all([
+          factoryManager.create(factoryCode, { email, offerId: 1 }),
+          factoryManager.create(factoryCode, { email, offerId: 2 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+        ])
+          .then()
+          .then(() => {
+            chai
+              .request(server)
+              .get(`/offer-app/offers?page=0`)
+              .set('authorization', generateToken())
+              .then(response => {
+                response.should.have.status(200);
+                response.body.count.should.eqls(0);
+                response.body.offers.length.should.eqls(0);
+                done();
+              });
+          });
+      });
+  });
+
+  it('should be success get no offers, because they not began', done => {
+    Promise.all([factoryManager.create('NotBeganOffer'), factoryManager.create('NotBeganOffer')])
+      .then()
+      .then(() => {
+        Promise.all([
+          factoryManager.create(factoryCode, { email, offerId: 1 }),
+          factoryManager.create(factoryCode, { email, offerId: 2 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+        ])
+          .then()
+          .then(() => {
+            chai
+              .request(server)
+              .get(`/offer-app/offers?page=0`)
+              .set('authorization', generateToken())
+              .then(response => {
+                response.should.have.status(200);
+                response.body.count.should.eqls(0);
+                response.body.offers.length.should.eqls(0);
+                done();
+              });
+          });
+      });
+  });
+
+  it('should be success get no offers, because they dont have redemptions left', done => {
+    Promise.all([
+      factoryManager.create('NoRedemptionsLeftOffer'),
+      factoryManager.create('NoRedemptionsLeftOffer')
+    ])
+      .then()
+      .then(() => {
+        Promise.all([
+          factoryManager.create(factoryCode, { email, offerId: 1 }),
+          factoryManager.create(factoryCode, { email, offerId: 2 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+        ])
+          .then()
+          .then(() => {
+            chai
+              .request(server)
+              .get(`/offer-app/offers?page=0`)
+              .set('authorization', generateToken())
+              .then(response => {
+                response.should.have.status(200);
+                response.body.count.should.eqls(0);
+                response.body.offers.length.should.eqls(0);
+                done();
+              });
+          });
+      });
+  });
+
   it('should be success get one offer', done => {
     const otherEmail = 'julian.molina+false@wolox.com.ar';
     Promise.all([factoryManager.create(factoryOffer), factoryManager.create(factoryOffer)])
@@ -166,6 +249,57 @@ describe('/offer-app/codes GET', () => {
                   response.body.count.should.eqls(2);
                   response.body.codes.length.should.eqls(2);
                   dictum.chai(response);
+                  done();
+                });
+            });
+        });
+      });
+    });
+  });
+  it('should be success get one code because one offer after 3 days', done => {
+    factoryManager.create(factoryOffer).then(off1 => {
+      factoryManager.create(factoryOffer, { expiration: moment().diff(7, 'days') }).then(off2 => {
+        factoryManager.create(factoryCode, { email, offerId: off1.dataValues.id }).then(() => {
+          factoryManager
+            .create(factoryCode, {
+              email,
+              offerId: off2.dataValues.id
+            })
+            .then(() => {
+              chai
+                .request(server)
+                .get(`/offer-app/codes?page=0`)
+                .set('authorization', generateToken())
+                .then(response => {
+                  response.should.have.status(200);
+                  response.body.count.should.eqls(1);
+                  response.body.codes.length.should.eqls(1);
+                  done();
+                });
+            });
+        });
+      });
+    });
+  });
+  it('should be success get one code because one code was redeem after 3 days', done => {
+    factoryManager.create(factoryOffer).then(off1 => {
+      factoryManager.create(factoryOffer).then(off2 => {
+        factoryManager.create(factoryCode, { email, offerId: off1.dataValues.id }).then(() => {
+          factoryManager
+            .create(factoryCode, {
+              email,
+              offerId: off2.dataValues.id,
+              dateRedemption: moment().diff(5, 'days')
+            })
+            .then(() => {
+              chai
+                .request(server)
+                .get(`/offer-app/codes?page=0`)
+                .set('authorization', generateToken())
+                .then(response => {
+                  response.should.have.status(200);
+                  response.body.count.should.eqls(1);
+                  response.body.codes.length.should.eqls(1);
                   done();
                 });
             });
