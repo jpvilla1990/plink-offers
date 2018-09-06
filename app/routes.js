@@ -1,6 +1,7 @@
 const Offer = require('./controllers/offer'),
   Code = require('./controllers/code'),
   category = require('./controllers/category'),
+  termsAndConditions = require('./controllers/termsAndConditions'),
   typeOffer = require('./controllers/typeOffer'),
   EmailUser = require('./controllers/emailUser'),
   code = require('./controllers/code'),
@@ -30,4 +31,6 @@ exports.init = app => {
   app.get('/back/offers', Offer.getOffersBack);
   app.patch('/retail/:id/offers/:id_offer', [auth.requireRetail], Offer.changeActive);
   app.get('/offer-app/categories', category.getAllCategories);
+
+  app.get('/offer-app/terms-and-conditions', termsAndConditions.get);
 };

@@ -24,8 +24,8 @@ module.exports = (sequelize, DataTypes) => {
     Code.findOne({ where: filter }).catch(err => {
       throw errors.databaseError(err.message);
     });
-  Code.getAllBy = filter =>
-    Code.findAndCountAll({
+  Code.getAllBy = filter => {
+    return Code.findAndCountAll({
       offset: filter.offset,
       where: {
         email: filter.email,
@@ -64,6 +64,8 @@ module.exports = (sequelize, DataTypes) => {
     }).catch(err => {
       throw errors.databaseError(err.message);
     });
+  };
+
   Code.associate = models => {
     Code.belongsTo(models.offer, { as: 'offer' });
   };
