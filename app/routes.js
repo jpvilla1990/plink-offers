@@ -31,6 +31,5 @@ exports.init = app => {
   app.get('/back/offers', Offer.getOffersBack);
   app.patch('/retail/:id/offers/:id_offer', [auth.requireRetail], Offer.changeActive);
   app.get('/offer-app/categories', category.getAllCategories);
-
-  app.get('/offer-app/terms-and-conditions', termsAndConditions.get);
+  app.get('/offers-public/terms-and-conditions', termsAndConditions.get);
 };

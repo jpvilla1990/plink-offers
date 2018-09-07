@@ -6,12 +6,12 @@ const chai = require('chai'),
   should = chai.should(),
   expect = chai.expect;
 
-describe('/offer-app/terms-and-conditions GET', () => {
+describe('/offers-public/terms-and-conditions GET', () => {
   it('Should get terms and conditions', done => {
     FactoryManager.create('FakeTermsAndConditions').then(tac => {
       chai
         .request(server)
-        .get('/offer-app/terms-and-conditions')
+        .get('/offers-public/terms-and-conditions')
         .then(res => {
           res.should.have.status(200);
           res.should.be.json;
@@ -26,7 +26,7 @@ describe('/offer-app/terms-and-conditions GET', () => {
   it('Should not found terms and conditions', done => {
     chai
       .request(server)
-      .get('/offer-app/terms-and-conditions')
+      .get('/offers-public/terms-and-conditions')
       .then(res => {
         res.should.have.status(404);
         res.should.be.json;
