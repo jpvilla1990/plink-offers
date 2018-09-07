@@ -57,6 +57,16 @@ exports.newOffer = (offer, emailTo) => {
     html = pug.renderFile(templateDir, params);
   return html;
 };
+
+exports.offerDisabledByPlink = offer => {
+  const templateDir = path.join(__dirname, `/emailTemplates/offerDisabledByPlink.pug`),
+    params = {
+      offer
+    },
+    html = pug.renderFile(templateDir, params);
+  return html;
+};
+
 exports.offerExpired = offer => {
   const templateDir = path.join(__dirname, `/emailTemplates/offerExpired.pug`),
     params = {

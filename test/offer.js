@@ -698,4 +698,57 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
         });
     });
   });
+
+  describe('PATCH /back/offers/:id', () => {
+    it('Should disable an offer and send an email', done => {
+      simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
+        callback(undefined, true);
+      });
+
+      factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+        factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+          factoryManager.create(factoryOffer, { category: rv.id, strategy: r.id, active: true }).then(off => {
+            chai
+              .request(server)
+              .patch(`/back/offers/${off.id}`)
+              .set('authorization', generateToken())
+              .then(res => {
+                res.should.have.status(200);
+                dictum.chai(res);
+                Offer.getBy({ id: off.id }).then(exist => {
+                  exist.active.should.eqls(false);
+                  mailer.transporter.sendMail.callCount.should.eqls(1);
+                  done();
+                });
+              });
+          });
+        });
+      });
+    });
+
+    it('Should not disable a not found offer and not send email', done => {
+      simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
+        callback(undefined, true);
+      });
+
+      factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+        factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+          factoryManager.create(factoryOffer, { category: rv.id, strategy: r.id, active: true }).then(off => {
+            chai
+              .request(server)
+              .patch(`/back/offers/${off.id + 1}`)
+              .set('authorization', generateToken())
+              .then(res => {
+                res.should.have.status(404);
+                Offer.getBy({ id: off.id }).then(exist => {
+                  exist.active.should.eqls(true);
+                  mailer.transporter.sendMail.callCount.should.eqls(0);
+                  done();
+                });
+              });
+          });
+        });
+      });
+    });
+  });
 });

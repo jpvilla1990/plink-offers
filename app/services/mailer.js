@@ -64,6 +64,15 @@ exports.sendNewOffer = ({ offer, mail, name, dataCommerce, nameCategory }) => {
   };
   return exports.sendEmail(email);
 };
+
+exports.sendOfferDisabledByPlink = offer => {
+  return exports.sendEmail({
+    subject: i18n.t(`${constants.OFFER_DISABLED_BY_PLINK}.subject`),
+    html: servicesHtml.offerDisabledByPlink(offer),
+    to: offer.creator
+  });
+};
+
 exports.sendEmail = email => {
   email.html = servicesHtml.replaceSpecialTags(email.html);
   return new Promise((resolve, reject) => {

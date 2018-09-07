@@ -29,6 +29,7 @@ exports.init = app => {
   );
   app.post('/offer-app/offers/:id/code', [auth.requireEmail], code.createCodeApp);
   app.get('/back/offers', Offer.getOffersBack);
+  app.patch('/back/offers/:id', Offer.backDisableOffer);
   app.patch('/retail/:id/offers/:id_offer', [auth.requireRetail], Offer.changeActive);
   app.get('/offer-app/categories', category.getAllCategories);
   app.get('/offers-public/terms-and-conditions', termsAndConditions.get);
