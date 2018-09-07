@@ -12,9 +12,9 @@
     "subject": "Ups! Esta oferta no esta disponible."
   },
   "finished": {
-    "subject": "Ups! Esta oferta ha expirado."
+    "subject": "Ups! Esta oferta ha finalizado."
   },
-  "offerBeforeBegin":{
+  "offerBeforeBegin": {
     "subject": "Ups! Esta oferta no ha comenzado."
   },
   "newOffer": {

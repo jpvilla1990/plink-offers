@@ -77,17 +77,20 @@ exports.offerExpired = offer => {
       name_retail: offer.retailName,
       title: {
         [constants.OFFER_DISABLED]: 'Oferta no disponible',
-        [constants.OFFER_FINISHED]: 'Oferta caducada',
+        [constants.OFFER_FINISHED]: 'Oferta finalizada',
         [constants.OFFER_INACTIVE]: 'Oferta no comenzada'
       }[offer.status],
       subtitle: {
         [constants.OFFER_DISABLED]: 'La siguiente oferta ya no está disponible',
-        [constants.OFFER_FINISHED]: 'La siguiente oferta ha caducado',
+        [constants.OFFER_FINISHED]: 'La siguiente oferta ha finalizado',
         [constants.OFFER_INACTIVE]: 'La siguiente oferta aun no ha comenzado'
       }[offer.status],
       statusDates: {
         [constants.OFFER_DISABLED]: '',
-        [constants.OFFER_FINISHED]: `La oferta caducó: ${offer.expiration}`,
+        [constants.OFFER_FINISHED]:
+          offer.redemptions === offer.maxRedemptions
+            ? 'La oferta se ha quedado sin redenciones'
+            : `La oferta caduco: ${offer.expiration}`,
         [constants.OFFER_INACTIVE]: `La oferta comienza: ${offer.begin}`
       }[offer.status],
       address: offer.retailAddress
