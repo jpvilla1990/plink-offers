@@ -24,16 +24,29 @@ module.exports = (sequelize, DataTypes) => {
   emailUser.getAll = filter => {
     const today = utils.moment();
     const offerFiltering = {
-      begin: {
-        [Op.lte]: today
-      },
-      expiration: {
-        [Op.gte]: today
-      },
-      redemptions: {
-        [Op.lt]: sequelize.col('offer.max_redemptions')
-      },
-      active: true
+      [Op.and]: [
+        Sequelize.where(Sequelize.fn('lower', Sequelize.col('product')), {
+          [Op.like]: `%${filter.name.toLowerCase()}%`
+        }),
+        {
+          begin: {
+            [Op.lte]: today
+          }
+        },
+        {
+          expiration: {
+            [Op.gte]: today
+          }
+        },
+        {
+          redemptions: {
+            [Op.lt]: sequelize.col('offer.max_redemptions')
+          }
+        },
+        {
+          active: true
+        }
+      ]
     };
     if (filter.category) offerFiltering.categoryId = filter.category;
     return emailUser

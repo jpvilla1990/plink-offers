@@ -3,10 +3,11 @@ const EmailUser = require('../models').email_user,
   Code = require('../models').code;
 
 exports.getAll = (req, res, next) => {
-  const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10,
-    offsetQuery = req.query.page ? req.query.page * limitQuery : 0,
-    category = req.query.category ? parseInt(req.query.category) : null;
-  return EmailUser.getAll({ offset: offsetQuery, email: req.email, limit: limitQuery, category })
+  const limit = req.query.limit ? parseInt(req.query.limit) : 10,
+    offset = req.query.page ? req.query.page * limit : 0,
+    category = req.query.category ? parseInt(req.query.category) : null,
+    name = req.query.name ? req.query.name : '';
+  return EmailUser.getAll({ offset, limit, email: req.email, category, name })
     .then(offersByUser => {
       const offers = new Array();
       return Promise.all(serviceEmailUser.getDataFromOffers(offersByUser))

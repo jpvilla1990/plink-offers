@@ -51,6 +51,57 @@ describe('/offer-app/offers GET', () => {
           });
       });
   });
+
+  const someOffersWithIncludeTextInName = text => {
+    return Promise.all([
+      factoryManager.create(factoryCategory, { name: 'travel' }),
+      factoryManager.create(factoryCategory, { name: 'shoes' }),
+      factoryManager.create(factoryOffer, { categoryId: 1, product: `${text}landia` }),
+      factoryManager.create(factoryOffer, { categoryId: 2, product: `Z${text}tos Carlitos` })
+    ]).then(() => {
+      return Promise.all([
+        factoryManager.create(factoryCode, { email, offerId: 1 }),
+        factoryManager.create(factoryCode, { email, offerId: 2 }),
+        factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
+        factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+      ]);
+    });
+  };
+
+  it('should be success get one offers for like product name', done => {
+    const text = 'apa';
+    someOffersWithIncludeTextInName(text).then(() => {
+      chai
+        .request(server)
+        .get(`/offer-app/offers?page=0&name=${text}`)
+        .set('authorization', generateToken())
+        .then(response => {
+          response.should.have.status(200);
+          response.body.count.should.eqls(2);
+          response.body.offers.length.should.eqls(2);
+          response.body.offers[0].product.toLowerCase().should.include(text);
+          response.body.offers[1].product.toLowerCase().should.include(text);
+          done();
+        });
+    });
+  });
+
+  it('should not get offers for like product name', done => {
+    const text = 'apa';
+    someOffersWithIncludeTextInName(text).then(() => {
+      chai
+        .request(server)
+        .get(`/offer-app/offers?page=0&name=xyz`)
+        .set('authorization', generateToken())
+        .then(response => {
+          response.should.have.status(200);
+          response.body.count.should.eqls(0);
+          response.body.offers.length.should.eqls(0);
+          done();
+        });
+    });
+  });
+
   it('should be success get two offers', done => {
     Promise.all([factoryManager.create(factoryOffer), factoryManager.create(factoryOffer)])
       .then()
