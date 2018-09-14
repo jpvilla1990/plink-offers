@@ -19,7 +19,7 @@ exports.init = app => {
   app.get('/retail/:id/code/:code', [auth.requireRetail], code.getCode);
   app.get('/retail/:id/offers/:id_offer', [auth.requireRetail], Offer.getOffer);
   app.post('/access-offer', Offer.accessOffer);
-  app.get('/offer-app/offers', EmailUser.getAll);
+  app.get('/offer-app/offers', [auth.requireEmail], EmailUser.getAll);
   app.get('/offer-app/codes', [auth.requireEmail], EmailUser.getCodes);
   app.post('/offer-app/offers/:id/code', [auth.requireEmail], code.createCodeApp);
   app.get(
