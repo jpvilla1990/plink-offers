@@ -15,9 +15,9 @@ const chai = require('chai'),
 describe('/offer-app/offers GET', () => {
   const generateToken = (email = 'julian.molina@wolox.com.ar') => `bearer ${token.generate({ email })}`,
     email = 'julian.molina@wolox.com.ar';
-  simple.mock(requestService, 'retail').resolveWith({
+  simple.mock(requestService, 'getPoints').resolveWith({
     address: 'Cochabamba 3254',
-    commerce: { description: 'McDonalds', nit: '112233' },
+    commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
     posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
   });
   it('should be success get one offers for specific category ( food ) ', done => {
@@ -26,30 +26,26 @@ describe('/offer-app/offers GET', () => {
       factoryManager.create(factoryCategory, { name: 'food' }),
       factoryManager.create(factoryOffer, { categoryId: 1 }),
       factoryManager.create(factoryOffer, { categoryId: 2 })
-    ])
-      .then()
-      .then(() => {
-        Promise.all([
-          factoryManager.create(factoryCode, { email, offerId: 1 }),
-          factoryManager.create(factoryCode, { email, offerId: 2 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
-        ])
-          .then()
-          .then(() => {
-            chai
-              .request(server)
-              .get(`/offer-app/offers?page=0&category=2`)
-              .set('authorization', generateToken())
-              .then(response => {
-                response.should.have.status(200);
-                response.body.count.should.eqls(1);
-                response.body.offers.length.should.eqls(1);
-                dictum.chai(response);
-                done();
-              });
+    ]).then(() => {
+      Promise.all([
+        factoryManager.create(factoryCode, { email, offerId: 1 }),
+        factoryManager.create(factoryCode, { email, offerId: 2 }),
+        factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
+        factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+      ]).then(() => {
+        chai
+          .request(server)
+          .get(`/offer-app/offers?page=0&category=2`)
+          .set('authorization', generateToken())
+          .then(response => {
+            response.should.have.status(200);
+            response.body.count.should.eqls(1);
+            response.body.offers.length.should.eqls(1);
+            dictum.chai(response);
+            done();
           });
       });
+    });
   });
 
   const someOffersWithIncludeTextInName = text => {
@@ -180,6 +176,58 @@ describe('/offer-app/offers GET', () => {
       });
   });
 
+  it('should be success get no offers, because they are expired', done => {
+    Promise.all([factoryManager.create('ExpiredOffer'), factoryManager.create('ExpiredOffer')])
+      .then()
+      .then(() => {
+        Promise.all([
+          factoryManager.create(factoryCode, { email, offerId: 1 }),
+          factoryManager.create(factoryCode, { email, offerId: 2 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+        ])
+          .then()
+          .then(() => {
+            chai
+              .request(server)
+              .get(`/offer-app/offers?page=0`)
+              .set('authorization', generateToken())
+              .then(response => {
+                response.should.have.status(200);
+                response.body.count.should.eqls(0);
+                response.body.offers.length.should.eqls(0);
+                done();
+              });
+          });
+      });
+  });
+
+  it('should be success get no offers, because they not began', done => {
+    Promise.all([factoryManager.create('NotBeganOffer'), factoryManager.create('NotBeganOffer')])
+      .then()
+      .then(() => {
+        Promise.all([
+          factoryManager.create(factoryCode, { email, offerId: 1 }),
+          factoryManager.create(factoryCode, { email, offerId: 2 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+        ])
+          .then()
+          .then(() => {
+            chai
+              .request(server)
+              .get(`/offer-app/offers?page=0`)
+              .set('authorization', generateToken())
+              .then(response => {
+                response.should.have.status(200);
+                response.body.count.should.eqls(0);
+                response.body.offers.length.should.eqls(0);
+                done();
+              });
+          });
+      });
+  });
+
   it('should be success get no offers, because they dont have redemptions left', done => {
     Promise.all([
       factoryManager.create('NoRedemptionsLeftOffer'),
@@ -228,8 +276,8 @@ describe('/offer-app/offers GET', () => {
               .set('authorization', generateToken())
               .then(response => {
                 response.should.have.status(200);
-                response.body.count.should.eqls(1);
-                response.body.offers.length.should.eqls(1);
+                response.body.count.should.eqls(2);
+                response.body.offers.length.should.eqls(2);
                 done();
               });
           });
