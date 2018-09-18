@@ -52,6 +52,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       active: {
         type: DataTypes.BOOLEAN
+      },
+      creator: {
+        type: DataTypes.STRING,
+        field: 'email_creator'
       }
     },
     {
@@ -87,6 +91,19 @@ module.exports = (sequelize, DataTypes) => {
     }).catch(err => {
       throw errors.databaseError(err.message);
     });
+
+  Offer.disable = (conditions, value) => {
+    return Offer.getBy(conditions).then(offer => {
+      if (offer) {
+        return offer.update({ active: value !== undefined ? value : !offer.active }).then(updated => {
+          return updated;
+        });
+      } else {
+        throw errors.offerNotFound;
+      }
+    });
+  };
+
   Offer.incrementField = (field, filter, transaction) =>
     Offer.increment(field, { where: filter, transaction }).catch(err => {
       throw errors.databaseError(err.detail);

@@ -20,6 +20,7 @@ exports.getDataFromOffers = list => {
               maxRedemptions: value.offer.dataValues.maxRedemptions,
               begin: value.offer.dataValues.begin,
               retailName: rv.commerce.description,
+              retailImage: rv.commerce.imageUrl,
               retailAddress: rv.address
             };
           return code ? { ...offerFormated, code } : offerFormated;

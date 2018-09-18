@@ -6,10 +6,14 @@ const verifyExist = key =>
   body(key)
     .exists()
     .withMessage(`The ${key} is required`);
+
 const verifyExistQuery = key =>
   query(key)
     .exists()
     .withMessage(`The ${key} is required`);
+
+const verifyIntGreaterThanZero = (result, key) =>
+  result.isInt([{ min: 1 }]).withMessage(`The ${key} must be integer greater than 0`);
 
 const verifyString = (result, key) => result.isString().withMessage(`The ${key} must be String`);
 const verifyInteger = (result, key) => result.isInt().withMessage(`The ${key} must be Integer`);
@@ -21,7 +25,7 @@ exports.checkAll = [
   verifyInteger(verifyExist('category'), 'category'),
   verifyInteger(verifyExist('strategy'), 'strategy'),
   verifyString(verifyExist('valueStrategy'), 'valueStrategy'),
-  verifyInteger(verifyExist('maxRedemptions'), 'maxRedemptions'),
+  verifyIntGreaterThanZero(verifyExist('maxRedemptions'), 'maxRedemptions'),
   verifyString(verifyExist('purpose'), 'purpose'),
   verifyString(verifyExist('url'), 'url')
 ];

@@ -13,7 +13,7 @@ exports.getOfferStatus = offer => {
     if (beforeBegin) {
       return OFFER_INACTIVE;
     } else if (afterBegin && beforeExpires) {
-      return OFFER_ACTIVE;
+      return offer.redemptions < offer.maxRedemptions ? OFFER_ACTIVE : OFFER_FINISHED;
     } else {
       return OFFER_FINISHED;
     }

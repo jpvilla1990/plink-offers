@@ -1,0 +1,16 @@
+doctype html
+html
+  head
+    link(href='https://fonts.googleapis.com/css?family=Exo', rel='stylesheet')
+  body
+    div(style='background-color: #EAECED;')
+      div(style="background-color: #FFF; display: block; margin: 0 auto; width: 600px; height: 665px; text-align: center; padding: 0 0 20px; font-family: 'Exo', sans-serif;")
+        div(style='position: relative;')
+          img(src='http://s3.amazonaws.com/plink-dashboard-development/assets/email/header_mail.png', alt='plink')
+        h2(style='font-weight: bold; color: #0D63F9; margin-top: 50px; font-size: 26px;') Oferta Inhabilitada!
+        p(style='color: #0D63F9; max-width: 380px; margin: 0 auto; font-size: 15px; line-height: 20px; width: 70%;')
+          | La oferta
+          | con el título #{offer.valueStrategy} en #{offer.product}, con fecha #{offer.begin} a #{offer.expiration} ha sido inhabilitada por el equipo de soporte Plink, para conocer los
+          | motivos de esta acción comunícate a hello@plink.com.co.
+        div(style='margin: 10px;')
+          span(style='display: inline-block; color: #0D63F9; vertical-align: middle; padding: 15px; font-size: 12px;') hello@plink.com.co

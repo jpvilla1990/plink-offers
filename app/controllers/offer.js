@@ -3,7 +3,7 @@ const Offer = require('../models').offer,
   errors = require('../errors'),
   codeService = require('../services/code'),
   offerService = require('../services/offer'),
-  { sendNewOffer } = require('../services/mailer'),
+  { sendNewOffer, sendOfferDisabledByPlink } = require('../services/mailer'),
   serviceS3 = require('../services/s3'),
   config = require('../../config'),
   requestService = require('../services/request'),
@@ -35,6 +35,7 @@ exports.create = (req, res, next) => {
     imageUrl: req.body.url
   };
   offer.retail = req.retail;
+  offer.creator = req.user.email;
   return requestService
     .getPoints(offer.retail)
     .then(dataCommerce => {
@@ -137,15 +138,19 @@ exports.getOffersBack = (req, res, next) => {
     })
     .catch(err => next(err));
 };
+
+exports.backDisableOffer = (req, res, next) =>
+  Offer.disable({ id: parseInt(req.params.id) }, false)
+    .then(offer =>
+      sendOfferDisabledByPlink(offer).then(() => {
+        res.status(200).end();
+      })
+    )
+    .catch(next);
+
 exports.changeActive = (req, res, next) =>
-  Offer.getBy({ id: parseInt(req.params.id_offer) })
-    .then(offer => {
-      if (offer) {
-        return offer.update({ active: !offer.dataValues.active }).then(() => {
-          res.status(200).end();
-        });
-      } else {
-        throw errors.offerNotFound;
-      }
+  Offer.disable({ id: parseInt(req.params.id_offer), retail: req.retail })
+    .then(() => {
+      res.status(200).end();
     })
     .catch(next);

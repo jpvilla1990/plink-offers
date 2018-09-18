@@ -6,9 +6,10 @@ const sequelize = require('../models').sequelize,
   config = require('../../config'),
   { sendNewOffer } = require('../services/mailer'),
   { newOffer } = require('../services/html'),
-  { retail } = require('../services/request'),
+  requestService = require('../services/request'),
   Sequelize = require('sequelize'),
   queryHelper = require('../services/queryHelper'),
+  utils = require('../utils'),
   Op = Sequelize.Op;
 
 exports.getAllBack = params => {
@@ -30,4 +31,79 @@ exports.getAllBack = params => {
   return Offer.findAndCountAll(paramsQuery).catch(err => {
     throw errors.databaseError(err.message);
   });
+};
+exports.getAllApp = params => {
+  const today = utils.moment(),
+    offerFiltering = {
+      [Op.and]: [
+        Sequelize.where(Sequelize.fn('lower', Sequelize.col('product')), {
+          [Op.like]: `%${params.name.toLowerCase()}%`
+        }),
+        {
+          begin: {
+            [Op.lte]: today
+          }
+        },
+        {
+          expiration: {
+            [Op.gte]: today
+          }
+        },
+        {
+          redemptions: {
+            [Op.lt]: sequelize.col('offer.max_redemptions')
+          }
+        },
+        {
+          active: true
+        }
+      ]
+    };
+  if (params.category) offerFiltering.categoryId = params.category;
+  const paramsQuery = {
+    offset: params.offset,
+    where: offerFiltering,
+    limit: params.limit,
+    order: [['created_at', 'DESC']],
+    include: [
+      {
+        model: sequelize.models.category,
+        as: 'category'
+      },
+      {
+        model: sequelize.models.code,
+        as: 'code',
+        where: { email: params.email },
+        required: false
+      }
+    ]
+  };
+  return Offer.findAll(paramsQuery).catch(err => {
+    throw errors.databaseError(err.message);
+  });
+};
+
+exports.getDataFromOffers = list => {
+  const offersFiltered = list.filter(
+    value => constants.OFFER_ACTIVE === utils.getOfferStatus(value.dataValues)
+  );
+  return offersFiltered.map(value =>
+    requestService.getPoints(value.dataValues.retail).then(rv => {
+      const code = value.code.length > 0 ? value.code[0].code : null,
+        offerFormated = {
+          idOffer: value.dataValues.id,
+          image: value.dataValues.imageUrl,
+          category: value.category.dataValues.name,
+          product: value.dataValues.product,
+          valueStrategy: value.dataValues.valueStrategy,
+          expires: value.dataValues.expiration,
+          maxRedemptions: value.dataValues.maxRedemptions,
+          begin: value.dataValues.begin,
+          retailName: rv.commerce.description,
+          retailImage: rv.commerce.imageUrl,
+          retailAddress: rv.address
+        };
+      return code ? { ...offerFormated, code } : offerFormated;
+    })
+  );
 };

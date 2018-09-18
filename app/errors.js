@@ -12,6 +12,7 @@ exports.CODE_REDEEMED = 'code_redeemed';
 exports.OFFER_INACTIVE = 'offer_inactive';
 exports.OFFER_EXPIRE = 'offer_expire';
 exports.OFFER_NOT_FOUND = 'offer_not_found';
+exports.TERMS_AND_CONDITIONS_NOT_FOUND = 'terms_and_conditions_not_found';
 exports.EXISTING_MAIL = 'existing_mail';
 exports.USER_NOT_FOUND = 'user_not_found';
 exports.EXISTING_USER = 'existing_user';
@@ -22,6 +23,10 @@ exports.userUnauthorized = internalError('User is not authorized', exports.USER_
 exports.badRequest = message => internalError(message, exports.BAD_REQUEST);
 exports.databaseError = message => internalError(message, exports.DATABASE_ERROR);
 exports.codeNotFound = internalError('Code Not Found', exports.CODE_NOT_FOUND);
+exports.termsAndConditionsNotFound = internalError(
+  'Terms and conditions not found',
+  exports.TERMS_AND_CONDITIONS_NOT_FOUND
+);
 exports.codeRedeemed = internalError('Code Redeemed', exports.CODE_REDEEMED);
 exports.offerInactive = internalError('Offer Inactive', exports.OFFER_INACTIVE);
 exports.offerExpire = internalError('Offer Expire', exports.OFFER_EXPIRE);
