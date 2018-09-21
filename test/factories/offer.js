@@ -7,7 +7,7 @@ exports.nameFactory = 'Offer';
 factory.define(exports.nameFactory, Offer, {
   product: factory.seq('Offer.product', n => `product${n}`),
   begin: moment().subtract(1, 'days'),
-  expiration: moment().add(10, 'days'),
+  expiration: moment().add(2, 'days'),
   strategy: factory.assoc('TypeOffer', 'id'),
   maxRedemptions: 50,
   redemptions: 0,
@@ -26,7 +26,7 @@ factory.define(exports.nameFactory, Offer, {
 factory.define('ActiveOffer', Offer, {
   product: factory.seq('Offer.product', n => `product${n}`),
   begin: moment().subtract(1, 'days'),
-  expiration: moment().add(10, 'days'),
+  expiration: moment().add(2, 'days'),
   strategy: factory.assoc('TypeOffer', 'id'),
   maxRedemptions: 50,
   redemptions: 0,
@@ -45,7 +45,7 @@ factory.define('ActiveOffer', Offer, {
 factory.define('DisabledOffer', Offer, {
   product: factory.seq('Offer.product', n => `product${n}`),
   begin: moment().subtract(1, 'days'),
-  expiration: moment().add(10, 'days'),
+  expiration: moment().add(2, 'days'),
   strategy: factory.assoc('TypeOffer', 'id'),
   maxRedemptions: 50,
   redemptions: 0,
@@ -58,7 +58,8 @@ factory.define('DisabledOffer', Offer, {
   valueStrategy: '10%',
   categoryId: factory.assoc('Category', 'id'),
   nit: 12345,
-  active: false
+  active: false,
+  dateInactive: moment()
 });
 
 factory.define('ExpiredOffer', Offer, {
@@ -83,7 +84,7 @@ factory.define('ExpiredOffer', Offer, {
 factory.define('NotBeganOffer', Offer, {
   product: factory.seq('Offer.product', n => `product${n}`),
   begin: moment().add(10, 'days'),
-  expiration: moment().add(11, 'days'),
+  expiration: moment().add(2, 'days'),
   strategy: factory.assoc('TypeOffer', 'id'),
   maxRedemptions: 50,
   redemptions: 50,

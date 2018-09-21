@@ -11,6 +11,7 @@ const chai = require('chai'),
   factoryCode = require('../test/factories/code').nameFactory,
   factoryEmailUser = require('../test/factories/emailUser').nameFactory,
   requestService = require('../app/services/request'),
+  rollbarService = require('../app/services/rollbar'),
   simple = require('simple-mock'),
   token = require('./factories/token'),
   jobNotify = require('../app/jobs/notify'),
@@ -19,6 +20,7 @@ const chai = require('chai'),
   Offer = require('../app/models').offer,
   EmailUser = require('../app/models').email_user,
   { OFFER_ACTIVE, OFFER_INACTIVE, OFFER_DISABLED, OFFER_FINISHED } = require('../app/constants'),
+  ZendeskService = require('../app/services/zendesk'),
   should = chai.should(),
   expect = chai.expect,
   offerExample = {
@@ -67,6 +69,8 @@ describe('/retail/:id/offers POST', () => {
     simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
       callback(undefined, true);
     });
+    simple.mock(ZendeskService, 'findGroupId').resolveWith(Promise.resolve(1234));
+    simple.mock(ZendeskService, 'postTicket').resolveWith(Promise.resolve());
   });
   it('should be successful', done => {
     factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
@@ -113,6 +117,32 @@ describe('/retail/:id/offers POST', () => {
         err.body.should.have.property('internal_code');
         done();
       });
+  });
+  it('should be successful but zendesk fail', done => {
+    simple.restore(ZendeskService, 'findGroupId');
+    simple.restore(ZendeskService, 'postTicket');
+    simple
+      .mock(ZendeskService, 'findGroupId')
+      .rejectWith({ internalCode: 'group_id_not_found', message: 'Group id for zendesk not found' });
+    simple.mock(rollbarService, 'error').returnWith({});
+    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+        chai
+          .request(server)
+          .post('/retail/1222/offers')
+          .set(headerName, tokenExample)
+          .send(offerExample)
+          .then(res => {
+            res.should.have.status(201);
+            Offer.getBy({ id: 1 }).then(exist => {
+              const off = !!exist;
+              off.should.eql(true);
+              rollbarService.error.callCount.should.eqls(1);
+              done();
+            });
+          });
+      });
+    });
   });
 });
 

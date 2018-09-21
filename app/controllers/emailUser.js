@@ -26,7 +26,7 @@ exports.getCodes = (req, res, next) => {
     .then(codes => {
       const offersWithCodes = serviceEmailUser.getDataFromCodes(codes.rows);
       res.status(200);
-      res.send({ count: offersWithCodes.length, codes: offersWithCodes });
+      res.send({ pages: Math.ceil(codes.count / limitQuery), count: codes.count, codes: offersWithCodes });
       res.end();
     })
     .catch(next);

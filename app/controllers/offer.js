@@ -4,9 +4,11 @@ const Offer = require('../models').offer,
   codeService = require('../services/code'),
   offerService = require('../services/offer'),
   { sendNewOffer, sendOfferDisabledByPlink } = require('../services/mailer'),
+  serviceRollbar = require('../services/rollbar'),
   serviceS3 = require('../services/s3'),
   config = require('../../config'),
   requestService = require('../services/request'),
+  ZendeskService = require('../services/zendesk'),
   urlParse = require('url').parse,
   utils = require('../utils');
 
@@ -48,6 +50,19 @@ exports.create = (req, res, next) => {
             dataCommerce,
             nameCategory: category.dataValues.name
           }).then(() => {
+            ZendeskService.findGroupId(config.common.zendesk.group_name)
+              .then(groupId =>
+                ZendeskService.postTicket(
+                  ZendeskService.newOfferTicket({
+                    nit: dataCommerce.commerce.nit,
+                    valueStrategy: newOff.valueStrategy,
+                    product: newOff.product,
+                    categoryName: category.dataValues.name,
+                    groupId
+                  })
+                )
+              )
+              .catch(err => serviceRollbar.error(err.message, req));
             res.status(201);
             res.end();
           });

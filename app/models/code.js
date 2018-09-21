@@ -5,6 +5,12 @@ const op = require('sequelize').Op,
   { moment } = require('../utils');
 
 module.exports = (sequelize, DataTypes) => {
+  const beforeThreeDaysCondition = params =>
+    sequelize.where(
+      sequelize.fn('datediff', moment().format('YYYY-MM-DD'), sequelize.col(params.column)),
+      params.condition
+    );
+
   const Code = sequelize.define(
     'code',
     {
@@ -27,6 +33,11 @@ module.exports = (sequelize, DataTypes) => {
   Code.getAllBy = filter => {
     return Code.findAndCountAll({
       offset: filter.offset,
+      order: [
+        [sequelize.models.offer, 'active', 'DESC'],
+        [sequelize.literal('`offer.status` DESC')],
+        ['date_redemption', 'ASC']
+      ],
       where: {
         email: filter.email,
         dateRedemption: sequelize.where(
@@ -53,12 +64,41 @@ module.exports = (sequelize, DataTypes) => {
         {
           model: sequelize.models.offer,
           as: 'offer',
-          where: sequelize.where(
-            sequelize.fn('datediff', moment().format('YYYY-MM-DD'), sequelize.col('expiration')),
-            {
-              [op.lte]: 3
-            }
-          )
+          attributes: [
+            'id',
+            'begin',
+            'expiration',
+            'product',
+            ['max_redemptions', 'maxRedemptions'],
+            ['value_type_offer', 'valueStrategy'],
+            'retail',
+            ['image_url', 'imageUrl'],
+            'strategy',
+            ['category_id', 'categoryId'],
+            'nit',
+            'active',
+            ['email_creator', 'creator'],
+            'redemptions',
+            [
+              sequelize.literal(
+                `CASE WHEN begin <= '${moment().format('YYYY-MM-DD')}' and expiration >= '${moment().format(
+                  'YYYY-MM-DD'
+                )}' then 1 else 0 end`
+              ),
+              'status'
+            ]
+          ],
+          where: {
+            [op.or]: [
+              beforeThreeDaysCondition({ column: 'expiration', condition: { [op.lte]: 3 } }),
+              {
+                [op.and]: [
+                  { active: { [op.eq]: false } },
+                  beforeThreeDaysCondition({ column: 'date_inactive', condition: { [op.gte]: -3 } })
+                ]
+              }
+            ]
+          }
         }
       ]
     }).catch(err => {

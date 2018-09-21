@@ -406,4 +406,65 @@ describe('/offer-app/codes GET', () => {
       });
     });
   });
+  it('should be success get one code because one code was redeem after 3 days', done => {
+    factoryManager.create(factoryOffer).then(off1 => {
+      factoryManager.create(factoryOffer).then(off2 => {
+        factoryManager.create(factoryCode, { email, offerId: off1.dataValues.id }).then(() => {
+          factoryManager
+            .create(factoryCode, {
+              email,
+              offerId: off2.dataValues.id,
+              dateRedemption: moment().diff(5, 'days')
+            })
+            .then(() => {
+              chai
+                .request(server)
+                .get(`/offer-app/codes?page=0`)
+                .set('authorization', generateToken())
+                .then(response => {
+                  response.should.have.status(200);
+                  response.body.count.should.eqls(1);
+                  response.body.codes.length.should.eqls(1);
+                  done();
+                });
+            });
+        });
+      });
+    });
+  });
+  it('should be success get codes ordered', done => {
+    Promise.all([
+      factoryManager
+        .create('ExpiredOffer')
+        .then(off => factoryManager.create(factoryCode, { email, offerId: off.dataValues.id })),
+      factoryManager
+        .create('ActiveOffer')
+        .then(off => factoryManager.create(factoryCode, { email, offerId: off.dataValues.id })),
+      factoryManager
+        .create('DisabledOffer', { date_inactive: moment().add(2, 'days') })
+        .then(off => factoryManager.create(factoryCode, { email, offerId: off.dataValues.id })),
+      factoryManager
+        .create('ActiveOffer')
+        .then(off =>
+          factoryManager.create(factoryCode, { email, offerId: off.dataValues.id, dateRedemption: moment() })
+        )
+    ]).then(() =>
+      chai
+        .request(server)
+        .get(`/offer-app/codes?page=0`)
+        .set('authorization', generateToken())
+        .then(response => {
+          response.should.have.status(200);
+          response.body.count.should.eqls(4);
+          response.body.codes[0].status.should.eqls('active');
+          response.body.codes[1].status.should.eqls('active');
+          response.body.codes[1].dateRedemption.should.eqls(moment().format('YYYY-MM-DD'));
+          response.body.codes[2].status.should.eqls('finished');
+          response.body.codes[3].status.should.eqls('disabled');
+          response.body.pages.should.eqls(1);
+          response.body.count.should.eqls(4);
+          done();
+        })
+    );
+  });
 });
