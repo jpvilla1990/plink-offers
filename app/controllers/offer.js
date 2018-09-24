@@ -1,9 +1,10 @@
 const Offer = require('../models').offer,
+  CodeService = require('../services/code'),
   Category = require('../models').category,
   errors = require('../errors'),
   codeService = require('../services/code'),
   offerService = require('../services/offer'),
-  { sendNewOffer, sendOfferDisabledByPlink } = require('../services/mailer'),
+  { sendNewOffer, sendOfferDisabledByPlink, sendOfferDisabledToUserWithCode } = require('../services/mailer'),
   serviceRollbar = require('../services/rollbar'),
   serviceS3 = require('../services/s3'),
   config = require('../../config'),
@@ -154,18 +155,32 @@ exports.getOffersBack = (req, res, next) => {
     .catch(err => next(err));
 };
 
-exports.backDisableOffer = (req, res, next) =>
-  Offer.disable({ id: parseInt(req.params.id) }, false)
+exports.backDisableOffer = (req, res, next) => {
+  const id = parseInt(req.params.id);
+  return Offer.disable({ id }, false)
     .then(offer =>
-      sendOfferDisabledByPlink(offer).then(() => {
-        res.status(200).end();
-      })
+      CodeService.getByOfferId(id).then(codes =>
+        CodeService.getOfferRetailForCodes(codes).then(codesWithRetail =>
+          Promise.all(codesWithRetail.map(code => sendOfferDisabledToUserWithCode(code)))
+            .finally(() => sendOfferDisabledByPlink(offer))
+            .finally(() => res.status(200).end())
+        )
+      )
     )
     .catch(next);
+};
 
-exports.changeActive = (req, res, next) =>
-  Offer.disable({ id: parseInt(req.params.id_offer), retail: req.retail })
-    .then(() => {
-      res.status(200).end();
-    })
+exports.changeActive = (req, res, next) => {
+  const id = parseInt(req.params.id_offer);
+  return Offer.disable({ id, retail: req.retail })
+    .then(() =>
+      CodeService.getByOfferId(id).then(codes =>
+        CodeService.getOfferRetailForCodes(codes).then(codesWithRetail =>
+          Promise.all(codes.map(code => sendOfferDisabledToUserWithCode(code))).finally(() =>
+            res.status(200).end()
+          )
+        )
+      )
+    )
     .catch(next);
+};

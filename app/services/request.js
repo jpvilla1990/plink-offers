@@ -13,3 +13,12 @@ const retail = endpoint => {
 };
 
 exports.getPoints = id => retail(`/points/${id}`);
+
+// {
+//   commerce: {
+//     description: string,
+//     nit: number
+//   },
+//   imageUrl: string,
+//   address: string
+// }

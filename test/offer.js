@@ -727,9 +727,47 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
           done();
         });
     });
+
+    it("Should send email to offer's redeemed code users", done => {
+      simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
+        callback(undefined, true);
+      });
+
+      factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+        factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+          factoryManager
+            .create(factoryOffer, {
+              retail: 11,
+              category: rv.id,
+              strategy: r.id,
+              active: true
+            })
+            .then(off => {
+              factoryManager.create(factoryCode, { offerId: off.id }).then(code => {
+                chai
+                  .request(server)
+                  .patch(`/retail/11/offers/${off.id}`)
+                  .set('authorization', generateToken())
+                  .then(res => {
+                    res.should.have.status(200);
+                    mailer.transporter.sendMail.callCount.should.eqls(1);
+                    done();
+                  });
+              });
+            });
+        });
+      });
+    });
   });
 
   describe('PATCH /back/offers/:id', () => {
+    beforeEach(() => {
+      simple.mock(requestService, 'getPoints').resolveWith({
+        address: 'Cochabamba 3254',
+        commerce: { description: 'McDonalds', nit: 1234 },
+        posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
+      });
+    });
     it('Should disable an offer and send an email', done => {
       simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
         callback(undefined, true);
@@ -776,6 +814,30 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
                   done();
                 });
               });
+          });
+        });
+      });
+    });
+
+    it("Should send email to offer's redeemed code offers", done => {
+      simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
+        callback(undefined, true);
+      });
+
+      factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+        factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+          factoryManager.create(factoryOffer, { category: rv.id, strategy: r.id, active: true }).then(off => {
+            factoryManager.create(factoryCode, { offerId: off.id }).then(code => {
+              chai
+                .request(server)
+                .patch(`/back/offers/${off.id}`)
+                .set('authorization', generateToken())
+                .then(res => {
+                  res.should.have.status(200);
+                  mailer.transporter.sendMail.callCount.should.eqls(2);
+                  done();
+                });
+            });
           });
         });
       });
