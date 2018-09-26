@@ -107,3 +107,23 @@ exports.getDataFromOffers = list => {
     })
   );
 };
+
+exports.getDataFromRetail = offer =>
+  requestService.getPoints(offer.dataValues.retail).then(retail => ({
+    idOffer: offer.dataValues.id,
+    image: offer.dataValues.imageUrl,
+    category: offer.category.dataValues.name,
+    product: offer.dataValues.product,
+    valueStrategy: offer.dataValues.valueStrategy,
+    expires: offer.dataValues.expiration,
+    maxRedemptions: offer.dataValues.maxRedemptions,
+    begin: offer.dataValues.begin,
+    retailName: retail.commerce.description,
+    retailImage: retail.commerce.imageUrl,
+    retailAddress: retail.address
+  }));
+exports.checkOfferAndFormat = (offer, formatter = () => {}) =>
+  new Promise((resolve, reject) => {
+    if (!offer) reject(errors.offerNotFound);
+    resolve(formatter(offer));
+  });

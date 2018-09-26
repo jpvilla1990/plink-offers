@@ -20,7 +20,6 @@ exports.getOfferStatus = offer => {
   }
   return OFFER_DISABLED;
 };
-
 exports.map = off => {
   const send = {
     image: off.dataValues.imageUrl,

@@ -843,4 +843,42 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
       });
     });
   });
+
+  describe('GET /back/offers/:id_offer', () => {
+    beforeEach(() =>
+      simple.mock(requestService, 'getPoints').resolveWith({
+        address: 'Cochabamba 3254',
+        commerce: { description: 'McDonalds', nit: 1234, imageUrl: 'fake-image.png' },
+        posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
+      })
+    );
+    it('Should be success get offer', done => {
+      factoryManager.create(factoryOffer).then(off =>
+        chai
+          .request(server)
+          .get(`/back/offers/${off.id}`)
+          .set('authorization', generateToken())
+          .then(res => {
+            res.should.have.status(200);
+            dictum.chai(res);
+            done();
+          })
+      );
+    });
+    it('Should be fail because the offer does not exist', done => {
+      factoryManager.create(factoryOffer).then(off =>
+        chai
+          .request(server)
+          .get(`/back/offers/4541`)
+          .set('authorization', generateToken())
+          .then(res => {
+            res.body.should.have.property('message');
+            expect(res.body.message).to.equal('Offer Not Found');
+            res.body.should.have.property('internal_code');
+            expect(res.body.internal_code).to.equal('offer_not_found');
+            done();
+          })
+      );
+    });
+  });
 });

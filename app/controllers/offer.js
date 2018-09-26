@@ -72,21 +72,15 @@ exports.create = (req, res, next) => {
     })
     .catch(err => next(err));
 };
-exports.getOffer = (req, res, next) => {
-  const idOffer = req.params.id_offer;
-  return Offer.getBy({ id: idOffer })
-    .then(off => {
-      if (off) {
-        const send = utils.map(off);
-        res.status(200);
-        res.send(send);
-        res.end();
-      } else {
-        throw errors.offerNotFound;
-      }
-    })
+
+const getFormattedOffer = (params, formatter) =>
+  Offer.getBy(params).then(off => offerService.checkOfferAndFormat(off, formatter));
+
+exports.getOffer = (mapper = utils.map) => (req, res, next) =>
+  getFormattedOffer({ id: req.params.id_offer }, mapper)
+    .then(offerFormated => res.status(200).send(offerFormated))
     .catch(next);
-};
+
 exports.getAll = (req, res, next) => {
   const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10;
   const offsetQuery = req.query.page ? req.query.page * limitQuery : 0;
