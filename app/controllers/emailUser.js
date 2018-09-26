@@ -13,7 +13,11 @@ exports.getAll = (req, res, next) => {
     .then(offers =>
       Promise.all(serviceOffer.getDataFromOffers(offers)).then(offersWithDataRetail => {
         res.status(200);
-        res.send({ count: offersWithDataRetail.length, offers: offersWithDataRetail });
+        res.send({
+          pages: Math.ceil(offersWithDataRetail.length / limit),
+          count: offersWithDataRetail.length,
+          offers: offersWithDataRetail
+        });
         res.end();
       })
     )

@@ -33,7 +33,7 @@ exports.getAllBack = params => {
   });
 };
 exports.getAllApp = params => {
-  const today = utils.moment(),
+  const today = utils.moment().format('YYYY-MM-DD'),
     offerFiltering = {
       [Op.and]: [
         Sequelize.where(Sequelize.fn('lower', Sequelize.col('product')), {
@@ -83,11 +83,8 @@ exports.getAllApp = params => {
   });
 };
 
-exports.getDataFromOffers = list => {
-  const offersFiltered = list.filter(
-    value => constants.OFFER_ACTIVE === utils.getOfferStatus(value.dataValues)
-  );
-  return offersFiltered.map(value =>
+exports.getDataFromOffers = list =>
+  list.map(value =>
     requestService.getPoints(value.dataValues.retail).then(rv => {
       const code = value.code.length > 0 ? value.code[0].code : null,
         offerFormated = {
@@ -106,7 +103,6 @@ exports.getDataFromOffers = list => {
       return code ? { ...offerFormated, code } : offerFormated;
     })
   );
-};
 
 exports.getDataFromRetail = offer =>
   requestService.getPoints(offer.dataValues.retail).then(retail => ({
