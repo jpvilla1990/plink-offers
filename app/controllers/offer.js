@@ -149,32 +149,21 @@ exports.getOffersBack = (req, res, next) => {
     .catch(err => next(err));
 };
 
-exports.backDisableOffer = (req, res, next) => {
-  const id = parseInt(req.params.id);
-  return Offer.disable({ id }, false)
-    .then(offer =>
-      CodeService.getByOfferId(id).then(codes =>
-        CodeService.getOfferRetailForCodes(codes).then(codesWithRetail =>
-          Promise.all(codesWithRetail.map(code => sendOfferDisabledToUserWithCode(code)))
-            .finally(() => sendOfferDisabledByPlink(offer))
-            .finally(() => res.status(200).end())
-        )
-      )
+const disable = (search, actionFinally) =>
+  Offer.disable(search).then(offer =>
+    CodeService.getByOfferId(search.id).then(result =>
+      CodeService.getOfferRetailForCodes(result).then(data => {
+        const dataForMap = search.retail ? result : data;
+        return Promise.all(dataForMap.map(value => sendOfferDisabledToUserWithCode(value))).finally(() =>
+          actionFinally(offer)
+        );
+      })
     )
-    .catch(next);
-};
+  );
 
-exports.changeActive = (req, res, next) => {
-  const id = parseInt(req.params.id_offer);
-  return Offer.disable({ id, retail: req.retail })
-    .then(() =>
-      CodeService.getByOfferId(id).then(codes =>
-        CodeService.getOfferRetailForCodes(codes).then(codesWithRetail =>
-          Promise.all(codes.map(code => sendOfferDisabledToUserWithCode(code))).finally(() =>
-            res.status(200).end()
-          )
-        )
-      )
-    )
-    .catch(next);
+exports.disableOffer = (action = () => {}) => (req, res, next) => {
+  const conditions = { id: req.params.id_offer };
+  return disable(req.retail ? { ...conditions, retail: req.retail } : conditions, action)
+    .catch(next)
+    .finally(() => res.status(200).end());
 };

@@ -694,25 +694,6 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
           });
         });
     });
-    it('should be successful to enable offer', done => {
-      chai
-        .request(server)
-        .patch(`/retail/11/offers/1`)
-        .set('authorization', generateToken())
-        .then(() =>
-          chai
-            .request(server)
-            .patch(`/retail/11/offers/1`)
-            .set('authorization', generateToken())
-            .then(res => {
-              res.should.have.status(200);
-              Offer.getBy({ retail: 11 }).then(exist => {
-                exist.dataValues.active.should.eqls(true);
-                done();
-              });
-            })
-        );
-    });
     it('should be fail because the offer does not exist', done => {
       chai
         .request(server)

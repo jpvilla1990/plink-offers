@@ -97,18 +97,17 @@ module.exports = (sequelize, DataTypes) => {
       throw errors.databaseError(err.message);
     });
 
-  Offer.disable = (conditions, value) => {
-    return Offer.getBy(conditions).then(offer => {
+  Offer.disable = conditions =>
+    Offer.getBy(conditions).then(offer => {
       if (offer) {
         return offer.update({
-          active: value !== undefined ? value : !offer.active,
+          active: false,
           dateInactive: moment()
         });
       } else {
         throw errors.offerNotFound;
       }
     });
-  };
 
   Offer.incrementField = (field, filter, transaction) =>
     Offer.increment(field, { where: filter, transaction }).catch(err => {
