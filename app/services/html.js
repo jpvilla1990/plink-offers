@@ -66,7 +66,7 @@ exports.offerDisabledWithCode = code => {
       bg_general_code: serviceS3.getUrlEmail('bg_general_code'),
       logo_bancocolombia: serviceS3.getUrlEmail('logo_bancocolombia'),
       logo_superintendence: serviceS3.getUrlEmail('logo_superintendencia'),
-      brand_logo: code.offer.retailImageUrl || serviceS3.getUrlEmail('ic_default_comercio'),
+      brand_logo: code.offer.retail.commerce.imageUrl || serviceS3.getUrlEmail('ic_default_comercio'),
       ticket: serviceS3.getUrlEmail('ticket'),
       code
     };
