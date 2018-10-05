@@ -58,6 +58,21 @@ exports.newOffer = (offer, emailTo) => {
   return html;
 };
 
+exports.offerDisabledWithCode = code => {
+  const templateDir = path.join(__dirname, `/emailTemplates/offerDisabled.pug`),
+    params = {
+      logo_plink: serviceS3.getUrlEmail('logo_plink'),
+      bg_footer: serviceS3.getUrlEmail('bg_footer'),
+      bg_general_code: serviceS3.getUrlEmail('bg_general_code'),
+      logo_bancocolombia: serviceS3.getUrlEmail('logo_bancocolombia'),
+      logo_superintendence: serviceS3.getUrlEmail('logo_superintendencia'),
+      brand_logo: code.offer.retail.commerce.imageUrl || serviceS3.getUrlEmail('ic_default_comercio'),
+      ticket: serviceS3.getUrlEmail('ticket'),
+      code
+    };
+  return pug.renderFile(templateDir, params);
+};
+
 exports.offerDisabledByPlink = offer => {
   const templateDir = path.join(__dirname, `/emailTemplates/offerDisabledByPlink.pug`),
     params = {

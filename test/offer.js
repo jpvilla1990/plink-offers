@@ -11,6 +11,7 @@ const chai = require('chai'),
   factoryCode = require('../test/factories/code').nameFactory,
   factoryEmailUser = require('../test/factories/emailUser').nameFactory,
   requestService = require('../app/services/request'),
+  rollbarService = require('../app/services/rollbar'),
   simple = require('simple-mock'),
   token = require('./factories/token'),
   jobNotify = require('../app/jobs/notify'),
@@ -19,6 +20,7 @@ const chai = require('chai'),
   Offer = require('../app/models').offer,
   EmailUser = require('../app/models').email_user,
   { OFFER_ACTIVE, OFFER_INACTIVE, OFFER_DISABLED, OFFER_FINISHED } = require('../app/constants'),
+  ZendeskService = require('../app/services/zendesk'),
   should = chai.should(),
   expect = chai.expect,
   offerExample = {
@@ -67,6 +69,8 @@ describe('/retail/:id/offers POST', () => {
     simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
       callback(undefined, true);
     });
+    simple.mock(ZendeskService, 'findGroupId').resolveWith(Promise.resolve(1234));
+    simple.mock(ZendeskService, 'postTicket').resolveWith(Promise.resolve());
   });
   it('should be successful', done => {
     factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
@@ -113,6 +117,32 @@ describe('/retail/:id/offers POST', () => {
         err.body.should.have.property('internal_code');
         done();
       });
+  });
+  it('should be successful but zendesk fail', done => {
+    simple.restore(ZendeskService, 'findGroupId');
+    simple.restore(ZendeskService, 'postTicket');
+    simple
+      .mock(ZendeskService, 'findGroupId')
+      .rejectWith({ internalCode: 'group_id_not_found', message: 'Group id for zendesk not found' });
+    simple.mock(rollbarService, 'error').returnWith({});
+    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+        chai
+          .request(server)
+          .post('/retail/1222/offers')
+          .set(headerName, tokenExample)
+          .send(offerExample)
+          .then(res => {
+            res.should.have.status(201);
+            Offer.getBy({ id: 1 }).then(exist => {
+              const off = !!exist;
+              off.should.eql(true);
+              rollbarService.error.callCount.should.eqls(1);
+              done();
+            });
+          });
+      });
+    });
   });
 });
 
@@ -664,25 +694,6 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
           });
         });
     });
-    it('should be successful to enable offer', done => {
-      chai
-        .request(server)
-        .patch(`/retail/11/offers/1`)
-        .set('authorization', generateToken())
-        .then(() =>
-          chai
-            .request(server)
-            .patch(`/retail/11/offers/1`)
-            .set('authorization', generateToken())
-            .then(res => {
-              res.should.have.status(200);
-              Offer.getBy({ retail: 11 }).then(exist => {
-                exist.dataValues.active.should.eqls(true);
-                done();
-              });
-            })
-        );
-    });
     it('should be fail because the offer does not exist', done => {
       chai
         .request(server)
@@ -697,9 +708,47 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
           done();
         });
     });
+
+    it("Should send email to offer's redeemed code users", done => {
+      simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
+        callback(undefined, true);
+      });
+
+      factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+        factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+          factoryManager
+            .create(factoryOffer, {
+              retail: 11,
+              category: rv.id,
+              strategy: r.id,
+              active: true
+            })
+            .then(off => {
+              factoryManager.create(factoryCode, { offerId: off.id }).then(code => {
+                chai
+                  .request(server)
+                  .patch(`/retail/11/offers/${off.id}`)
+                  .set('authorization', generateToken())
+                  .then(res => {
+                    res.should.have.status(200);
+                    mailer.transporter.sendMail.callCount.should.eqls(1);
+                    done();
+                  });
+              });
+            });
+        });
+      });
+    });
   });
 
   describe('PATCH /back/offers/:id', () => {
+    beforeEach(() => {
+      simple.mock(requestService, 'getPoints').resolveWith({
+        address: 'Cochabamba 3254',
+        commerce: { description: 'McDonalds', nit: 1234 },
+        posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
+      });
+    });
     it('Should disable an offer and send an email', done => {
       simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
         callback(undefined, true);
@@ -749,6 +798,68 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
           });
         });
       });
+    });
+
+    it("Should send email to offer's redeemed code offers", done => {
+      simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
+        callback(undefined, true);
+      });
+
+      factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+        factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+          factoryManager.create(factoryOffer, { category: rv.id, strategy: r.id, active: true }).then(off => {
+            factoryManager.create(factoryCode, { offerId: off.id }).then(code => {
+              chai
+                .request(server)
+                .patch(`/back/offers/${off.id}`)
+                .set('authorization', generateToken())
+                .then(res => {
+                  res.should.have.status(200);
+                  mailer.transporter.sendMail.callCount.should.eqls(2);
+                  done();
+                });
+            });
+          });
+        });
+      });
+    });
+  });
+
+  describe('GET /back/offers/:id_offer', () => {
+    beforeEach(() =>
+      simple.mock(requestService, 'getPoints').resolveWith({
+        address: 'Cochabamba 3254',
+        commerce: { description: 'McDonalds', nit: 1234, imageUrl: 'fake-image.png' },
+        posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
+      })
+    );
+    it('Should be success get offer', done => {
+      factoryManager.create(factoryOffer).then(off =>
+        chai
+          .request(server)
+          .get(`/back/offers/${off.id}`)
+          .set('authorization', generateToken())
+          .then(res => {
+            res.should.have.status(200);
+            dictum.chai(res);
+            done();
+          })
+      );
+    });
+    it('Should be fail because the offer does not exist', done => {
+      factoryManager.create(factoryOffer).then(off =>
+        chai
+          .request(server)
+          .get(`/back/offers/4541`)
+          .set('authorization', generateToken())
+          .then(res => {
+            res.body.should.have.property('message');
+            expect(res.body.message).to.equal('Offer Not Found');
+            res.body.should.have.property('internal_code');
+            expect(res.body.internal_code).to.equal('offer_not_found');
+            done();
+          })
+      );
     });
   });
 });

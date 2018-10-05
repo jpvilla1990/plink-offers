@@ -1,4 +1,5 @@
-const errors = require('../errors');
+const errors = require('../errors'),
+  { moment } = require('../utils');
 
 ('use strict');
 
@@ -56,6 +57,10 @@ module.exports = (sequelize, DataTypes) => {
       creator: {
         type: DataTypes.STRING,
         field: 'email_creator'
+      },
+      dateInactive: {
+        type: DataTypes.DATEONLY,
+        field: 'date_inactive'
       }
     },
     {
@@ -92,17 +97,17 @@ module.exports = (sequelize, DataTypes) => {
       throw errors.databaseError(err.message);
     });
 
-  Offer.disable = (conditions, value) => {
-    return Offer.getBy(conditions).then(offer => {
+  Offer.disable = conditions =>
+    Offer.getBy(conditions).then(offer => {
       if (offer) {
-        return offer.update({ active: value !== undefined ? value : !offer.active }).then(updated => {
-          return updated;
+        return offer.update({
+          active: false,
+          dateInactive: moment()
         });
       } else {
         throw errors.offerNotFound;
       }
     });
-  };
 
   Offer.incrementField = (field, filter, transaction) =>
     Offer.increment(field, { where: filter, transaction }).catch(err => {

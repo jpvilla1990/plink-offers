@@ -1,12 +1,15 @@
 const Offer = require('../models').offer,
+  CodeService = require('../services/code'),
   Category = require('../models').category,
   errors = require('../errors'),
   codeService = require('../services/code'),
   offerService = require('../services/offer'),
-  { sendNewOffer, sendOfferDisabledByPlink } = require('../services/mailer'),
+  { sendNewOffer, sendOfferDisabledByPlink, sendOfferDisabledToUserWithCode } = require('../services/mailer'),
+  serviceRollbar = require('../services/rollbar'),
   serviceS3 = require('../services/s3'),
   config = require('../../config'),
   requestService = require('../services/request'),
+  ZendeskService = require('../services/zendesk'),
   urlParse = require('url').parse,
   utils = require('../utils');
 
@@ -48,6 +51,19 @@ exports.create = (req, res, next) => {
             dataCommerce,
             nameCategory: category.dataValues.name
           }).then(() => {
+            ZendeskService.findGroupId(config.common.zendesk.group_name)
+              .then(groupId =>
+                ZendeskService.postTicket(
+                  ZendeskService.newOfferTicket({
+                    nit: dataCommerce.commerce.nit,
+                    valueStrategy: newOff.valueStrategy,
+                    product: newOff.product,
+                    categoryName: category.dataValues.name,
+                    groupId
+                  })
+                )
+              )
+              .catch(err => serviceRollbar.error(err.message, req));
             res.status(201);
             res.end();
           });
@@ -56,21 +72,15 @@ exports.create = (req, res, next) => {
     })
     .catch(err => next(err));
 };
-exports.getOffer = (req, res, next) => {
-  const idOffer = req.params.id_offer;
-  return Offer.getBy({ id: idOffer })
-    .then(off => {
-      if (off) {
-        const send = utils.map(off);
-        res.status(200);
-        res.send(send);
-        res.end();
-      } else {
-        throw errors.offerNotFound;
-      }
-    })
+
+const getFormattedOffer = (params, formatter) =>
+  Offer.getBy(params).then(off => offerService.checkOfferAndFormat(off, formatter));
+
+exports.getOffer = (mapper = utils.map) => (req, res, next) =>
+  getFormattedOffer({ id: req.params.id_offer }, mapper)
+    .then(offerFormated => res.status(200).send(offerFormated))
     .catch(next);
-};
+
 exports.getAll = (req, res, next) => {
   const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10;
   const offsetQuery = req.query.page ? req.query.page * limitQuery : 0;
@@ -139,18 +149,21 @@ exports.getOffersBack = (req, res, next) => {
     .catch(err => next(err));
 };
 
-exports.backDisableOffer = (req, res, next) =>
-  Offer.disable({ id: parseInt(req.params.id) }, false)
-    .then(offer =>
-      sendOfferDisabledByPlink(offer).then(() => {
-        res.status(200).end();
+const disable = (search, actionFinally) =>
+  Offer.disable(search).then(offer =>
+    CodeService.getByOfferId(search.id).then(result =>
+      CodeService.getOfferRetailForCodes(result).then(data => {
+        const dataForMap = search.retail ? result : data;
+        return Promise.all(dataForMap.map(value => sendOfferDisabledToUserWithCode(value))).finally(() =>
+          actionFinally(offer)
+        );
       })
     )
-    .catch(next);
+  );
 
-exports.changeActive = (req, res, next) =>
-  Offer.disable({ id: parseInt(req.params.id_offer), retail: req.retail })
-    .then(() => {
-      res.status(200).end();
-    })
-    .catch(next);
+exports.disableOffer = (action = () => {}) => (req, res, next) => {
+  const conditions = { id: req.params.id_offer };
+  return disable(req.retail ? { ...conditions, retail: req.retail } : conditions, action)
+    .catch(next)
+    .finally(() => res.status(200).end());
+};

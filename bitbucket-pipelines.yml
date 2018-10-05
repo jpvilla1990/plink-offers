@@ -17,6 +17,9 @@ pipelines:
           - export URL_S3_EMAIL=https://s3.amazonaws.com FOLDER_BUCKET_EMAIL=plink_offers TIME_MSG=60
           - export URL_SERVER_API=http://localhost:8080/offers CODE_ACCESS=1234 EMAIL_PLINK=ofertas@plink.com.co
           - export TIME_NODECRON='10 * * * * *'
+          - export ZENDESK_GROUP_NAME='Plink Ofertas'
+          - export ZENDESK_API_HOST=https://zendesk.com/api/v2
+          - export ZENDESK_API_TOKEN=sarlanga
           - npm install
           - npm run migrations
           - npm test

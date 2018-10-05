@@ -59,6 +59,13 @@ const config = {
       accessToken: process.env.ROLLBAR_ACCESS_TOKEN,
       environment: process.env.ROLLBAR_ENV
     },
+    zendesk: {
+      group_name: process.env.ZENDESK_GROUP_NAME,
+      api: {
+        host: process.env.ZENDESK_API_HOST,
+        token: process.env.ZENDESK_API_TOKEN
+      }
+    },
     aws: {
       key: process.env.KEY_AWS,
       secret: process.env.SECRET_AWS,

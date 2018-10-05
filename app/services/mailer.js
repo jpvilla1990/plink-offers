@@ -65,13 +65,19 @@ exports.sendNewOffer = ({ offer, mail, name, dataCommerce, nameCategory }) => {
   return exports.sendEmail(email);
 };
 
-exports.sendOfferDisabledByPlink = offer => {
-  return exports.sendEmail({
+exports.sendOfferDisabledByPlink = offer =>
+  exports.sendEmail({
     subject: i18n.t(`${constants.OFFER_DISABLED_BY_PLINK}.subject`),
     html: servicesHtml.offerDisabledByPlink(offer),
     to: offer.creator
   });
-};
+
+exports.sendOfferDisabledToUserWithCode = code =>
+  exports.sendEmail({
+    subject: i18n.t(`${constants.OFFER_DISABLED_USER}.subject`),
+    html: servicesHtml.offerDisabledWithCode(code),
+    to: code.email
+  });
 
 exports.sendEmail = email => {
   email.html = servicesHtml.replaceSpecialTags(email.html);

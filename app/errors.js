@@ -18,6 +18,7 @@ exports.USER_NOT_FOUND = 'user_not_found';
 exports.EXISTING_USER = 'existing_user';
 exports.NONEXISTENTOFFER = 'nonexistent_offer';
 exports.OFFER_DISABLED = 'offer_disabled';
+exports.GROUP_ID_NOT_FOUND = 'group_id_not_found';
 exports.defaultError = message => internalError(message, exports.DEFAULT_ERROR);
 exports.userUnauthorized = internalError('User is not authorized', exports.USER_UNAUTHORIZED);
 exports.badRequest = message => internalError(message, exports.BAD_REQUEST);
@@ -37,3 +38,4 @@ exports.nonExistentOffer = internalError('The offer does not exist', exports.NON
 exports.userNotFound = internalError('User not found', exports.USER_NOT_FOUND);
 exports.offerDisabled = internalError('Offer Disabled', exports.OFFER_DISABLED);
 exports.points = internalError('Error when tried to obtain data from commerce', exports.DEFAULT_ERROR);
+exports.zendeskGroupIdNotFound = internalError('Group id for zendesk not found', exports.GROUP_ID_NOT_FOUND);

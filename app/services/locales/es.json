@@ -19,5 +19,11 @@
   },
   "newOffer": {
     "subject": "¡ No puedes dejar pasar esta oportunidad !"
+  },
+  "disabled_user": {
+    "subject": "Queremos informarte que esta oferta ha sido deshabilitada."
+  },
+  "disabled_by_plink": {
+    "subject": "Queremos informarte que esta oferta ha sido deshabilitada."
   }
 }

@@ -1,4 +1,5 @@
 const errors = require('../errors'),
+  serviceRollbar = require('../services/rollbar'),
   logger = require('../logger');
 
 const DEFAULT_STATUS_CODE = 500;
@@ -19,14 +20,15 @@ const statusCodes = {
   [errors.SAVING_ERROR]: 400,
   [errors.DATABASE_ERROR]: 503,
   [errors.USER_UNAUTHORIZED]: 401,
-  [errors.DEFAULT_ERROR]: 500
+  [errors.DEFAULT_ERROR]: 500,
+  [errors.GROUP_ID_NOT_FOUND]: 404
 };
 
 exports.handle = (error, req, res, next) => {
   if (error.internalCode) {
     res.status(statusCodes[error.internalCode] || DEFAULT_STATUS_CODE);
   } else {
-    // Unrecognized error, notifying it to rollbar.
+    serviceRollbar.error(error.message, req);
     next(error);
     res.status(DEFAULT_STATUS_CODE);
   }

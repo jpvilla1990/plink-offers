@@ -1,6 +1,7 @@
 exports.OFFER_ACTIVE = 'active';
 exports.OFFER_INACTIVE = 'inactive';
 exports.OFFER_DISABLED = 'disabled';
+exports.OFFER_DISABLED_USER = 'disabled_user';
 exports.OFFER_DISABLED_BY_PLINK = 'disabled_by_plink';
 exports.NEW_OFFER = 'newOffer';
 exports.OFFER_EXPIRED = 'offerExpired';

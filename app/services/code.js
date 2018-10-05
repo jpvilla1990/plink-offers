@@ -1,8 +1,10 @@
 const Code = require('../models').code,
   Offer = require('../models').offer,
+  Category = require('../models').category,
   { moment } = require('../utils'),
   { getOfferStatus } = require('../utils'),
   { OFFER_ACTIVE, OFFER_INACTIVE } = require('../constants'),
+  requestService = require('./request'),
   sequelize = require('../models').sequelize,
   Op = sequelize.Op,
   errors = require('../errors');
@@ -24,6 +26,33 @@ exports.getCode = ({ retailId, number }) =>
     }
     throw errors.codeNotFound;
   });
+
+exports.getByOfferId = id =>
+  Code.findAll({
+    where: {
+      offerId: id
+    },
+    include: [
+      {
+        model: Offer,
+        as: 'offer',
+        include: {
+          model: Category,
+          as: 'category'
+        }
+      }
+    ]
+  });
+
+exports.getOfferRetailForCodes = codes =>
+  Promise.all(
+    codes.map(code =>
+      requestService.getPoints(code.offer.retail).then(dataCommerce => {
+        code.offer.retail = dataCommerce;
+        return code;
+      })
+    )
+  );
 
 exports.getRedemptions = filter => {
   return Code.findAndCountAll({

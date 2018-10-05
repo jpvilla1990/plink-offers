@@ -1,0 +1,169 @@
+doctype transitional
+head
+  meta(charset='UTF-8')
+  title Plink
+style.
+  @import url('https://fonts.googleapis.com/css?family=Exo:400,700');
+table(cellpadding='0' cellspacing='0' style='max-width:650px;margin:0 auto;background:#fff;width:650px;height:100%;border-collapse:collapse;')
+  tr
+    td(background=bg_general_code bgcolor='#ffffff' width='684' height='632' valign='top')
+      //[if gte mso 9]
+      v:rect(xmlns:v='urn:schemas-microsoft-com:vml' fill='true' stroke='false' style='width:650px;height:632px;')
+        v:fill(type='tile' src=bg_general_code color='#ffffff')
+          v:textbox(inset='0,0,0,0')
+            //[endif]
+            div
+              table(cellpadding='0' cellspacing='0' style='max-width:650px;margin:0 auto;width:650px;height:100%;border-collapse:collapse;')
+                tr
+                  td(style='text-align: center;padding:130px 90px 30px;')
+                    img(width='115' height='56' src=logo_plink)
+                tr
+                  td(style="color: #fff;text-align: center;font-size: 20px;font-weight: bold;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px;padding:0 90px;")
+                    | Oferta deshabilitada
+                tr
+                  td(style="color: #fff;text-align: center;font-size: 14px;font-weight: normal;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px;padding:0 75px;line-height: 1.2;")
+                    | Queremos informarte que esta oferta ha sido deshabilitada. ¡Pronto estaremos enviandote más ofertas!
+                tr
+                  td(style='padding: 35px 0 60px;')
+                    table(cellpadding='12' cellspacing='0' style='max-width:650px;margin:0 auto;width:650px;height:100%;border-collapse:collapse;')
+                      tr
+                        td(style='width: 40%; vertical-align: top; padding-left: 90px;')
+                          img(width='180' height='114' style='width: 180px; border-radius: 10px;' src=code.offer.imageUrl)
+                        td(style='padding-right: 79px;padding-bottom: 5px;')
+                          table(cellpadding='0' cellspacing='0' style='max-width:308pxpx;margin:0 auto;width:308px;height:100%;border-collapse:collapse;')
+                            tr
+                              td(colspan='2' style='color: #5c5c5c;font-family: Arial, Helvetica, sans-serif;font-size: 14px;font-weight: bold;letter-spacing: 0.97px;line-height: 1.3;padding-bottom: 10px;')
+                                | #{code.offer.valueStrategy} en #{code.offer.product} pagando con tus tarjetas Bancolombia
+                            tr
+                              td(colspan='2' style='color: #ff6500;font-family: Arial, Helvetica, sans-serif;font-size: 12px;font-weight: normal;letter-spacing: 0.97px;line-height: 1.3;padding-bottom: 15px;')
+                                | Oferta v&aacute;lida hasta:  #{code.offer.expiration}
+                            tr
+                              td(style='width: 20%; padding-right: 10px;')
+                                img(width='47' height='43' style='width: 47px;' src=brand_logo)
+                              td
+                                table(cellpadding='0' cellspacing='0' style='max-width:247px;margin:0 auto;width:247px;height:100%;border-collapse:collapse;')
+                                  tr
+                                    td(style='color: #9b9b9b;font-family: Arial, Helvetica, sans-serif;font-size: 11px;font-weight: normal;letter-spacing: 0.97px;line-height: 1.3;')
+                                      | #{code.offer.retail.commerce.description}
+                                  tr
+                                    td(style='color: #9b9b9b;font-family: Arial, Helvetica, sans-serif;font-size: 11px;font-weight: normal;letter-spacing: 0.97px;line-height: 1.3;')
+                                      | #{code.offer.retail.address}
+                tr
+                  td(style="color: #5f5e5e;text-align: center;font-size: 14px;font-weight: normal;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px;padding:0 75px;line-height: 1.2;")
+                    | Mi c&oacute;digo de cupon
+                tr
+                  td(style="color: #0d63f9;text-align: center;font-size: 30px;font-weight: bold;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px;padding:0 75px;line-height: 1.2;")
+                    | #{code.code}
+                tr
+                  td(style="color: #5f5e5e;text-align: center;font-size: 12px;font-weight: normal;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px;padding:0 75px;line-height: 1.2;")
+                    img(width='16' height='12' src=ticket)
+                    | &nbsp;&nbsp; #{code.offer.maxRedemptions - code.offer.redemptions} disponibles
+            //[if gte mso 9]
+      //[endif]
+  tr
+    td(bgcolor='#f1f2f2' style='padding: 20px 0;')
+      table(cellpadding='0' cellspacing='0' style='max-width:650px;margin:0 auto;width:650px;height:100%;border-collapse:collapse;')
+        tr
+          td(style="padding: 0 72px 15px;color: #424242;font-size: 14px;font-weight: bold;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px;")
+            | Condiciones generales
+        tr
+          td(style="padding: 0 72px;color: #757575;font-size: 12px;font-weight: normal;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px;")
+            | 1. BANCOLOMBIA S.A. s&oacute;lo es el emisor de los medios de pago a trav&eacute;s de los cuales se puede acceder a los beneficios mencionados.
+            | Los beneficios aqu&iacute; descritos son ofrecidos y asumidos por #{code.offer.retail.commerce.description} por lo tanto, son ellos los responsables
+            | de la oferta, la venta, la entrega, el funcionamiento y la garant&iacute;a de los mismos.
+            br
+            br
+            | 2. Los Productos y Servicios Financieros son ofrecidos por Bancolombia. Producto de cr&eacute;dito sujeto a reglamento.
+            br
+            br
+            | 3. El beneficio corresponde a #{code.offer.valueStrategy} off en #{code.offer.product}.
+            br
+            br
+            | 4. El beneficio aplica en la tienda f&iacute;sica: #{code.offer.retail.commerce.description} - #{code.offer.retail.address}
+            br
+            br
+            | 5. Este beneficio no es acumulable con bonos de compra, otros descuentos y/o promociones vigentes en el punto
+            |                 de venta. No aplica para domicilios.
+            br
+            br
+            | 6. Bancolombia podr&aacute; realizar modificaciones, adiciones o eliminaciones a los presentes t&eacute;rminos y condiciones
+            |                 en caso de considerarlo necesario.
+            br
+            br
+            | 7. La calidad, idoneidad, seguridad y garant&iacute;a de los productos y servicios ofrecidos son responsabilidad
+            |                 exclusiva de #{code.offer.retail.commerce.description}.
+            br
+            br
+            | 8. Es indispensable mencionar la actividad promocional al momento de realizar el pedido, y &uacute;nicamente para
+            |                 clientes que realicen el pago con tarjetas Bancolombia.
+            br
+            br
+            | 9. Descuento v&aacute;lido hasta #{code.offer.expiration} y/o hasta agotar existencias. Unidades disponibles: #{code.offer.maxRedemptions}
+            br
+            br
+            | 10. La generación del código no asegura el disfrute del beneficio. Beneficio sujeto a condiciones de vigencia y/o disponibilidad del producto/servicio.
+            br
+            br
+            | 11. Aplica &uacute;nicamente para la totalidad de compras hechas con tarjetas Bancolombia.
+            br
+            br
+            | 12. El beneficio es personal e intransferible, y no es canjeable por efectivo u otros bienes y/o servicios.
+            |                 El cumplimiento de las normas de comercializaci&oacute;n de los productos y/o servicios es total y exclusiva responsabilidad
+            |                 de #{code.offer.retail.commerce.description}.
+            br
+            br
+            | 13. Las im&aacute;genes de los productos son de referencia.
+  tr
+    td(background=bg_footer bgcolor='#ffffff' width='684' height='296' valign='top')
+      //[if gte mso 9]
+      v:rect(xmlns:v='urn:schemas-microsoft-com:vml' fill='true' stroke='false' style='width:650px;height:296px;')
+        v:fill(type='tile' src=bg_footer color='#ffffff')
+          v:textbox(inset='0,0,0,0')
+            //[endif]
+            div
+              table(cellpadding='0' cellspacing='0' style='max-width:650px;margin:0 auto;width:650px;height:300px;border-collapse:collapse;')
+                tr
+                  td &nbsp;
+                tr
+                  td &nbsp;
+                tr
+                  td &nbsp;
+                tr
+                  td(valign='top' rowspan='5' style='width: 50px;padding-left: 30px;')
+                    img(width='19' height='196' src=logo_superintendence alt='')
+                  td &nbsp;
+                tr
+                  td &nbsp;
+                tr
+                  td &nbsp;
+                tr
+                  td(valign='top' style="padding: 0 72px;color: #ff6500;font-size: 14px;font-weight: normal;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px; text-align: center;")
+                    | Manteng&aacute;monos en contacto
+                    br
+                    a(href='mailto:hello@plink.com.co' style='color: #ff6500;text-decoration: none; font-weight: bold;') hello@plink.com.co
+                tr
+                  td(valign='middle' style='text-align: center;')
+                    img(width='146' height='35' src=logo_bancocolombia alt='')
+                    span &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    img(width='3' height='34' src=mail_separator alt='')
+                    span &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    img(width='47' height='43' src=brand_logo alt='')
+            //[if gte mso 9]
+      //[endif]
+  tr
+    td(style="text-align:center;padding: 0 80px 15px; font-size: 11px; color: #4a4a4a;font-weight: normal;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px;")
+      hr(style='width: 160px;border: 2px dashed #e0dede;margin-bottom: 25px;')
+      |  Bancolombia nunca le solicitar&aacute; datos financieros como usuarios, claves, n&uacute;meros de tarjetas de cr&eacute;dito con sus
+      |           c&oacute;digos de seguridad y fechas de vencimiento mediante v&iacute;nculos de correo electr&oacute;nico o llamadas telef&oacute;nicas.
+      br
+      br
+      | Para verificar la autenticidad de este correo electr&oacute;nico puede reenviarlo a
+      br
+      a(style="font-size: 11px; color: #4a4a4a;font-weight: bold;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px; text-decoration: none;" href='mailto:correosospechoso@bancolombia.com.co') correosospechoso@bancolombia.com.co
+  tr
+    td(style="text-align:center;padding: 0 80px; font-size: 11px; color: #ff6500;font-weight: normal;font-family: Arial, Helvetica, sans-serif;letter-spacing: 0.78px; padding-bottom: 50px;")
+      hr(style='width: 160px;border: 2px dashed #e0dede;margin-bottom: 25px;')
+      |  PLINK es una marca de Bancolombia S.A. Los productos y servicios ofrecidos a trav&eacute;s de PLINK , son otorgados por
+      |           Bancolombia S.A. Copyright &copy; 2018 GRUPO BANCOLOMBIA.
+// fix for Gmail auto-resize
+div(style='display:none;font:15px courier;font-family:avenir, Helvetica, Arial, sans-serif;line-height:0;margin:0;padding:0;white-space:nowrap;')

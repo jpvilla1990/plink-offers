@@ -20,7 +20,6 @@ exports.getOfferStatus = offer => {
   }
   return OFFER_DISABLED;
 };
-
 exports.map = off => {
   const send = {
     image: off.dataValues.imageUrl,
@@ -58,7 +57,7 @@ exports.getDataForBack = offers =>
     image: value.imageUrl,
     begin: value.begin,
     expires: value.expiration,
-    status: exports.getOfferStatus(value),
+    status: exports.getOfferStatus(value.dataValues),
     creationDate: moment(value.dataValues.created_at).format('YYYY-MM-DD'),
     title: `${value.valueStrategy} en ${value.product}`
   }));

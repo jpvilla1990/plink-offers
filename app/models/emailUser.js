@@ -6,6 +6,27 @@ const errors = require('../errors'),
 const Op = Sequelize.Op;
 const utils = require('../utils');
 
+const validOfferConstraint = today => [
+  {
+    begin: {
+      [Op.lte]: today
+    }
+  },
+  {
+    expiration: {
+      [Op.gte]: today
+    }
+  },
+  {
+    redemptions: {
+      [Op.lt]: Sequelize.col('offer.max_redemptions')
+    }
+  },
+  {
+    active: true
+  }
+];
+
 module.exports = (sequelize, DataTypes) => {
   const emailUser = sequelize.define(
     'email_user',
@@ -27,26 +48,8 @@ module.exports = (sequelize, DataTypes) => {
       [Op.and]: [
         Sequelize.where(Sequelize.fn('lower', Sequelize.col('product')), {
           [Op.like]: `%${filter.name.toLowerCase()}%`
-        }),
-        {
-          begin: {
-            [Op.lte]: today
-          }
-        },
-        {
-          expiration: {
-            [Op.gte]: today
-          }
-        },
-        {
-          redemptions: {
-            [Op.lt]: sequelize.col('offer.max_redemptions')
-          }
-        },
-        {
-          active: true
-        }
-      ]
+        })
+      ].concat(validOfferConstraint(today))
     };
     if (filter.category) offerFiltering.categoryId = filter.category;
     return emailUser
