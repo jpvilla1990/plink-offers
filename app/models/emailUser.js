@@ -35,6 +35,10 @@ module.exports = (sequelize, DataTypes) => {
       offerId: {
         type: DataTypes.INTEGER,
         field: 'offer_id'
+      },
+      hashEmail: {
+        type: DataTypes.STRING,
+        field: 'hash_email'
       }
     },
     {

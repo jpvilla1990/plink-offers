@@ -30,7 +30,7 @@ exports.checkAll = [
   verifyString(verifyExist('url'), 'url')
 ];
 exports.checkQuery = [verifyInteger(verifyExistQuery('page'), 'page')];
-exports.checkEmail = [verifyEmail(verifyExist('email'), 'email')];
+exports.checkEmail = [verifyString(verifyExist('email'), 'email')];
 exports.validate = (req, res, next) => {
   const errorsMessages = validationResult(req).array();
   if (errorsMessages.length !== 0) {

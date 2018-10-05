@@ -43,9 +43,9 @@ exports.create = (req, res, next) => {
     .getPoints(offer.retail)
     .then(dataCommerce => {
       offer.nit = dataCommerce.commerce.nit;
-      return Offer.create(offer).then(newOff => {
-        return Category.getBy({ id: offer.categoryId }).then(category => {
-          return sendNewOffer({
+      return Offer.create(offer).then(newOff =>
+        Category.getBy({ id: offer.categoryId }).then(category =>
+          sendNewOffer({
             offer: newOff.dataValues,
             mail: config.common.server.email_new_offer,
             dataCommerce,
@@ -66,9 +66,9 @@ exports.create = (req, res, next) => {
               .catch(err => serviceRollbar.error(err.message, req));
             res.status(201);
             res.end();
-          });
-        });
-      });
+          })
+        )
+      );
     })
     .catch(err => next(err));
 };
