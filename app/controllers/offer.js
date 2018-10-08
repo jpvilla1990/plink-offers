@@ -163,7 +163,6 @@ const disable = (search, actionFinally) =>
           )
         : Promise.resolve()
   );
-
 exports.disableOffer = (action = () => {}) => (req, res, next) => {
   const conditions = { id: req.params.id_offer };
   return disable(req.retail ? { ...conditions, retail: req.retail } : conditions, action)
