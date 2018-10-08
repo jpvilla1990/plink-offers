@@ -100,6 +100,7 @@ module.exports = (sequelize, DataTypes) => {
   Offer.disable = conditions =>
     Offer.getBy(conditions).then(offer => {
       if (offer) {
+        if (!offer.active) Promise.resolve();
         return offer.update({
           active: false,
           dateInactive: moment()

@@ -750,7 +750,6 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
       simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
         callback(undefined, true);
       });
-
       factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
         factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
           factoryManager.create(factoryOffer, { category: rv.id, strategy: r.id, active: true }).then(off => {
@@ -766,6 +765,32 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
                   mailer.transporter.sendMail.callCount.should.eqls(1);
                   done();
                 });
+              });
+          });
+        });
+      });
+    });
+    it('Should disable an offer was disabled before and dont send mail', done => {
+      simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
+        callback(undefined, true);
+      });
+      factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+        factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+          factoryManager.create('ActiveOffer', { category: rv.id, strategy: r.id }).then(off => {
+            chai
+              .request(server)
+              .patch(`/back/offers/${off.id}`)
+              .set('authorization', generateToken())
+              .then(() => {
+                chai
+                  .request(server)
+                  .patch(`/back/offers/${off.id}`)
+                  .set('authorization', generateToken())
+                  .then(res => {
+                    res.should.have.status(200);
+                    mailer.transporter.sendMail.callCount.should.eqls(2);
+                    done();
+                  });
               });
           });
         });

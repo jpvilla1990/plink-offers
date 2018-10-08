@@ -150,15 +150,18 @@ exports.getOffersBack = (req, res, next) => {
 };
 
 const disable = (search, actionFinally) =>
-  Offer.disable(search).then(offer =>
-    CodeService.getByOfferId(search.id).then(result =>
-      CodeService.getOfferRetailForCodes(result).then(data => {
-        const dataForMap = search.retail ? result : data;
-        return Promise.all(dataForMap.map(value => sendOfferDisabledToUserWithCode(value))).finally(() =>
-          actionFinally(offer)
-        );
-      })
-    )
+  Offer.disable(search).then(
+    offer =>
+      offer
+        ? CodeService.getByOfferId(search.id).then(result =>
+            CodeService.getOfferRetailForCodes(result).then(data => {
+              const dataForMap = search.retail ? result : data;
+              return Promise.all(dataForMap.map(value => sendOfferDisabledToUserWithCode(value))).finally(
+                () => actionFinally(offer)
+              );
+            })
+          )
+        : Promise.resolve()
   );
 
 exports.disableOffer = (action = () => {}) => (req, res, next) => {
