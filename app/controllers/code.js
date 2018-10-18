@@ -26,24 +26,25 @@ const changeCode = code => {
 
 exports.create = (req, res, next) => {
   const code = {
-    email: req.body.email,
+    hashEmail: req.body.email,
     offerId: parseInt(req.params.id)
   };
   return Offer.getBy({ id: code.offerId })
     .then(off => {
       if (off) {
         const status = getOfferStatus(off.dataValues);
-        return UserEmail.getBy({ email: code.email, offer_id: code.offerId }).then(userEmail => {
+        return UserEmail.getBy({ hashEmail: code.hashEmail, offer_id: code.offerId }).then(userEmail => {
           if (userEmail) {
             return requestService
               .getPoints(off.dataValues.retail)
               .then(dataCommerce => {
+                code.email = userEmail.email;
                 if (status === OFFER_ACTIVE) {
                   code.code = uuid().slice(0, 8);
                   return uniqueCode.verify(code).then(newCode =>
                     sendNewCode({
                       offer: off.dataValues,
-                      code: newCode.dataValues,
+                      code: { ...newCode.dataValues, email: userEmail.email },
                       dataCommerce,
                       nameCategory: off.category.dataValues.name
                     }).then(() => {

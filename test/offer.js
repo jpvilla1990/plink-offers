@@ -348,8 +348,7 @@ describe('job notify', () => {
           warning = simple.mock(logger.warn);
         })
       )
-    )
-  );
+    ));
   it('should be fail because the count of mail es grather than Daily quota limit ', done => {
     jobNotify.notify().then(() => {
       mailer.transporter.sendMail.callCount.should.eqls(0);
@@ -617,8 +616,7 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
             factoryManager.create(factoryOffer, { nit: 1333 }),
             factoryManager.create(factoryOffer, { nit: 1234 })
           ])
-      )
-    );
+      ));
     it('should be successful with filter ', done => {
       chai
         .request(server)
@@ -679,8 +677,7 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
     beforeEach(() =>
       Promise.all([factoryManager.create(factoryCategory), factoryManager.create(factoryTypeOffer)]).then(
         () => Promise.all([factoryManager.create(factoryOffer, { retail: 11 })])
-      )
-    );
+      ));
     it('should be successful to disable offer', done => {
       chai
         .request(server)
@@ -753,7 +750,6 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
       simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
         callback(undefined, true);
       });
-
       factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
         factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
           factoryManager.create(factoryOffer, { category: rv.id, strategy: r.id, active: true }).then(off => {
@@ -769,6 +765,32 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
                   mailer.transporter.sendMail.callCount.should.eqls(1);
                   done();
                 });
+              });
+          });
+        });
+      });
+    });
+    it('Should disable an offer was disabled before and dont send mail', done => {
+      simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
+        callback(undefined, true);
+      });
+      factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+        factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+          factoryManager.create('ActiveOffer', { category: rv.id, strategy: r.id }).then(off => {
+            chai
+              .request(server)
+              .patch(`/back/offers/${off.id}`)
+              .set('authorization', generateToken())
+              .then(() => {
+                chai
+                  .request(server)
+                  .patch(`/back/offers/${off.id}`)
+                  .set('authorization', generateToken())
+                  .then(res => {
+                    res.should.have.status(200);
+                    mailer.transporter.sendMail.callCount.should.eqls(2);
+                    done();
+                  });
               });
           });
         });
@@ -831,8 +853,7 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
         address: 'Cochabamba 3254',
         commerce: { description: 'McDonalds', nit: 1234, imageUrl: 'fake-image.png' },
         posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
-      })
-    );
+      }));
     it('Should be success get offer', done => {
       factoryManager.create(factoryOffer).then(off =>
         chai

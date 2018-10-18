@@ -123,3 +123,20 @@ exports.checkOfferAndFormat = (offer, formatter = () => {}) =>
     if (!offer) reject(errors.offerNotFound);
     resolve(formatter(offer));
   });
+exports.getByWithCode = filter => {
+  Offer.findOne({
+    where: filter,
+    include: [
+      {
+        model: sequelize.models.category,
+        as: 'category'
+      },
+      {
+        model: sequelize.models.type_offer,
+        as: 'type'
+      }
+    ]
+  }).catch(err => {
+    throw errors.databaseError(err.message);
+  });
+};

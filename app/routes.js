@@ -21,9 +21,6 @@ exports.init = app => {
   app.get('/retail/:id/code/:code', [auth.requireRetail], code.getCode);
   app.get('/retail/:id/offers/:id_offer', [auth.requireRetail], Offer.getOffer());
   app.post('/access-offer', Offer.accessOffer);
-  app.get('/offer-app/offers', [auth.requireEmail], EmailUser.getAll);
-  app.get('/offer-app/codes', [auth.requireEmail], EmailUser.getCodes);
-  app.post('/offer-app/offers/:id/code', [auth.requireEmail], code.createCodeApp);
   app.get(
     '/retail/:id/offers/:id_offer/redemptions',
     [auth.requireRetail, validator.checkQuery, validator.validate],
@@ -35,5 +32,9 @@ exports.init = app => {
   app.get('/back/offers/:id_offer', Offer.getOffer(offerService.getDataFromRetail));
   app.patch('/retail/:id/offers/:id_offer', [auth.requireRetail], Offer.disableOffer());
   app.get('/offer-app/categories', category.getAllCategories);
+  app.get('/offer-app/offers', [auth.requireEmail], EmailUser.getAll);
+  app.get('/offer-app/codes', [auth.requireEmail], EmailUser.getCodes);
+  app.post('/offer-app/offers/:id/code', [auth.requireEmail], code.createCodeApp);
+  app.get('/offer-app/offers/:id', [auth.requireEmail], EmailUser.getOffer);
   app.get('/offers-public/terms-and-conditions', termsAndConditions.get);
 };

@@ -2,6 +2,7 @@ const chai = require('chai'),
   expect = chai.expect,
   dictum = require('dictum.js'),
   server = require('./../app'),
+  should = chai.should(),
   moment = require('moment'),
   requestService = require('../app/services/request'),
   Offer = require('../app/models').offer,
@@ -47,18 +48,18 @@ describe('/offers/:id/code POST', () => {
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
       factoryManager.create(factoryOffer, { retail: 1222 })
     ]).then(() =>
-      factoryManager.create(factoryEmailUser, { email: 'julian.molina@wolox.com.ar', offerId: 1 }).then(() =>
+      factoryManager.create(factoryEmailUser, { offerId: 1 }).then(newEmailUser =>
         chai
           .request(server)
           .post(`/offers/1/code`)
-          .send({ email: 'julian.molina@wolox.com.ar' })
+          .send({ email: newEmailUser.hashEmail })
           .then(json => {
             json.should.have.status(201);
             Offer.getBy({ id: 1 }).then(after => {
               after.codes.should.eqls(1);
             });
             mailer.transporter.sendMail.lastCall.args[0].subject.should.equal(i18next.t(`newCode.subject`));
-            mailer.transporter.sendMail.lastCall.args[0].to.should.equal('julian.molina@wolox.com.ar');
+            mailer.transporter.sendMail.lastCall.args[0].to.should.equal(newEmailUser.email);
             dictum.chai(json);
             done();
           })
@@ -77,11 +78,11 @@ describe('/offers/:id/code POST', () => {
               email: 'julian.molina@wolox.com.ar',
               offer_id: before.id
             })
-            .then(() => {
+            .then(newEmailUser => {
               chai
                 .request(server)
                 .post(`/offers/${before.id}/code`)
-                .send({ email: 'julian.molina@wolox.com.ar' })
+                .send({ email: newEmailUser.hashEmail })
                 .then(json => {
                   json.should.have.status(400);
                   json.should.be.json;
@@ -122,19 +123,15 @@ describe('/offers/:id/code POST', () => {
       factoryManager.create(factoryCategory, { name: 'travel' }),
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
       factoryManager.create(factoryOffer, { retail: 1222 })
-    ])
-      .then()
-      .then(() =>
-        Promise.all([
-          factoryManager.create(factoryCode, { email: 'julian.molina@wolox.com.ar', offerId: 1 }),
-          factoryManager.create(factoryEmailUser, { email: 'julian.molina@wolox.com.ar', offerId: 1 })
-        ])
-          .then()
-          .then(() =>
+    ]).then(() =>
+      factoryManager.create(factoryCode, { email: 'julian.molina@wolox.com.ar', offerId: 1 }).then(() =>
+        factoryManager
+          .create(factoryEmailUser, { email: 'julian.molina@wolox.com.ar', offerId: 1 })
+          .then(newEmailUser =>
             chai
               .request(server)
               .post(`/offers/1/code`)
-              .send({ email: 'julian.molina@wolox.com.ar' })
+              .send({ email: newEmailUser.hashEmail })
               .then(json => {
                 json.should.have.status(400);
                 json.should.be.json;
@@ -144,38 +141,38 @@ describe('/offers/:id/code POST', () => {
                 done();
               })
           )
-      );
+      )
+    );
   });
-
   it('should be fail because the offer was disabled', done => {
     Promise.all([
       factoryManager.create(factoryCategory, { name: 'travel' }),
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
       factoryManager.create(factoryOffer, { retail: 1222, active: false })
     ]).then(() =>
-      Promise.all([
-        factoryManager.create(factoryEmailUser, { email: 'julian.molina@wolox.com.ar', offerId: 1 })
-      ]).then(() =>
-        chai
-          .request(server)
-          .post(`/offers/1/code`)
-          .send({ email: 'julian.molina@wolox.com.ar' })
-          .then(json => {
-            json.should.have.status(400);
-            json.should.be.json;
-            json.body.should.have.property('message');
-            json.body.should.have.property('internal_code');
-            json.body.internal_code.should.be.equal('offer_disabled');
-            done();
-          })
-      )
+      factoryManager
+        .create(factoryEmailUser, { email: 'julian.molina@wolox.com.ar', offerId: 1 })
+        .then(newEmailUser =>
+          chai
+            .request(server)
+            .post(`/offers/1/code`)
+            .send({ email: newEmailUser.hashEmail })
+            .then(json => {
+              json.should.have.status(400);
+              json.should.be.json;
+              json.body.should.have.property('message');
+              json.body.should.have.property('internal_code');
+              json.body.internal_code.should.be.equal('offer_disabled');
+              done();
+            })
+        )
     );
   });
   it('should be fail because the user does not exist', done => {
     Promise.all([
       factoryManager.create(factoryCategory, { name: 'travel' }),
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
-      factoryManager.create(factoryOffer, { retail: 1222, active: false })
+      factoryManager.create('ActiveOffer', { retail: 1222 })
     ]).then(() =>
       Promise.all([
         factoryManager.create(factoryEmailUser, { email: 'julian.molina@wolox.com.ar', offerId: 1 })
@@ -183,36 +180,16 @@ describe('/offers/:id/code POST', () => {
         chai
           .request(server)
           .post(`/offers/1/code`)
-          .send({ email: 'julian.molina@wolox.com.ar' })
+          .send({ email: 'hash400' })
           .then(json => {
-            json.should.have.status(400);
+            json.should.have.status(404);
             json.should.be.json;
             json.body.should.have.property('message');
             json.body.should.have.property('internal_code');
-            json.body.internal_code.should.be.equal('offer_disabled');
+            json.body.internal_code.should.be.equal('user_not_found');
             done();
           })
       )
-    );
-  });
-  it('should be fail because the user does not exist', done => {
-    Promise.all([
-      factoryManager.create(factoryCategory, { name: 'travel' }),
-      factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
-      factoryManager.create(factoryOffer)
-    ]).then(() =>
-      chai
-        .request(server)
-        .post(`/offers/1/code`)
-        .send({ email: 'julian.molina@wolox.com.ar' })
-        .then(json => {
-          json.should.have.status(404);
-          json.should.be.json;
-          json.body.should.have.property('message');
-          json.body.should.have.property('internal_code');
-          json.body.internal_code.should.be.equal('user_not_found');
-          done();
-        })
     );
   });
   it('should be fail because getPoints does not work', done => {
@@ -222,19 +199,18 @@ describe('/offers/:id/code POST', () => {
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
       factoryManager.create(factoryOffer, { retail: 1222 })
     ]).then(() =>
-      factoryManager.create(factoryEmailUser, { email: 'julian.molina@wolox.com.ar', offerId: 1 }).then(() =>
+      factoryManager.create(factoryEmailUser, { offerId: 1 }).then(newEmailUser =>
         chai
           .request(server)
           .post(`/offers/1/code`)
-          .send({ email: 'julian.molina@wolox.com.ar' })
+          .send({ email: newEmailUser.hashEmail })
           .then(json => {
             json.should.have.status(201);
             Offer.getBy({ id: 1 }).then(after => {
               after.codes.should.eqls(1);
             });
             mailer.transporter.sendMail.lastCall.args[0].subject.should.equal(i18next.t(`newCode.subject`));
-            mailer.transporter.sendMail.lastCall.args[0].to.should.equal('julian.molina@wolox.com.ar');
-            dictum.chai(json);
+            mailer.transporter.sendMail.lastCall.args[0].to.should.equal(newEmailUser.email);
             done();
           })
       )

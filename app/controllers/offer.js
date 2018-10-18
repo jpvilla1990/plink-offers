@@ -43,9 +43,9 @@ exports.create = (req, res, next) => {
     .getPoints(offer.retail)
     .then(dataCommerce => {
       offer.nit = dataCommerce.commerce.nit;
-      return Offer.create(offer).then(newOff => {
-        return Category.getBy({ id: offer.categoryId }).then(category => {
-          return sendNewOffer({
+      return Offer.create(offer).then(newOff =>
+        Category.getBy({ id: offer.categoryId }).then(category =>
+          sendNewOffer({
             offer: newOff.dataValues,
             mail: config.common.server.email_new_offer,
             dataCommerce,
@@ -66,9 +66,9 @@ exports.create = (req, res, next) => {
               .catch(err => serviceRollbar.error(err.message, req));
             res.status(201);
             res.end();
-          });
-        });
-      });
+          })
+        )
+      );
     })
     .catch(err => next(err));
 };
@@ -150,17 +150,19 @@ exports.getOffersBack = (req, res, next) => {
 };
 
 const disable = (search, actionFinally) =>
-  Offer.disable(search).then(offer =>
-    CodeService.getByOfferId(search.id).then(result =>
-      CodeService.getOfferRetailForCodes(result).then(data => {
-        const dataForMap = search.retail ? result : data;
-        return Promise.all(dataForMap.map(value => sendOfferDisabledToUserWithCode(value))).finally(() =>
-          actionFinally(offer)
-        );
-      })
-    )
+  Offer.disable(search).then(
+    offer =>
+      offer
+        ? CodeService.getByOfferId(search.id).then(result =>
+            CodeService.getOfferRetailForCodes(result).then(data => {
+              const dataForMap = search.retail ? result : data;
+              return Promise.all(dataForMap.map(value => sendOfferDisabledToUserWithCode(value))).finally(
+                () => actionFinally(offer)
+              );
+            })
+          )
+        : Promise.resolve()
   );
-
 exports.disableOffer = (action = () => {}) => (req, res, next) => {
   const conditions = { id: req.params.id_offer };
   return disable(req.retail ? { ...conditions, retail: req.retail } : conditions, action)

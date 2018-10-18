@@ -1,4 +1,4 @@
-image: node:8.9.4
+image: node:8.11.4
 
 pipelines:
   default:
@@ -6,6 +6,7 @@ pipelines:
         caches:
           - node
         script:
+          - npm update -g
           - export NODE_ENV=testing DB_NAME_TEST=plink-offers-test
           - export DB_HOST_TEST=127.0.0.1 DB_PORT_TEST=3306
           - export DB_USERNAME_TEST=root DB_PASSWORD_TEST=plink

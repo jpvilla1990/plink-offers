@@ -40,7 +40,8 @@ exports.getDataFromCodes = codes => {
     dateRedemption: code.dataValues.dateRedemption
       ? moment(code.dataValues.dateRedemption).format('YYYY-MM-DD')
       : null,
-    status: getOfferStatus(code.offer.dataValues)
+    status: getOfferStatus(code.offer.dataValues),
+    idOffer: code.offer.dataValues.id
   }));
   return emailWithCodes;
 };

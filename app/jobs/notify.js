@@ -3,6 +3,7 @@ const AWS = require('aws-sdk'),
   Offer = require('../models').offer,
   EmailUser = require('../models').email_user,
   logger = require('../logger'),
+  md5 = require('md5'),
   emailService = require('../services/mailer'),
   requestService = require('../services/request'),
   CronJob = require('cron').CronJob,
@@ -69,7 +70,11 @@ exports.notify = () => {
                     .getPoints(off.dataValues.retail)
                     .then(dataCommerce => {
                       emails.forEach(element => {
-                        EmailUser.createModel({ email: element.mail, offerId: off.dataValues.id })
+                        EmailUser.createModel({
+                          hashEmail: md5(element.mail),
+                          email: element.mail,
+                          offerId: off.dataValues.id
+                        })
                           .then(() => {
                             logger.info(
                               `The user was created with email: ${element.mail}
@@ -81,24 +86,25 @@ exports.notify = () => {
                               `The user was not create with email : ${element.mail} because ${error.message}`
                             );
                           });
+
                         emailService
                           .sendNewOffer({
                             dataCommerce,
-                            offer: off.dataValues,
+                            offer: { ...off.dataValues, maskedMail: md5(element.mail) },
                             mail: element.mail,
                             name: element.name,
                             nameCategory: off.category.dataValues.name
+                          })
+                          .then(() => {
+                            logger.info(
+                              `Sent offer with id: ${off.id} to ${element.name} ( ${element.mail} )`
+                            );
                           })
                           .catch(error => {
                             logger.error(
                               `Didnt send offer with id: ${off.id} to ${element.name} ( ${
                                 element.mail
                               } ) because ${error}`
-                            );
-                          })
-                          .then(() => {
-                            logger.info(
-                              `Sent offer with id: ${off.id} to ${element.name} ( ${element.mail} )`
                             );
                           });
                       });

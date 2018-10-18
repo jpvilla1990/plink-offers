@@ -80,26 +80,41 @@ module.exports = (sequelize, DataTypes) => {
     }).catch(err => {
       throw errors.databaseError(err.message);
     });
-  Offer.getBy = filter =>
-    Offer.findOne({
-      where: filter,
-      include: [
+  Offer.getBy = filter => {
+    let includes = [
+      {
+        model: sequelize.models.category,
+        as: 'category'
+      },
+      {
+        model: sequelize.models.type_offer,
+        as: 'type'
+      }
+    ];
+    if (filter.email) {
+      includes = [
+        ...includes,
         {
-          model: sequelize.models.category,
-          as: 'category'
-        },
-        {
-          model: sequelize.models.type_offer,
-          as: 'type'
+          model: sequelize.models.code,
+          as: 'code',
+          where: { email: filter.email },
+          required: false
         }
-      ]
+      ];
+      delete filter.email;
+    }
+    return Offer.findOne({
+      where: filter,
+      include: includes
     }).catch(err => {
       throw errors.databaseError(err.message);
     });
+  };
 
   Offer.disable = conditions =>
     Offer.getBy(conditions).then(offer => {
       if (offer) {
+        if (!offer.active) Promise.resolve();
         return offer.update({
           active: false,
           dateInactive: moment()

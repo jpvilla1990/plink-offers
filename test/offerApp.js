@@ -228,6 +228,58 @@ describe('/offer-app/offers GET', () => {
       });
   });
 
+  it('should be success get no offers, because they are expired', done => {
+    Promise.all([factoryManager.create('ExpiredOffer'), factoryManager.create('ExpiredOffer')])
+      .then()
+      .then(() => {
+        Promise.all([
+          factoryManager.create(factoryCode, { email, offerId: 1 }),
+          factoryManager.create(factoryCode, { email, offerId: 2 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+        ])
+          .then()
+          .then(() => {
+            chai
+              .request(server)
+              .get(`/offer-app/offers?page=0`)
+              .set('authorization', generateToken())
+              .then(response => {
+                response.should.have.status(200);
+                response.body.count.should.eqls(0);
+                response.body.offers.length.should.eqls(0);
+                done();
+              });
+          });
+      });
+  });
+
+  it('should be success get no offers, because they not began', done => {
+    Promise.all([factoryManager.create('NotBeganOffer'), factoryManager.create('NotBeganOffer')])
+      .then()
+      .then(() => {
+        Promise.all([
+          factoryManager.create(factoryCode, { email, offerId: 1 }),
+          factoryManager.create(factoryCode, { email, offerId: 2 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
+          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+        ])
+          .then()
+          .then(() => {
+            chai
+              .request(server)
+              .get(`/offer-app/offers?page=0`)
+              .set('authorization', generateToken())
+              .then(response => {
+                response.should.have.status(200);
+                response.body.count.should.eqls(0);
+                response.body.offers.length.should.eqls(0);
+                done();
+              });
+          });
+      });
+  });
+
   it('should be success get no offers, because they dont have redemptions left', done => {
     Promise.all([
       factoryManager.create('NoRedemptionsLeftOffer'),
@@ -466,5 +518,67 @@ describe('/offer-app/codes GET', () => {
           done();
         })
     );
+  });
+  describe('/offer-app/offers/:id_offer GET', () => {
+    it('should be success get a offer with code', done => {
+      simple.mock(requestService, 'getPoints').resolveWith({
+        address: 'Cochabamba 3254',
+        commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
+        posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
+      });
+      let idOffer;
+      factoryManager
+        .create('ActiveOffer')
+        .then(off => {
+          idOffer = off.dataValues.id;
+          factoryManager.create(factoryCode, { email, offerId: off.dataValues.id });
+        })
+        .then(() =>
+          chai
+            .request(server)
+            .get(`/offer-app/offers/${idOffer}`)
+            .set('authorization', generateToken())
+            .then(response => {
+              response.should.have.status(200);
+              expect(response.body.code).to.not.be.undefined;
+              dictum.chai(response);
+              done();
+            })
+        );
+    });
+    it('should be success get a offer without code', done => {
+      simple.restore(requestService, 'getPoints');
+      simple.mock(requestService, 'getPoints').resolveWith({
+        address: 'Cochabamba 3254',
+        commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
+        posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
+      });
+      factoryManager.create('ActiveOffer').then(off =>
+        chai
+          .request(server)
+          .get(`/offer-app/offers/${off.dataValues.id}`)
+          .set('authorization', generateToken())
+          .then(response => {
+            response.should.have.status(200);
+            expect(response.body.code).to.be.undefined;
+            done();
+          })
+      );
+    });
+    it('Should be fail because the offer does not exist', done => {
+      factoryManager.create(factoryOffer).then(off =>
+        chai
+          .request(server)
+          .get(`/offer-app/offers/1236784`)
+          .set('authorization', generateToken())
+          .then(err => {
+            err.body.should.have.property('message');
+            expect(err.body.message).to.equal('Offer Not Found');
+            err.body.should.have.property('internal_code');
+            expect(err.body.internal_code).to.equal('offer_not_found');
+            done();
+          })
+      );
+    });
   });
 });
