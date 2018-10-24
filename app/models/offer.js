@@ -61,6 +61,12 @@ module.exports = (sequelize, DataTypes) => {
       dateInactive: {
         type: DataTypes.DATEONLY,
         field: 'date_inactive'
+      },
+      genders: {
+        type: DataTypes.STRING
+      },
+      ranges: {
+        type: DataTypes.STRING
       }
     },
     {

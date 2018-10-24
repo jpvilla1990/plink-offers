@@ -32,7 +32,9 @@ const chai = require('chai'),
     valueStrategy: '30%',
     maxRedemptions: 1200,
     purpose: 'Atraer clientes',
-    url: 'https://s3.amazonaws.com/plink-email-assets/plink_offers/bg_general.png'
+    url: 'https://s3.amazonaws.com/plink-email-assets/plink_offers/bg_general.png',
+    genders: ['Male', 'Female'],
+    ranges: ['smaller than 17 years', '18 to 23']
   },
   offerWithoutProduct = {
     begin: '2017-02-13',
@@ -42,7 +44,9 @@ const chai = require('chai'),
     valueStrategy: '30%',
     maxRedemptions: 1200,
     purpose: 'Atraer clientes',
-    url: 'https://s3.amazonaws.com/plink-email-assets/plink_offers/bg_general.png'
+    url: 'https://s3.amazonaws.com/plink-email-assets/plink_offers/bg_general.png',
+    genders: ['Male', 'Female'],
+    ranges: ['smaller than 17 years', '18 to 23']
   },
   offerWithCategoryWrong = {
     product: '2x1 en McDuo',
@@ -53,7 +57,9 @@ const chai = require('chai'),
     valueStrategy: '30%',
     maxRedemptions: 1200,
     purpose: 'Atraer clientes',
-    url: 'https://s3.amazonaws.com/plink-email-assets/plink_offers/bg_general.png'
+    url: 'https://s3.amazonaws.com/plink-email-assets/plink_offers/bg_general.png',
+    genders: ['Male', 'Female'],
+    ranges: ['smaller than 17 years', '18 to 23']
   },
   tokenExample = `test ${token.generate({ points: '1222,1444,1333' })}`;
 
@@ -147,10 +153,10 @@ describe('/retail/:id/offers POST', () => {
 });
 
 describe('/retail/:id/offers GET', () => {
-  it('should be successful with one page and with limit', done => {
+  it('should be successful with one page and limit', done => {
     factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
-        factoryManager.create(factoryOffer, offerExample).then(off => {
+        factoryManager.create('ActiveOffer').then(off => {
           chai
             .request(server)
             .get('/retail/1222/offers?page=0')
@@ -170,7 +176,7 @@ describe('/retail/:id/offers GET', () => {
   it('should be successful  with one page but without limit', done => {
     factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
-        factoryManager.create(factoryOffer, offerExample).then(off => {
+        factoryManager.create('ActiveOffer').then(off => {
           chai
             .request(server)
             .get('/retail/1222/offers?page=0')
@@ -487,7 +493,9 @@ describe('/retail/:id/offers/:id_offer GET', () => {
                 'status',
                 'category',
                 'typeOffer',
-                'valueStrategy'
+                'valueStrategy',
+                'genders',
+                'ranges'
               ]);
               dictum.chai(response);
               done();

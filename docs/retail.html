@@ -22,9 +22,9 @@
 }</pre></div></div><div class="panel-body"><h4>Response Data</h4><div class="container"><h5>Status: 200</h5><h5>Headers</h5><pre>{
   "authorization": "bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwb2ludHMiOiIxMSIsIm9mZmVycyI6dHJ1ZX0.17GVMSAbpzCsX0ENcN-yCmcI8PlY075MVv1kANN2wiU"
 }</pre><h5>Body</h5><pre>{
-  "email": "*****@diupabi.ng",
+  "email": "*****@lawol.bt",
   "code": "code2",
-  "dateRedemption": "2018-10-24 07:20:31",
+  "dateRedemption": "2018-10-24 07:32:32",
   "status": "active",
   "product": "product8",
   "image": "'https://s3.amazonaws.com/plink-email-assets/plink_offers/9.jpg"
@@ -42,7 +42,7 @@
 }</pre></div></div></div></div><div class="panel panel-default"><div class="panel-heading" role="tab" id="heading-retail-1222-offers-POST"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#accordion" aria-expanded="true" aria-controls="collapse-retail-1222-offers-POST" href="#collapse-retail-1222-offers-POST">POST /retail/1222/offers</a></h4></div><div id="collapse-retail-1222-offers-POST" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-retail-1222-offers-POST"><div class="panel-body"><h4>Request Data</h4><div class="container"><h5>Headers</h5><pre>{
   "authorization": "test eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwb2ludHMiOiIxMjIyLDE0NDQsMTMzMyIsIm9mZmVycyI6dHJ1ZX0.za1EizGyZvi99KJkzSDWoHc2TdBZCKTUAj7nM0JbGdE",
   "content-type": "application/json",
-  "content-length": 265
+  "content-length": 339
 }</pre><h5>Body</h5><pre>{
   "product": "2x1 en McDuo",
   "begin": "2017-02-13",
@@ -53,11 +53,19 @@
   "maxRedemptions": 1200,
   "purpose": "Atraer clientes",
   "url": "https://s3.amazonaws.com/plink-email-assets/plink_offers/bg_general.png",
+  "genders": [
+    "Male",
+    "Female"
+  ],
+  "ranges": [
+    "smaller than 17 years",
+    "18 to 23"
+  ],
   "retail": 1222
 }</pre></div></div><div class="panel-body"><h4>Response Data</h4><div class="container"><h5>Status: 201</h5><h5>Headers</h5><pre>{
   "authorization": "test eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwb2ludHMiOiIxMjIyLDE0NDQsMTMzMyIsIm9mZmVycyI6dHJ1ZX0.za1EizGyZvi99KJkzSDWoHc2TdBZCKTUAj7nM0JbGdE",
   "content-type": "application/json",
-  "content-length": 265
+  "content-length": 339
 }</pre><h5>Body</h5><pre>{}</pre></div></div></div></div><div class="panel panel-default"><div class="panel-heading" role="tab" id="heading-retail-1222-offers-GET"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#accordion" aria-expanded="true" aria-controls="collapse-retail-1222-offers-GET" href="#collapse-retail-1222-offers-GET">GET /retail/1222/offers?page=0</a></h4></div><div id="collapse-retail-1222-offers-GET" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-retail-1222-offers-GET"><div class="panel-body"><h4>Request Data</h4><div class="container"><h5>Headers</h5><pre>{
   "authorization": "test eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwb2ludHMiOiIxMjIyLDE0NDQsMTMzMyIsIm9mZmVycyI6dHJ1ZX0.za1EizGyZvi99KJkzSDWoHc2TdBZCKTUAj7nM0JbGdE"
 }</pre></div></div><div class="panel-body"><h4>Response Data</h4><div class="container"><h5>Status: 200</h5><h5>Headers</h5><pre>{
@@ -67,14 +75,14 @@
   "offers": [
     {
       "id": 1,
-      "product": "2x1 en McDuo",
-      "begin": "2017-02-13",
-      "expires": "2017-05-24",
-      "maxRedemptions": 1200,
+      "product": "product17",
+      "begin": "2018-10-23",
+      "expires": "2018-10-26",
+      "maxRedemptions": 50,
       "image": "'https://s3.amazonaws.com/plink-email-assets/plink_offers/18.jpg",
       "codes": 0,
       "redemptions": 0,
-      "status": "finished"
+      "status": "active"
     }
   ]
 }</pre></div></div></div></div><div class="panel panel-default"><div class="panel-heading" role="tab" id="heading-retail-1222-offers-GET"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#accordion" aria-expanded="true" aria-controls="collapse-retail-1222-offers-GET" href="#collapse-retail-1222-offers-GET">GET /retail/1222/offers?page=0</a></h4></div><div id="collapse-retail-1222-offers-GET" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-retail-1222-offers-GET"><div class="panel-body"><h4>Request Data</h4><div class="container"><h5>Headers</h5><pre>{
@@ -86,7 +94,7 @@
   "offers": [
     {
       "id": 1,
-      "product": "product17",
+      "product": "product19",
       "begin": "2018-11-03",
       "expires": "2018-10-26",
       "maxRedemptions": 50,
@@ -105,7 +113,7 @@
   "offers": [
     {
       "id": 1,
-      "product": "product18",
+      "product": "product20",
       "begin": "2018-10-23",
       "expires": "2018-10-26",
       "maxRedemptions": 50,
@@ -124,7 +132,7 @@
   "offers": [
     {
       "id": 1,
-      "product": "product19",
+      "product": "product21",
       "begin": "2018-10-22",
       "expires": "2018-10-23",
       "maxRedemptions": 50,
@@ -140,7 +148,7 @@
   "authorization": "bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwb2ludHMiOiIxMSIsIm9mZmVycyI6dHJ1ZX0.17GVMSAbpzCsX0ENcN-yCmcI8PlY075MVv1kANN2wiU"
 }</pre><h5>Body</h5><pre>{
   "image": "'https://s3.amazonaws.com/plink-email-assets/plink_offers/30.jpg",
-  "product": "product25",
+  "product": "product27",
   "begin": "2018-10-23",
   "expires": "2018-10-26",
   "maxRedemptions": 50,
@@ -148,7 +156,15 @@
   "status": "active",
   "category": "name30",
   "typeOffer": "PERCENTAGE",
-  "valueStrategy": "10%"
+  "valueStrategy": "10%",
+  "genders": [
+    "Male",
+    "Female"
+  ],
+  "ranges": [
+    "smaller than 17 years",
+    "18 to 23"
+  ]
 }</pre></div></div></div></div><div class="panel panel-default"><div class="panel-heading" role="tab" id="heading-retail-11-offers-1-redemptions-GET"><h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#accordion" aria-expanded="true" aria-controls="collapse-retail-11-offers-1-redemptions-GET" href="#collapse-retail-11-offers-1-redemptions-GET">GET /retail/11/offers/1/redemptions?page=0</a></h4></div><div id="collapse-retail-11-offers-1-redemptions-GET" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-retail-11-offers-1-redemptions-GET"><div class="panel-body"><h4>Request Data</h4><div class="container"><h5>Headers</h5><pre>{
   "authorization": "bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwb2ludHMiOiIxMSIsIm9mZmVycyI6dHJ1ZX0.17GVMSAbpzCsX0ENcN-yCmcI8PlY075MVv1kANN2wiU"
 }</pre></div></div><div class="panel-body"><h4>Response Data</h4><div class="container"><h5>Status: 200</h5><h5>Headers</h5><pre>{
@@ -160,15 +176,15 @@
       "code": "code9",
       "createdAt": "2018-10-24",
       "dateRedemption": "2018-10-24",
-      "hourRedemption": "07:20",
-      "mail": "*****@ukoji.mp"
+      "hourRedemption": "07:32",
+      "mail": "*****@kere.si"
     },
     {
       "code": "code10",
       "createdAt": "2018-10-24",
       "dateRedemption": "2018-10-24",
-      "hourRedemption": "07:20",
-      "mail": "*****@togresre.mq"
+      "hourRedemption": "07:32",
+      "mail": "*****@homa.tv"
     }
   ]
 }</pre></div></div></div></div></div></body></html>

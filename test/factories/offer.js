@@ -20,7 +20,9 @@ factory.define(exports.nameFactory, Offer, {
   valueStrategy: '10%',
   categoryId: factory.assoc('Category', 'id'),
   nit: 12345,
-  active: true
+  active: true,
+  genders: 'Male,Female',
+  ranges: 'smaller than 17 years,18 to 23'
 });
 
 factory.define('ActiveOffer', Offer, {
@@ -39,7 +41,9 @@ factory.define('ActiveOffer', Offer, {
   valueStrategy: '10%',
   categoryId: factory.assoc('Category', 'id'),
   nit: 12345,
-  active: true
+  active: true,
+  genders: 'Male,Female',
+  ranges: 'smaller than 17 years,18 to 23'
 });
 
 factory.define('DisabledOffer', Offer, {
