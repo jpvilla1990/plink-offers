@@ -14,7 +14,7 @@ exports.init = app => {
   app.post('/retail/:id/offers', [auth.requireRetail, validator.checkAll, validator.validate], Offer.create);
   app.get('/image-offer', Offer.getImageUrl);
   app.get('/retail/:id/offers', [auth.requireRetail], Offer.getAll);
-  app.post('/offers/:id/code', [validator.checkEmail, validator.validate], Code.create);
+  app.post('/offers/:id/code', [validator.checkEmailHash, validator.validate], Code.create);
   app.get('/categories', category.getAllCategories);
   app.get('/type-offers', typeOffer.getAllTypes);
   app.patch('/retail/:id/code/:code/redeem', [auth.requireRetail], code.redeemCode);
@@ -36,5 +36,6 @@ exports.init = app => {
   app.get('/offer-app/codes', [auth.requireEmail], EmailUser.getCodes);
   app.post('/offer-app/offers/:id/code', [auth.requireEmail], code.createCodeApp);
   app.get('/offer-app/offers/:id', [auth.requireEmail], EmailUser.getOffer);
+  app.post('/offers-public/users', [validator.checkEmail, validator.validate], EmailUser.checkAvailable);
   app.get('/offers-public/terms-and-conditions', termsAndConditions.get);
 };

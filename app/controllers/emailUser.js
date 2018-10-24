@@ -2,6 +2,7 @@ const EmailUser = require('../models').email_user,
   Offer = require('../models').offer,
   serviceEmailUser = require('../services/emailUser'),
   serviceOffer = require('../services/offer'),
+  serviceCognito = require('../services/cognito'),
   errors = require('../errors'),
   Code = require('../models').code;
 
@@ -52,3 +53,13 @@ exports.getCodes = (req, res, next) => {
     })
     .catch(next);
 };
+exports.checkAvailable = (req, res, next) =>
+  serviceCognito
+    .checkEmail(req.body.email)
+    .then(result =>
+      res
+        .status(200)
+        .send(result)
+        .end()
+    )
+    .catch(next);

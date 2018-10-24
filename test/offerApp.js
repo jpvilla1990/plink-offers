@@ -6,6 +6,7 @@ const chai = require('chai'),
   simple = require('simple-mock'),
   expect = chai.expect,
   token = require('../test/factories/token'),
+  cognitoService = require('../app/services/cognito'),
   factoryManager = require('../test/factories/factoryManager'),
   factoryOffer = require('../test/factories/offer').nameFactory,
   factoryCategory = require('../test/factories/category').nameFactory,
@@ -579,6 +580,71 @@ describe('/offer-app/codes GET', () => {
             done();
           })
       );
+    });
+  });
+  describe('/offers-public/users POST', () => {
+    it('should be success when the user exist', done => {
+      simple.mock(cognitoService.cognito, 'adminGetUser').returnWith({
+        promise: () => Promise.resolve()
+      });
+      chai
+        .request(server)
+        .post(`/offers-public/users`)
+        .send({ email })
+        .set('authorization', generateToken())
+        .then(response => {
+          response.should.have.status(200);
+          expect(response.body.exist).to.be.true;
+          dictum.chai(response);
+          simple.restore(cognitoService.cognito, 'adminGetUser');
+          done();
+        });
+    });
+    it('should be success when the user does not exist', done => {
+      simple.mock(cognitoService.cognito, 'adminGetUser').returnWith({
+        promise: () => Promise.reject({ code: 'UserNotFoundException' })
+      });
+      chai
+        .request(server)
+        .post(`/offers-public/users`)
+        .send({ email })
+        .set('authorization', generateToken())
+        .then(response => {
+          response.should.have.status(200);
+          expect(response.body.exist).to.be.false;
+          simple.restore(cognitoService.cognito, 'adminGetUser');
+          done();
+        });
+    });
+    it('should be fail because an error ocurred in cognito', done => {
+      simple.mock(cognitoService.cognito, 'adminGetUser').returnWith({
+        promise: () => Promise.reject({ code: 'InternalErrorException' })
+      });
+      chai
+        .request(server)
+        .post(`/offers-public/users`)
+        .send({ email })
+        .set('authorization', generateToken())
+        .then(response => {
+          response.body.should.have.property('message');
+          expect(response.body.message).to.equal('InternalErrorException');
+          response.body.should.have.property('internal_code');
+          expect(response.body.internal_code).to.equal('bad_request');
+          done();
+        });
+    });
+    it('should be fail because does not send email', done => {
+      chai
+        .request(server)
+        .post(`/offers-public/users`)
+        .set('authorization', generateToken())
+        .then(response => {
+          response.body.should.have.property('message');
+          expect(response.body.message).to.include('The email is required');
+          response.body.should.have.property('internal_code');
+          expect(response.body.internal_code).to.equal('bad_request');
+          done();
+        });
     });
   });
 });
