@@ -18,6 +18,7 @@ describe('/offer-app/offers GET', () => {
     email = 'julian.molina@wolox.com.ar';
   simple.mock(requestService, 'getPoints').resolveWith({
     address: 'Cochabamba 3254',
+    reference: 'Next to McDonalds',
     commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
     posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
   });
@@ -550,6 +551,7 @@ describe('/offer-app/codes GET', () => {
     it('should be success get a offer with code', done => {
       simple.mock(requestService, 'getPoints').resolveWith({
         address: 'Cochabamba 3254',
+        reference: 'Next to McDonalds',
         commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
         posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
       });
@@ -577,6 +579,7 @@ describe('/offer-app/codes GET', () => {
       simple.restore(requestService, 'getPoints');
       simple.mock(requestService, 'getPoints').resolveWith({
         address: 'Cochabamba 3254',
+        reference: 'Next to McDonalds',
         commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
         posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
       });

@@ -21,7 +21,8 @@ exports.getDataFromOffers = list => {
               begin: value.offer.dataValues.begin,
               retailName: rv.commerce.description,
               retailImage: rv.commerce.imageUrl,
-              retailAddress: rv.address
+              retailAddress: rv.address,
+              retailReference: rv.reference
             };
           return code ? { ...offerFormated, code } : offerFormated;
         })

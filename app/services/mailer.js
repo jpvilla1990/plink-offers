@@ -24,6 +24,7 @@ const getDataFromCommerce = (offer, dataCommerce, nameCategory) => ({
   retailName: dataCommerce.commerce.description,
   retailAddress: dataCommerce.address,
   retailImageUrl: dataCommerce.commerce.imageUrl,
+  retailReference: dataCommerce.reference,
   nameCategory: nameCategory.toUpperCase()
 });
 exports.transporter = transporter;

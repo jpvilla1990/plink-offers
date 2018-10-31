@@ -98,7 +98,8 @@ exports.getDataFromOffers = list =>
           begin: value.dataValues.begin,
           retailName: rv.commerce.description,
           retailImage: rv.commerce.imageUrl,
-          retailAddress: rv.address
+          retailAddress: rv.address,
+          retailReference: rv.reference
         };
       return code ? { ...offerFormated, code } : offerFormated;
     })
@@ -116,7 +117,8 @@ exports.getDataFromRetail = offer =>
     begin: offer.dataValues.begin,
     retailName: retail.commerce.description,
     retailImage: retail.commerce.imageUrl,
-    retailAddress: retail.address
+    retailAddress: retail.address,
+    retailReference: retail.reference
   }));
 exports.checkOfferAndFormat = (offer, formatter = () => {}) =>
   new Promise((resolve, reject) => {

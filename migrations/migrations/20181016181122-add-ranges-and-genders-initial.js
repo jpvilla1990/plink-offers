@@ -6,7 +6,7 @@ const ranges = [
     '25 a 36 años',
     '37 a 49 años',
     '50 a 64 años',
-    'Mayores de 65 años'
+    'Mayores de 64 años'
   ],
   genders = ['Hombre', 'Mujer'],
   moment = require('moment'),
