@@ -9,3 +9,5 @@ exports.OFFER_FINISHED = 'finished';
 exports.NEW_CODE = 'newCode';
 exports.BEFORE_BEGIN = 'offerBeforeBegin';
 exports.HIDE_EMAIL = 3;
+exports.GENDER = 'gender';
+exports.RANGE = 'range';

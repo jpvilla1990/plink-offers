@@ -23,6 +23,7 @@ exports.newCode = (offer, code) => {
       max_redemptions: offer.max_redemptions,
       expiration: offer.expiration,
       name_retail: offer.retailName,
+      reference_retail: offer.retailReference,
       address: offer.retailAddress
     },
     html = pug.renderFile(templateDir, params);
@@ -50,6 +51,7 @@ exports.newOffer = (offer, emailTo) => {
       address: offer.retailAddress,
       name_category: offer.nameCategory.toUpperCase(),
       name_person: offer.name,
+      reference_retail: offer.retailReference,
       create_code_url: `${config.common.server.base_path}?email=${
         !offer.maskedMail ? emailTo : offer.maskedMail
       }&id=${offer.id}`,
@@ -102,6 +104,7 @@ exports.offerExpired = offer => {
       product: offer.product,
       expiration: offer.expiration,
       name_retail: offer.retailName,
+      reference_retail: offer.retailReference,
       title: {
         [constants.OFFER_DISABLED]: 'Oferta no disponible',
         [constants.OFFER_FINISHED]: 'Oferta finalizada',

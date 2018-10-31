@@ -35,7 +35,9 @@ exports.create = (req, res, next) => {
     maxRedemptions: req.body.maxRedemptions,
     purpose: req.body.purpose,
     valueStrategy: req.body.valueStrategy,
-    imageUrl: req.body.url
+    imageUrl: req.body.url,
+    ranges: req.body.ranges.join(','),
+    genders: req.body.genders.join(',')
   };
   offer.retail = req.retail;
   offer.creator = req.user.email;

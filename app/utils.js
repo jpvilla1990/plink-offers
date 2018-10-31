@@ -31,7 +31,9 @@ exports.map = off => {
     status: exports.getOfferStatus(off.dataValues),
     category: off.category.name,
     typeOffer: off.type.description.toUpperCase(),
-    valueStrategy: off.dataValues.valueStrategy
+    valueStrategy: off.dataValues.valueStrategy,
+    genders: off.dataValues.genders ? off.dataValues.genders.split(',') : undefined,
+    ranges: off.dataValues.ranges ? off.dataValues.ranges.split(',') : undefined
   };
   return send;
 };

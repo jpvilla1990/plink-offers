@@ -38,6 +38,7 @@ describe('/offers/:id/code POST', () => {
     });
     simple.mock(requestService, 'getPoints').resolveWith({
       address: 'Cochabamba 3254',
+      reference: 'Next to McDonalds',
       commerce: { description: 'McDonalds', nit: 1234 },
       posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
     });

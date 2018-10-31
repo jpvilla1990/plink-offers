@@ -18,7 +18,8 @@ const destroyTableOrder = [
   'offers',
   'codes',
   'email_users',
-  'terms_and_conditions'
+  'terms_and_conditions',
+  'targets'
 ];
 
 beforeEach('drop tables', done => {

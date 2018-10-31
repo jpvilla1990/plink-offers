@@ -80,6 +80,7 @@ const config = {
       rate_transport: process.env.SENDING_RATE,
       time_nodecron: process.env.TIME_NODECRON,
       hidden_msg_time: process.env.TIME_MSG,
+      pool_id_users_app: process.env.BACK_USERS_POOL_ID,
       s3SignatureVersion: process.env.SIGNATURE_VERSION_S3 || 'v4',
       offers_images_cdn: process.env.OFFERS_IMAGES_CDN || 'images-offers-dev.plink.com.co'
     }

@@ -18,6 +18,12 @@ const verifyIntGreaterThanZero = (result, key) =>
 const verifyString = (result, key) => result.isString().withMessage(`The ${key} must be String`);
 const verifyInteger = (result, key) => result.isInt().withMessage(`The ${key} must be Integer`);
 const verifyEmail = (result, key) => result.isEmail().withMessage(`The ${key} must be valid`);
+const verifyArray = (result, key) =>
+  result
+    .isArray()
+    .withMessage(`The ${key} must be array`)
+    .custom(value => value.length > 0)
+    .withMessage(`The ${key} must contain elements`);
 exports.checkAll = [
   verifyString(verifyExist('product'), 'product'),
   verifyString(verifyExist('begin'), 'begin'),
@@ -27,10 +33,13 @@ exports.checkAll = [
   verifyString(verifyExist('valueStrategy'), 'valueStrategy'),
   verifyIntGreaterThanZero(verifyExist('maxRedemptions'), 'maxRedemptions'),
   verifyString(verifyExist('purpose'), 'purpose'),
-  verifyString(verifyExist('url'), 'url')
+  verifyString(verifyExist('url'), 'url'),
+  verifyArray(verifyExist('ranges'), 'ranges'),
+  verifyArray(verifyExist('genders'), 'genders')
 ];
 exports.checkQuery = [verifyInteger(verifyExistQuery('page'), 'page')];
-exports.checkEmail = [verifyString(verifyExist('email'), 'email')];
+exports.checkEmail = [verifyEmail(verifyExist('email'), 'email')];
+exports.checkEmailHash = [verifyString(verifyExist('email'), 'email')];
 exports.validate = (req, res, next) => {
   const errorsMessages = validationResult(req).array();
   if (errorsMessages.length !== 0) {
