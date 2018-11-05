@@ -11,11 +11,12 @@ const chai = require('chai'),
   factoryOffer = require('../test/factories/offer').nameFactory,
   factoryCategory = require('../test/factories/category').nameFactory,
   factoryUserOffer = require('../test/factories/userOffer').nameFactory,
-  factoryCode = require('../test/factories/code').nameFactory;
+  factoryCode = require('../test/factories/code').nameFactory,
+  email = 'julian.molina@wolox.com.ar';
+
+const generateToken = (mail = email) => `bearer ${token.generate({ email: mail })}`;
 
 describe('/offer-app/offers GET', () => {
-  const generateToken = (email = 'julian.molina@wolox.com.ar') => `bearer ${token.generate({ email })}`,
-    email = 'julian.molina@wolox.com.ar';
   simple.mock(requestService, 'getPoints').resolveWith({
     address: 'Cochabamba 3254',
     reference: 'Next to McDonalds',
@@ -27,13 +28,15 @@ describe('/offer-app/offers GET', () => {
       factoryManager.create(factoryCategory, { name: 'travel' }),
       factoryManager.create(factoryCategory, { name: 'food' }),
       factoryManager.create(factoryOffer, { categoryId: 1 }),
+      factoryManager.create(factoryOffer, { categoryId: 2 }),
       factoryManager.create(factoryOffer, { categoryId: 2 })
     ]).then(() => {
       Promise.all([
         factoryManager.create(factoryCode, { email, offerId: 1 }),
         factoryManager.create(factoryCode, { email, offerId: 2 }),
         factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
-        factoryManager.create(factoryUserOffer, { email, offerId: 2 })
+        factoryManager.create(factoryUserOffer, { email, offerId: 2 }),
+        factoryManager.create(factoryUserOffer, { email: 'domain@fake.com.ar', offerId: 2 })
       ]).then(() => {
         chai
           .request(server)
@@ -154,6 +157,32 @@ describe('/offer-app/offers GET', () => {
 
   it('should be success get no offers, because they not began', done => {
     Promise.all([factoryManager.create('NotBeganOffer'), factoryManager.create('NotBeganOffer')])
+      .then()
+      .then(() => {
+        Promise.all([
+          factoryManager.create(factoryCode, { email, offerId: 1 }),
+          factoryManager.create(factoryCode, { email, offerId: 2 }),
+          factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
+          factoryManager.create(factoryUserOffer, { email, offerId: 2 })
+        ])
+          .then()
+          .then(() => {
+            chai
+              .request(server)
+              .get(`/offer-app/offers?page=0`)
+              .set('authorization', generateToken())
+              .then(response => {
+                response.should.have.status(200);
+                response.body.count.should.eqls(0);
+                response.body.offers.length.should.eqls(0);
+                done();
+              });
+          });
+      });
+  });
+
+  it('should be success get no offers, because they are expired', done => {
+    Promise.all([factoryManager.create('ExpiredOffer'), factoryManager.create('ExpiredOffer')])
       .then()
       .then(() => {
         Promise.all([
@@ -382,8 +411,8 @@ describe('/offer-app/offers GET', () => {
               .set('authorization', generateToken())
               .then(response => {
                 response.should.have.status(200);
-                response.body.count.should.eqls(2);
-                response.body.offers.length.should.eqls(2);
+                response.body.count.should.eqls(1);
+                response.body.offers.length.should.eqls(1);
                 done();
               });
           });
@@ -422,8 +451,6 @@ describe('/offer-app/offers GET', () => {
 });
 
 describe('/offer-app/codes GET', () => {
-  const generateToken = (email = 'julian.molina@wolox.com.ar') => `bearer ${token.generate({ email })}`,
-    email = 'julian.molina@wolox.com.ar';
   it('should be success but the page was not sent', done => {
     chai
       .request(server)
@@ -573,133 +600,137 @@ describe('/offer-app/codes GET', () => {
         })
     );
   });
-  describe('/offer-app/offers/:id_offer GET', () => {
-    it('should be success get a offer with code', done => {
-      simple.mock(requestService, 'getPoints').resolveWith({
-        address: 'Cochabamba 3254',
-        reference: 'Next to McDonalds',
-        commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
-        posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
-      });
-      let idOffer;
-      factoryManager
-        .create('ActiveOffer')
-        .then(off => {
-          idOffer = off.dataValues.id;
-          factoryManager.create(factoryCode, { email, offerId: off.dataValues.id });
-        })
-        .then(() =>
-          chai
-            .request(server)
-            .get(`/offer-app/offers/${idOffer}`)
-            .set('authorization', generateToken())
-            .then(response => {
-              response.should.have.status(200);
-              expect(response.body.code).to.not.be.undefined;
-              dictum.chai(response);
-              done();
-            })
-        );
+});
+describe('/offer-app/offers/:id_offer GET', () => {
+  it('should be success get a offer with code', done => {
+    simple.mock(requestService, 'getPoints').resolveWith({
+      address: 'Cochabamba 3254',
+      reference: 'Next to McDonalds',
+      commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
+      posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
     });
-    it('should be success get a offer without code', done => {
-      simple.restore(requestService, 'getPoints');
-      simple.mock(requestService, 'getPoints').resolveWith({
-        address: 'Cochabamba 3254',
-        reference: 'Next to McDonalds',
-        commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
-        posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
-      });
-      factoryManager.create('ActiveOffer').then(off =>
+    let idOffer;
+    factoryManager
+      .create('ActiveOffer')
+      .then(off => {
+        idOffer = off.id;
+        return factoryManager
+          .create(factoryCode, { email, offerId: off.id })
+          .then(() => factoryManager.create(factoryUserOffer, { email, offerId: off.id }));
+      })
+      .then(() =>
         chai
           .request(server)
-          .get(`/offer-app/offers/${off.dataValues.id}`)
+          .get(`/offer-app/offers/${idOffer}`)
+          .set('authorization', generateToken())
+          .then(response => {
+            response.should.have.status(200);
+            expect(response.body.code).to.not.be.undefined;
+            dictum.chai(response);
+            done();
+          })
+      );
+  });
+  it('should be success get a offer without code', done => {
+    simple.restore(requestService, 'getPoints');
+    simple.mock(requestService, 'getPoints').resolveWith({
+      address: 'Cochabamba 3254',
+      reference: 'Next to McDonalds',
+      commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
+      posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
+    });
+    factoryManager.create('ActiveOffer').then(off =>
+      factoryManager.create(factoryUserOffer, { email, offerId: 1 }).then(() =>
+        chai
+          .request(server)
+          .get(`/offer-app/offers/${off.id}`)
           .set('authorization', generateToken())
           .then(response => {
             response.should.have.status(200);
             expect(response.body.code).to.be.undefined;
             done();
           })
-      );
-    });
-    it('Should be fail because the offer does not exist', done => {
-      factoryManager.create(factoryOffer).then(off =>
-        chai
-          .request(server)
-          .get(`/offer-app/offers/1236784`)
-          .set('authorization', generateToken())
-          .then(err => {
-            err.body.should.have.property('message');
-            expect(err.body.message).to.equal('Offer Not Found');
-            err.body.should.have.property('internal_code');
-            expect(err.body.internal_code).to.equal('offer_not_found');
-            done();
-          })
-      );
-    });
+      )
+    );
   });
-  describe('/offers-public/users POST', () => {
-    it('should be success when the user exist', done => {
-      simple.mock(cognitoService.cognito, 'adminGetUser').returnWith({
-        promise: () => Promise.resolve()
+  it('Should be fail because the offer does not exist', done => {
+    factoryManager.create(factoryOffer).then(off =>
+      chai
+        .request(server)
+        .get(`/offer-app/offers/1236784`)
+        .set('authorization', generateToken())
+        .then(err => {
+          err.body.should.have.property('message');
+          expect(err.body.message).to.equal('Offer Not Found');
+          err.body.should.have.property('internal_code');
+          expect(err.body.internal_code).to.equal('offer_not_found');
+          done();
+        })
+    );
+  });
+});
+describe('/offers-public/users POST', () => {
+  it('should be success when the user exist', done => {
+    simple.mock(cognitoService.cognito, 'adminGetUser').returnWith({
+      promise: () => Promise.resolve()
+    });
+    chai
+      .request(server)
+      .post(`/offers-public/users`)
+      .send({ email })
+      .set('authorization', generateToken())
+      .then(response => {
+        response.should.have.status(200);
+        expect(response.body.exist).to.be.true;
+        dictum.chai(response);
+        simple.restore(cognitoService.cognito, 'adminGetUser');
+        done();
       });
-      chai
-        .request(server)
-        .post(`/offers-public/users`)
-        .send({ email })
-        .set('authorization', generateToken())
-        .then(response => {
-          response.should.have.status(200);
-          expect(response.body.exist).to.be.true;
-          dictum.chai(response);
-          simple.restore(cognitoService.cognito, 'adminGetUser');
-          done();
-        });
+  });
+  it('should be success when the user does not exist', done => {
+    simple.mock(cognitoService.cognito, 'adminGetUser').returnWith({
+      promise: () => Promise.reject({ code: 'UserNotFoundException' })
     });
-    it('should be success when the user does not exist', done => {
-      simple.mock(cognitoService.cognito, 'adminGetUser').returnWith({
-        promise: () => Promise.reject({ code: 'UserNotFoundException' })
+    chai
+      .request(server)
+      .post(`/offers-public/users`)
+      .send({ email })
+      .set('authorization', generateToken())
+      .then(response => {
+        response.should.have.status(200);
+        expect(response.body.exist).to.be.false;
+        simple.restore(cognitoService.cognito, 'adminGetUser');
+        done();
       });
-      chai
-        .request(server)
-        .post(`/offers-public/users`)
-        .send({ email })
-        .set('authorization', generateToken())
-        .then(response => {
-          response.should.have.status(200);
-          expect(response.body.exist).to.be.false;
-          simple.restore(cognitoService.cognito, 'adminGetUser');
-          done();
-        });
+  });
+  it('should be fail because an error ocurred in cognito', done => {
+    simple.mock(cognitoService.cognito, 'adminGetUser').returnWith({
+      promise: () => Promise.reject({ code: 'InternalErrorException' })
     });
-    it('should be fail because an error ocurred in cognito', done => {
-      simple.mock(cognitoService.cognito, 'adminGetUser').returnWith({
-        promise: () => Promise.reject({ code: 'InternalErrorException' })
+    chai
+      .request(server)
+      .post(`/offers-public/users`)
+      .send({ email })
+      .set('authorization', generateToken())
+      .then(response => {
+        response.body.should.have.property('message');
+        expect(response.body.message).to.equal('InternalErrorException');
+        response.body.should.have.property('internal_code');
+        expect(response.body.internal_code).to.equal('bad_request');
+        done();
       });
-      chai
-        .request(server)
-        .post(`/offers-public/users`)
-        .send({ email })
-        .set('authorization', generateToken())
-        .then(response => {
-          response.body.should.have.property('message');
-          expect(response.body.message).to.equal('InternalErrorException');
-          response.body.should.have.property('internal_code');
-          expect(response.body.internal_code).to.equal('bad_request');
-          done();
-        });
-    });
-    it('should be fail because does not send email', done => {
-      chai
-        .request(server)
-        .post(`/offers-public/users`)
-        .set('authorization', generateToken())
-        .then(response => {
-          response.body.should.have.property('message');
-          expect(response.body.message).to.include('The email is required');
-          response.body.should.have.property('internal_code');
-          expect(response.body.internal_code).to.equal('bad_request');
-          done();
-        });
-    });
+  });
+  it('should be fail because does not send email', done => {
+    chai
+      .request(server)
+      .post(`/offers-public/users`)
+      .set('authorization', generateToken())
+      .then(response => {
+        response.body.should.have.property('message');
+        expect(response.body.message).to.include('The email is required');
+        response.body.should.have.property('internal_code');
+        expect(response.body.internal_code).to.equal('bad_request');
+        done();
+      });
   });
 });

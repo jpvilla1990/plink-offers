@@ -70,6 +70,11 @@ exports.getAllApp = params => {
         as: 'code',
         where: { email: params.email },
         required: false
+      },
+      {
+        model: sequelize.models.user_offer,
+        as: 'user_offer',
+        where: { email: params.email }
       }
     ]
   };
@@ -120,20 +125,26 @@ exports.checkOfferAndFormat = (offer, formatter = () => {}) =>
     if (!offer) reject(errors.offerNotFound);
     resolve(formatter(offer));
   });
-exports.getByWithCode = filter => {
+exports.getByApp = ({ email, id }) =>
   Offer.findOne({
-    where: filter,
+    where: { id },
     include: [
+      {
+        model: sequelize.models.user_offer,
+        as: 'user_offer',
+        where: { email }
+      },
       {
         model: sequelize.models.category,
         as: 'category'
       },
       {
-        model: sequelize.models.type_offer,
-        as: 'type'
+        model: sequelize.models.code,
+        as: 'code',
+        where: { email },
+        required: false
       }
     ]
   }).catch(err => {
     throw errors.databaseError(err.message);
   });
-};

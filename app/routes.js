@@ -5,7 +5,7 @@ const Offer = require('./controllers/offer'),
   termsAndConditions = require('./controllers/termsAndConditions'),
   offerService = require('./services/offer'),
   typeOffer = require('./controllers/typeOffer'),
-  EmailUser = require('./controllers/emailUser'),
+  userOffer = require('./controllers/userOffer'),
   code = require('./controllers/code'),
   { sendOfferDisabledByPlink } = require('./services/mailer'),
   auth = require('./middlewares/auth'),
@@ -35,10 +35,10 @@ exports.init = app => {
   app.get('/back/offers/:id_offer', Offer.getOffer(offerService.getDataFromRetail));
   app.patch('/retail/:id/offers/:id_offer', [auth.requireRetail], Offer.disableOffer());
   app.get('/offer-app/categories', category.getAllCategories);
-  app.get('/offer-app/offers', [auth.requireEmail], EmailUser.getAll);
-  app.get('/offer-app/codes', [auth.requireEmail], EmailUser.getCodes);
+  app.get('/offer-app/offers', [auth.requireEmail], userOffer.getAll);
+  app.get('/offer-app/codes', [auth.requireEmail], userOffer.getCodes);
   app.post('/offer-app/offers/:id/code', [auth.requireEmail], code.createCodeApp);
-  app.get('/offer-app/offers/:id', [auth.requireEmail], EmailUser.getOffer);
-  app.post('/offers-public/users', [validator.checkEmail, validator.validate], EmailUser.checkAvailable);
+  app.get('/offer-app/offers/:id', [auth.requireEmail], userOffer.getOffer);
+  app.post('/offers-public/users', [validator.checkEmail, validator.validate], userOffer.checkAvailable);
   app.get('/offers-public/terms-and-conditions', termsAndConditions.get);
 };

@@ -101,7 +101,7 @@ exports.createCodeApp = (req, res, next) => {
     offerId: req.params.id,
     email: req.email
   };
-  return Offer.getBy({ id: code.offerId })
+  return Offer.getBy({ id: code.offerId, email: req.email })
     .then(off => {
       if (off) {
         if (OFFER_ACTIVE === getOfferStatus(off.dataValues)) {
