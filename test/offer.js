@@ -9,16 +9,16 @@ const chai = require('chai'),
   factoryTypeOffer = require('../test/factories/typeOffer').nameFactory,
   factoryOffer = require('../test/factories/offer').nameFactory,
   factoryCode = require('../test/factories/code').nameFactory,
-  factoryEmailUser = require('../test/factories/emailUser').nameFactory,
+  factoryUserOffer = require('./factories/userOffer').nameFactory,
   requestService = require('../app/services/request'),
   rollbarService = require('../app/services/rollbar'),
   simple = require('simple-mock'),
   token = require('./factories/token'),
-  jobNotify = require('../app/jobs/notify'),
+  JobCreator = require('../app/jobs/creatorUserOffer'),
   mailer = require('../app/services/mailer'),
   headerName = config.common.session.header_name,
   Offer = require('../app/models').offer,
-  EmailUser = require('../app/models').email_user,
+  UserOffer = require('../app/models').user_offer,
   { OFFER_ACTIVE, OFFER_INACTIVE, OFFER_DISABLED, OFFER_FINISHED } = require('../app/constants'),
   ZendeskService = require('../app/services/zendesk'),
   should = chai.should(),
@@ -325,50 +325,14 @@ it('should be successful with one disabled offer (disabled)', done => {
   });
 });
 
-describe('job notify', () => {
-  let warning;
+describe('job creator', () => {
+  let offerId;
   beforeEach(() =>
     factoryManager.create(factoryCategory, { name: 'travel' }).then(rv =>
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r =>
         factoryManager.create(factoryOffer, { category: rv.id, strategy: r.id }).then(off => {
-          simple.mock(jobNotify.sqs, 'receiveMessage').returnWith({
-            promise: () =>
-              Promise.resolve({
-                Messages: [
-                  {
-                    Attributes: { MessageDeduplicationId: off.id },
-                    Body:
-                      '{"mails":[{"mail":"julian.molina@wolox.com.ar","name":"julian"},{"mail":"julian.molina@wolox.com.ar","name":"julian"},{"mail":"julian.molina@wolox.com.ar","name":"julian"}]}'
-                  }
-                ]
-              })
-          });
-          simple.mock(jobNotify.ses, 'getSendQuota').callFn((obj, callback) => {
-            callback(undefined, {
-              Max24HourSend: 2,
-              SentLast24Hours: 1
-            });
-          });
-          simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
-            callback(undefined, true);
-          });
-          warning = simple.mock(logger.warn);
-        })
-      )
-    )
-  );
-  it('should be fail because the count of mail es grather than Daily quota limit ', done => {
-    jobNotify.notify().then(() => {
-      mailer.transporter.sendMail.callCount.should.eqls(0);
-      done();
-    });
-  });
-
-  it('Should not send email, due to offer is expired', done => {
-    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
-      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
-        factoryManager.create('DisabledOffer').then(off => {
-          simple.mock(jobNotify.sqs, 'receiveMessage').returnWith({
+          offerId = off.id;
+          simple.mock(JobCreator.sqs, 'receiveMessage').returnWith({
             promise: () =>
               Promise.resolve({
                 Messages: [
@@ -379,96 +343,36 @@ describe('job notify', () => {
                 ]
               })
           });
-          simple.restore(jobNotify.ses, 'getSendQuota');
-          simple.mock(jobNotify.sqs, 'deleteMessage').returnWith({
+          simple.mock(JobCreator.sqs, 'deleteMessage').returnWith({
             promise: () => Promise.resolve({})
           });
-          simple.mock(jobNotify.ses, 'getSendQuota').callFn((obj, callback) => {
-            callback(undefined, {
-              Max24HourSend: 50,
-              SentLast24Hours: 1
-            });
-          });
-          simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
-            callback(undefined, true);
-          });
-          warning = simple.mock(logger.warn);
-
-          jobNotify.notify().then(() => {
-            mailer.transporter.sendMail.callCount.should.eqls(0);
+        })
+      )
+    ));
+  it('should be fail because the user offer already exist ', done => {
+    factoryManager
+      .create(factoryUserOffer, {
+        offerId,
+        email: 'julian.molina@wolox.com.ar'
+      })
+      .then(() =>
+        JobCreator.creatorUserOffer().then(() =>
+          UserOffer.findAll({ where: { email: 'julian.molina@wolox.com.ar' } }).then(exist => {
+            expect(exist.length).to.be.eqls(1);
             done();
-          });
-        });
-      });
-    });
+          })
+        )
+      );
   });
 
-  it('should be successful ', done => {
-    simple.mock(jobNotify.sqs, 'receiveMessage').returnWith({
-      promise: () =>
-        Promise.resolve({
-          Messages: [
-            {
-              Attributes: { MessageDeduplicationId: 1 },
-              Body: '{"mails":[{"mail":"julian.molina@wolox.com.ar","name":"julian"}]}'
-            }
-          ]
+  it('Should be successful for create a new user offer ', done => {
+    factoryManager.create('DisabledOffer').then(off => {
+      JobCreator.creatorUserOffer().then(() =>
+        UserOffer.findOne({ where: { email: 'julian.molina@wolox.com.ar' } }).then(exist => {
+          expect(exist).not.be.null;
+          done();
         })
-    });
-    simple.restore(jobNotify.ses, 'getSendQuota');
-    simple.mock(jobNotify.ses, 'getSendQuota').callFn((obj, callback) => {
-      callback(undefined, {
-        Max24HourSend: 50,
-        SentLast24Hours: 1
-      });
-    });
-    simple.mock(jobNotify.sqs, 'deleteMessage').returnWith({
-      promise: () => Promise.resolve({})
-    });
-    simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
-      callback(undefined, true);
-    });
-    jobNotify.notify().then(() => {
-      setTimeout(() => {
-        mailer.transporter.sendMail.callCount.should.eqls(1);
-        done();
-      }, 2000);
-    });
-  });
-  it('should be successful but the user already exist ', done => {
-    simple.mock(jobNotify.sqs, 'receiveMessage').returnWith({
-      promise: () =>
-        Promise.resolve({
-          Messages: [
-            {
-              Attributes: { MessageDeduplicationId: 1 },
-              Body: '{"mails":[{"mail":"julian.molina@wolox.com.ar","name":"julian"}]}'
-            }
-          ]
-        })
-    });
-    simple.restore(jobNotify.ses, 'getSendQuota');
-    simple.mock(jobNotify.ses, 'getSendQuota').callFn((obj, callback) => {
-      callback(undefined, {
-        Max24HourSend: 50,
-        SentLast24Hours: 1
-      });
-    });
-    simple.mock(jobNotify.sqs, 'deleteMessage').returnWith({
-      promise: () => Promise.resolve({})
-    });
-    simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
-      callback(undefined, true);
-    });
-    factoryManager.create(factoryEmailUser, { email: 'julian.molina@wolox.com.ar', offerId: 1 }).then(() => {
-      jobNotify.notify().then(() => {
-        setTimeout(() => {
-          EmailUser.getBy({ offerId: 1, email: 'julian.molina@wolox.com.ar' }).then(user => {
-            expect(user).to.not.equal(null);
-            done();
-          });
-        }, 2000);
-      });
+      );
     });
   });
 });
@@ -626,8 +530,7 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
             factoryManager.create(factoryOffer, { nit: 1333 }),
             factoryManager.create(factoryOffer, { nit: 1234 })
           ])
-      )
-    );
+      ));
     it('should be successful with filter ', done => {
       chai
         .request(server)
@@ -688,8 +591,7 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
     beforeEach(() =>
       Promise.all([factoryManager.create(factoryCategory), factoryManager.create(factoryTypeOffer)]).then(
         () => Promise.all([factoryManager.create(factoryOffer, { retail: 11 })])
-      )
-    );
+      ));
     it('should be successful to disable offer', done => {
       chai
         .request(server)
@@ -867,8 +769,7 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
         reference: 'Next to McDonalds',
         commerce: { description: 'McDonalds', nit: 1234, imageUrl: 'fake-image.png' },
         posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
-      })
-    );
+      }));
     it('Should be success get offer', done => {
       factoryManager.create(factoryOffer).then(off =>
         chai

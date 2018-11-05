@@ -14,7 +14,7 @@ const chai = require('chai'),
   factoryCategory = require('../test/factories/category').nameFactory,
   factoryTypeOffer = require('../test/factories/typeOffer').nameFactory,
   factoryOffer = require('../test/factories/offer').nameFactory,
-  factoryEmailUser = require('../test/factories/emailUser').nameFactory,
+  factoryUserOffer = require('../test/factories/userOffer').nameFactory,
   i18next = require('i18next'),
   factoryCode = require('../test/factories/code').nameFactory;
 
@@ -49,7 +49,7 @@ describe('/offers/:id/code POST', () => {
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
       factoryManager.create(factoryOffer, { retail: 1222 })
     ]).then(() =>
-      factoryManager.create(factoryEmailUser, { offerId: 1 }).then(newEmailUser =>
+      factoryManager.create(factoryUserOffer, { offerId: 1 }).then(newEmailUser =>
         chai
           .request(server)
           .post(`/offers/1/code`)
@@ -75,7 +75,7 @@ describe('/offers/:id/code POST', () => {
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
         factoryManager.create(factoryOffer, offerWithRetail).then(before => {
           factoryManager
-            .create(factoryEmailUser, {
+            .create(factoryUserOffer, {
               email: 'julian.molina@wolox.com.ar',
               offer_id: before.id
             })
@@ -127,7 +127,7 @@ describe('/offers/:id/code POST', () => {
     ]).then(() =>
       factoryManager.create(factoryCode, { email: 'julian.molina@wolox.com.ar', offerId: 1 }).then(() =>
         factoryManager
-          .create(factoryEmailUser, { email: 'julian.molina@wolox.com.ar', offerId: 1 })
+          .create(factoryUserOffer, { email: 'julian.molina@wolox.com.ar', offerId: 1 })
           .then(newEmailUser =>
             chai
               .request(server)
@@ -152,7 +152,7 @@ describe('/offers/:id/code POST', () => {
       factoryManager.create(factoryOffer, { retail: 1222, active: false })
     ]).then(() =>
       factoryManager
-        .create(factoryEmailUser, { email: 'julian.molina@wolox.com.ar', offerId: 1 })
+        .create(factoryUserOffer, { email: 'julian.molina@wolox.com.ar', offerId: 1 })
         .then(newEmailUser =>
           chai
             .request(server)
@@ -176,7 +176,7 @@ describe('/offers/:id/code POST', () => {
       factoryManager.create('ActiveOffer', { retail: 1222 })
     ]).then(() =>
       Promise.all([
-        factoryManager.create(factoryEmailUser, { email: 'julian.molina@wolox.com.ar', offerId: 1 })
+        factoryManager.create(factoryUserOffer, { email: 'julian.molina@wolox.com.ar', offerId: 1 })
       ]).then(() =>
         chai
           .request(server)
@@ -200,7 +200,7 @@ describe('/offers/:id/code POST', () => {
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
       factoryManager.create(factoryOffer, { retail: 1222 })
     ]).then(() =>
-      factoryManager.create(factoryEmailUser, { offerId: 1 }).then(newEmailUser =>
+      factoryManager.create(factoryUserOffer, { offerId: 1 }).then(newEmailUser =>
         chai
           .request(server)
           .post(`/offers/1/code`)

@@ -1,6 +1,6 @@
 const EmailUser = require('../models').email_user,
   Offer = require('../models').offer,
-  serviceEmailUser = require('../services/emailUser'),
+  serviceUserOffer = require('../services/userOffer'),
   serviceOffer = require('../services/offer'),
   serviceCognito = require('../services/cognito'),
   errors = require('../errors'),
@@ -46,7 +46,7 @@ exports.getCodes = (req, res, next) => {
   const offsetQuery = req.query.page ? req.query.page * limitQuery : 0;
   return Code.getAllBy({ offset: offsetQuery, email: req.email, limit: limitQuery })
     .then(codes => {
-      const offersWithCodes = serviceEmailUser.getDataFromCodes(codes.rows);
+      const offersWithCodes = serviceUserOffer.getDataFromCodes(codes.rows);
       res.status(200);
       res.send({ pages: Math.ceil(codes.count / limitQuery), count: codes.count, codes: offersWithCodes });
       res.end();
