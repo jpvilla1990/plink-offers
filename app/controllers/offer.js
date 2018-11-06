@@ -10,6 +10,7 @@ const Offer = require('../models').offer,
   config = require('../../config'),
   requestService = require('../services/request'),
   ZendeskService = require('../services/zendesk'),
+  targetService = require('../services/target'),
   urlParse = require('url').parse,
   utils = require('../utils');
 
@@ -47,28 +48,30 @@ exports.create = (req, res, next) => {
       offer.nit = dataCommerce.commerce.nit;
       return Offer.create(offer).then(newOff =>
         Category.getBy({ id: offer.categoryId }).then(category =>
-          sendNewOffer({
-            offer: newOff.dataValues,
-            mail: config.common.server.email_new_offer,
-            dataCommerce,
-            nameCategory: category.dataValues.name
-          }).then(() => {
-            ZendeskService.findGroupId(config.common.zendesk.group_name)
-              .then(groupId =>
-                ZendeskService.postTicket(
-                  ZendeskService.newOfferTicket({
-                    nit: dataCommerce.commerce.nit,
-                    valueStrategy: newOff.valueStrategy,
-                    product: newOff.product,
-                    categoryName: category.dataValues.name,
-                    groupId
-                  })
+          targetService.getByDescriptions(offer.ranges.split(',')).then(ranges =>
+            sendNewOffer({
+              offer: { ...newOff.dataValues, ranges },
+              mail: config.common.server.email_new_offer,
+              dataCommerce,
+              nameCategory: category.dataValues.name
+            }).then(() => {
+              ZendeskService.findGroupId(config.common.zendesk.group_name)
+                .then(groupId =>
+                  ZendeskService.postTicket(
+                    ZendeskService.newOfferTicket({
+                      nit: dataCommerce.commerce.nit,
+                      valueStrategy: newOff.valueStrategy,
+                      product: newOff.product,
+                      categoryName: category.dataValues.name,
+                      groupId
+                    })
+                  )
                 )
-              )
-              .catch(err => serviceRollbar.error(err.message, req));
-            res.status(201);
-            res.end();
-          })
+                .catch(err => serviceRollbar.error(err.message, req));
+              res.status(201);
+              res.end();
+            })
+          )
         )
       );
     })

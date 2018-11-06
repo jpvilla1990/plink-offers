@@ -7,7 +7,8 @@ module.exports = (sequelize, DataTypes) => {
     'target',
     {
       description: DataTypes.STRING,
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
+      alias: DataTypes.STRING
     },
     {
       paranoid: true,

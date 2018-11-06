@@ -51,6 +51,7 @@ exports.sendOfferExpired = ({ offer, code, dataCommerce, nameCategory }) => {
 };
 exports.sendNewOffer = ({ offer, mail, name, dataCommerce, nameCategory }) => {
   const infoMail = getDataFromCommerce(offer, dataCommerce, nameCategory);
+  infoMail.ranges = offer.ranges.map(range => range.alias).join();
   if (!name) {
     const postIds = dataCommerce.posTerminals.map(value => value.posId);
     infoMail.subject = `IdOferta=${offer.id} Nit=${offer.nit} Posids=${postIds.join()}`;
