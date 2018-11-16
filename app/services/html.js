@@ -56,7 +56,9 @@ exports.newOffer = (offer, emailTo) => {
         !offer.maskedMail ? emailTo : offer.maskedMail
       }&id=${offer.id}`,
       emailTo,
-      offer_id: offer.id
+      offer_id: offer.id,
+      genders: offer.genders,
+      ranges: offer.ranges
     },
     html = pug.renderFile(templateDir, params);
   return html;

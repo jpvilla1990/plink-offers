@@ -105,6 +105,11 @@ module.exports = (sequelize, DataTypes) => {
           as: 'code',
           where: { email: filter.email },
           required: false
+        },
+        {
+          model: sequelize.models.user_offer,
+          as: 'user_offer',
+          where: { email: filter.email }
         }
       ];
       delete filter.email;
@@ -147,6 +152,7 @@ module.exports = (sequelize, DataTypes) => {
     Offer.belongsTo(models.category, { as: 'category' });
     Offer.belongsTo(models.type_offer, { as: 'type', foreignKey: 'strategy' });
     Offer.hasMany(models.code, { as: 'code' });
+    Offer.hasMany(models.user_offer, { as: 'user_offer', foreignKey: 'offer_id' });
   };
   return Offer;
 };

@@ -4,7 +4,7 @@ const codeService = require('../services/code'),
   Offer = require('../models').offer,
   uniqueCode = require('../services/uniqueCode'),
   { sendNewCode, sendOfferExpired } = require('../services/mailer'),
-  UserEmail = require('../models').email_user,
+  UserOffer = require('../models').user_offer,
   { OFFER_DISABLED, OFFER_INACTIVE, OFFER_ACTIVE, OFFER_FINISHED } = require('../constants'),
   requestService = require('../services/request'),
   { getOfferStatus } = require('../utils'),
@@ -33,7 +33,7 @@ exports.create = (req, res, next) => {
     .then(off => {
       if (off) {
         const status = getOfferStatus(off.dataValues);
-        return UserEmail.getBy({ hashEmail: code.hashEmail, offer_id: code.offerId }).then(userEmail => {
+        return UserOffer.getBy({ hashEmail: code.hashEmail, offer_id: code.offerId }).then(userEmail => {
           if (userEmail) {
             return requestService
               .getPoints(off.dataValues.retail)
@@ -101,7 +101,7 @@ exports.createCodeApp = (req, res, next) => {
     offerId: req.params.id,
     email: req.email
   };
-  return Offer.getBy({ id: code.offerId })
+  return Offer.getBy({ id: code.offerId, email: req.email })
     .then(off => {
       if (off) {
         if (OFFER_ACTIVE === getOfferStatus(off.dataValues)) {

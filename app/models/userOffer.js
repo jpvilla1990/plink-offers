@@ -28,8 +28,8 @@ const validOfferConstraint = today => [
 ];
 
 module.exports = (sequelize, DataTypes) => {
-  const emailUser = sequelize.define(
-    'email_user',
+  const userOffer = sequelize.define(
+    'user_offer',
     {
       email: DataTypes.STRING,
       offerId: {
@@ -46,7 +46,7 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true
     }
   );
-  emailUser.getAll = filter => {
+  userOffer.getAll = filter => {
     const today = utils.moment();
     const offerFiltering = {
       [Op.and]: [
@@ -56,7 +56,7 @@ module.exports = (sequelize, DataTypes) => {
       ].concat(validOfferConstraint(today))
     };
     if (filter.category) offerFiltering.categoryId = filter.category;
-    return emailUser
+    return userOffer
       .findAll({
         offset: filter.offset,
         limit: filter.limit,
@@ -87,21 +87,21 @@ module.exports = (sequelize, DataTypes) => {
         throw errors.databaseError(err.message);
       });
   };
-  emailUser.createModel = newEmailUser =>
-    emailUser.create(newEmailUser).catch(err => {
+  userOffer.createModel = newEmailUser =>
+    userOffer.create(newEmailUser).catch(err => {
       if (err instanceof Sequelize.UniqueConstraintError && err.fields.email_users_email_offer_id) {
         throw errors.existingUser;
       } else {
         throw errors.databaseError(err.message);
       }
     });
-  emailUser.getBy = filter =>
-    emailUser.findOne({ where: filter }).catch(err => {
+  userOffer.getBy = filter =>
+    userOffer.findOne({ where: filter }).catch(err => {
       throw errors.databaseError(err.message);
     });
-  emailUser.associate = models => {
-    emailUser.belongsTo(models.offer, { as: 'offer' });
+  userOffer.associate = models => {
+    userOffer.belongsTo(models.offer, { as: 'offer' });
   };
 
-  return emailUser;
+  return userOffer;
 };

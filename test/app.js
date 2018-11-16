@@ -17,7 +17,7 @@ const destroyTableOrder = [
   'type_offers',
   'offers',
   'codes',
-  'email_users',
+  'user_offers',
   'terms_and_conditions',
   'targets'
 ];

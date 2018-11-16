@@ -5,7 +5,7 @@ const express = require('express'),
   path = require('path'),
   config = require('./config'),
   routes = require('./app/routes'),
-  { jobNotify } = require('./app/jobs/notify'),
+  { jobCreator } = require('./app/jobs/creatorUserOffer'),
   errors = require('./app/middlewares/errors'),
   i18next = require('./app/services/i18next'),
   migrationsManager = require('./migrations'),
@@ -52,7 +52,7 @@ const init = () => {
     })
     .then(() => i18next.init())
     .then(() => {
-      if (config.isTesting) jobNotify.start();
+      if (config.isTesting) jobCreator.start();
 
       routes.init(app);
 

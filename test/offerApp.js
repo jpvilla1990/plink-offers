@@ -10,12 +10,13 @@ const chai = require('chai'),
   factoryManager = require('../test/factories/factoryManager'),
   factoryOffer = require('../test/factories/offer').nameFactory,
   factoryCategory = require('../test/factories/category').nameFactory,
-  factoryEmailUser = require('../test/factories/emailUser').nameFactory,
-  factoryCode = require('../test/factories/code').nameFactory;
+  factoryUserOffer = require('../test/factories/userOffer').nameFactory,
+  factoryCode = require('../test/factories/code').nameFactory,
+  email = 'julian.molina@wolox.com.ar';
+
+const generateToken = (mail = email) => `bearer ${token.generate({ email: mail })}`;
 
 describe('/offer-app/offers GET', () => {
-  const generateToken = (email = 'julian.molina@wolox.com.ar') => `bearer ${token.generate({ email })}`,
-    email = 'julian.molina@wolox.com.ar';
   simple.mock(requestService, 'getPoints').resolveWith({
     address: 'Cochabamba 3254',
     reference: 'Next to McDonalds',
@@ -27,13 +28,15 @@ describe('/offer-app/offers GET', () => {
       factoryManager.create(factoryCategory, { name: 'travel' }),
       factoryManager.create(factoryCategory, { name: 'food' }),
       factoryManager.create(factoryOffer, { categoryId: 1 }),
+      factoryManager.create(factoryOffer, { categoryId: 2 }),
       factoryManager.create(factoryOffer, { categoryId: 2 })
     ]).then(() => {
       Promise.all([
         factoryManager.create(factoryCode, { email, offerId: 1 }),
         factoryManager.create(factoryCode, { email, offerId: 2 }),
-        factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
-        factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+        factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
+        factoryManager.create(factoryUserOffer, { email, offerId: 2 }),
+        factoryManager.create(factoryUserOffer, { email: 'domain@fake.com.ar', offerId: 2 })
       ]).then(() => {
         chai
           .request(server)
@@ -60,8 +63,8 @@ describe('/offer-app/offers GET', () => {
       return Promise.all([
         factoryManager.create(factoryCode, { email, offerId: 1 }),
         factoryManager.create(factoryCode, { email, offerId: 2 }),
-        factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
-        factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+        factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
+        factoryManager.create(factoryUserOffer, { email, offerId: 2 })
       ]);
     });
   };
@@ -107,8 +110,8 @@ describe('/offer-app/offers GET', () => {
         Promise.all([
           factoryManager.create(factoryCode, { email, offerId: 1 }),
           factoryManager.create(factoryCode, { email, offerId: 2 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+          factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
+          factoryManager.create(factoryUserOffer, { email, offerId: 2 })
         ])
           .then()
           .then(() => {
@@ -133,8 +136,8 @@ describe('/offer-app/offers GET', () => {
         Promise.all([
           factoryManager.create(factoryCode, { email, offerId: 1 }),
           factoryManager.create(factoryCode, { email, offerId: 2 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+          factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
+          factoryManager.create(factoryUserOffer, { email, offerId: 2 })
         ])
           .then()
           .then(() => {
@@ -159,34 +162,8 @@ describe('/offer-app/offers GET', () => {
         Promise.all([
           factoryManager.create(factoryCode, { email, offerId: 1 }),
           factoryManager.create(factoryCode, { email, offerId: 2 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
-        ])
-          .then()
-          .then(() => {
-            chai
-              .request(server)
-              .get(`/offer-app/offers?page=0`)
-              .set('authorization', generateToken())
-              .then(response => {
-                response.should.have.status(200);
-                response.body.count.should.eqls(0);
-                response.body.offers.length.should.eqls(0);
-                done();
-              });
-          });
-      });
-  });
-
-  it('should be success get no offers, because they not began', done => {
-    Promise.all([factoryManager.create('NotBeganOffer'), factoryManager.create('NotBeganOffer')])
-      .then()
-      .then(() => {
-        Promise.all([
-          factoryManager.create(factoryCode, { email, offerId: 1 }),
-          factoryManager.create(factoryCode, { email, offerId: 2 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+          factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
+          factoryManager.create(factoryUserOffer, { email, offerId: 2 })
         ])
           .then()
           .then(() => {
@@ -211,8 +188,8 @@ describe('/offer-app/offers GET', () => {
         Promise.all([
           factoryManager.create(factoryCode, { email, offerId: 1 }),
           factoryManager.create(factoryCode, { email, offerId: 2 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+          factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
+          factoryManager.create(factoryUserOffer, { email, offerId: 2 })
         ])
           .then()
           .then(() => {
@@ -237,8 +214,8 @@ describe('/offer-app/offers GET', () => {
         Promise.all([
           factoryManager.create(factoryCode, { email, offerId: 1 }),
           factoryManager.create(factoryCode, { email, offerId: 2 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+          factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
+          factoryManager.create(factoryUserOffer, { email, offerId: 2 })
         ])
           .then()
           .then(() => {
@@ -263,8 +240,8 @@ describe('/offer-app/offers GET', () => {
         Promise.all([
           factoryManager.create(factoryCode, { email, offerId: 1 }),
           factoryManager.create(factoryCode, { email, offerId: 2 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+          factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
+          factoryManager.create(factoryUserOffer, { email, offerId: 2 })
         ])
           .then()
           .then(() => {
@@ -289,8 +266,86 @@ describe('/offer-app/offers GET', () => {
         Promise.all([
           factoryManager.create(factoryCode, { email, offerId: 1 }),
           factoryManager.create(factoryCode, { email, offerId: 2 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+          factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
+          factoryManager.create(factoryUserOffer, { email, offerId: 2 })
+        ])
+          .then()
+          .then(() => {
+            chai
+              .request(server)
+              .get(`/offer-app/offers?page=0`)
+              .set('authorization', generateToken())
+              .then(response => {
+                response.should.have.status(200);
+                response.body.count.should.eqls(0);
+                response.body.offers.length.should.eqls(0);
+                done();
+              });
+          });
+      });
+  });
+
+  it('should be success get no offers, because they not began', done => {
+    Promise.all([factoryManager.create('NotBeganOffer'), factoryManager.create('NotBeganOffer')])
+      .then()
+      .then(() => {
+        Promise.all([
+          factoryManager.create(factoryCode, { email, offerId: 1 }),
+          factoryManager.create(factoryCode, { email, offerId: 2 }),
+          factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
+          factoryManager.create(factoryUserOffer, { email, offerId: 2 })
+        ])
+          .then()
+          .then(() => {
+            chai
+              .request(server)
+              .get(`/offer-app/offers?page=0`)
+              .set('authorization', generateToken())
+              .then(response => {
+                response.should.have.status(200);
+                response.body.count.should.eqls(0);
+                response.body.offers.length.should.eqls(0);
+                done();
+              });
+          });
+      });
+  });
+
+  it('should be success get no offers, because they are expired', done => {
+    Promise.all([factoryManager.create('ExpiredOffer'), factoryManager.create('ExpiredOffer')])
+      .then()
+      .then(() => {
+        Promise.all([
+          factoryManager.create(factoryCode, { email, offerId: 1 }),
+          factoryManager.create(factoryCode, { email, offerId: 2 }),
+          factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
+          factoryManager.create(factoryUserOffer, { email, offerId: 2 })
+        ])
+          .then()
+          .then(() => {
+            chai
+              .request(server)
+              .get(`/offer-app/offers?page=0`)
+              .set('authorization', generateToken())
+              .then(response => {
+                response.should.have.status(200);
+                response.body.count.should.eqls(0);
+                response.body.offers.length.should.eqls(0);
+                done();
+              });
+          });
+      });
+  });
+
+  it('should be success get no offers, because they not began', done => {
+    Promise.all([factoryManager.create('NotBeganOffer'), factoryManager.create('NotBeganOffer')])
+      .then()
+      .then(() => {
+        Promise.all([
+          factoryManager.create(factoryCode, { email, offerId: 1 }),
+          factoryManager.create(factoryCode, { email, offerId: 2 }),
+          factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
+          factoryManager.create(factoryUserOffer, { email, offerId: 2 })
         ])
           .then()
           .then(() => {
@@ -318,8 +373,8 @@ describe('/offer-app/offers GET', () => {
         Promise.all([
           factoryManager.create(factoryCode, { email, offerId: 1 }),
           factoryManager.create(factoryCode, { email, offerId: 2 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 2 })
+          factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
+          factoryManager.create(factoryUserOffer, { email, offerId: 2 })
         ])
           .then()
           .then(() => {
@@ -345,8 +400,8 @@ describe('/offer-app/offers GET', () => {
         Promise.all([
           factoryManager.create(factoryCode, { email, offerId: 1 }),
           factoryManager.create(factoryCode, { email, offerId: 2 }),
-          factoryManager.create(factoryEmailUser, { email, offerId: 1 }),
-          factoryManager.create(factoryEmailUser, { email: otherEmail, offerId: 2 })
+          factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
+          factoryManager.create(factoryUserOffer, { email: otherEmail, offerId: 2 })
         ])
           .then()
           .then(() => {
@@ -356,8 +411,8 @@ describe('/offer-app/offers GET', () => {
               .set('authorization', generateToken())
               .then(response => {
                 response.should.have.status(200);
-                response.body.count.should.eqls(2);
-                response.body.offers.length.should.eqls(2);
+                response.body.count.should.eqls(1);
+                response.body.offers.length.should.eqls(1);
                 done();
               });
           });
@@ -377,7 +432,7 @@ describe('/offer-app/offers GET', () => {
   it('should be fail because getPoints does not work', done => {
     simple.restore();
     Promise.all([factoryManager.create(factoryOffer, { retail: 4635 })]).then(() =>
-      Promise.all([factoryManager.create(factoryEmailUser, { email, offerId: 1 })]).then(() =>
+      Promise.all([factoryManager.create(factoryUserOffer, { email, offerId: 1 })]).then(() =>
         chai
           .request(server)
           .get(`/offer-app/offers`)
@@ -396,8 +451,6 @@ describe('/offer-app/offers GET', () => {
 });
 
 describe('/offer-app/codes GET', () => {
-  const generateToken = (email = 'julian.molina@wolox.com.ar') => `bearer ${token.generate({ email })}`,
-    email = 'julian.molina@wolox.com.ar';
   it('should be success but the page was not sent', done => {
     chai
       .request(server)
@@ -560,7 +613,9 @@ describe('/offer-app/codes GET', () => {
         .create('ActiveOffer')
         .then(off => {
           idOffer = off.dataValues.id;
-          factoryManager.create(factoryCode, { email, offerId: off.dataValues.id });
+          return factoryManager
+            .create(factoryCode, { email, offerId: off.dataValues.id })
+            .then(() => factoryManager.create(factoryUserOffer, { email, offerId: 1 }));
         })
         .then(() =>
           chai
@@ -584,15 +639,17 @@ describe('/offer-app/codes GET', () => {
         posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
       });
       factoryManager.create('ActiveOffer').then(off =>
-        chai
-          .request(server)
-          .get(`/offer-app/offers/${off.dataValues.id}`)
-          .set('authorization', generateToken())
-          .then(response => {
-            response.should.have.status(200);
-            expect(response.body.code).to.be.undefined;
-            done();
-          })
+        factoryManager.create(factoryUserOffer, { email, offerId: 1 }).then(() =>
+          chai
+            .request(server)
+            .get(`/offer-app/offers/${off.dataValues.id}`)
+            .set('authorization', generateToken())
+            .then(response => {
+              response.should.have.status(200);
+              expect(response.body.code).to.be.undefined;
+              done();
+            })
+        )
       );
     });
     it('Should be fail because the offer does not exist', done => {
