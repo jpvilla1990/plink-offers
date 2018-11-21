@@ -600,135 +600,166 @@ describe('/offer-app/codes GET', () => {
         })
     );
   });
-  describe('/offer-app/offers/:id_offer GET', () => {
-    it('should be success get a offer with code', done => {
-      simple.mock(requestService, 'getPoints').resolveWith({
-        address: 'Cochabamba 3254',
-        reference: 'Next to McDonalds',
-        commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
-        posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
-      });
-      let idOffer;
-      factoryManager
-        .create('ActiveOffer')
-        .then(off => {
-          idOffer = off.dataValues.id;
-          return factoryManager
-            .create(factoryCode, { email, offerId: off.dataValues.id })
-            .then(() => factoryManager.create(factoryUserOffer, { email, offerId: 1 }));
-        })
-        .then(() =>
-          chai
-            .request(server)
-            .get(`/offer-app/offers/${idOffer}`)
-            .set('authorization', generateToken())
-            .then(response => {
-              response.should.have.status(200);
-              expect(response.body.code).to.not.be.undefined;
-              dictum.chai(response);
-              done();
-            })
-        );
+});
+describe('/offer-app/offers/:id_offer GET', () => {
+  it('should be success get a offer with code', done => {
+    simple.mock(requestService, 'getPoints').resolveWith({
+      address: 'Cochabamba 3254',
+      reference: 'Next to McDonalds',
+      commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
+      posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
     });
-    it('should be success get a offer without code', done => {
-      simple.restore(requestService, 'getPoints');
-      simple.mock(requestService, 'getPoints').resolveWith({
-        address: 'Cochabamba 3254',
-        reference: 'Next to McDonalds',
-        commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
-        posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
-      });
-      factoryManager.create('ActiveOffer').then(off =>
-        factoryManager.create(factoryUserOffer, { email, offerId: 1 }).then(() =>
-          chai
-            .request(server)
-            .get(`/offer-app/offers/${off.dataValues.id}`)
-            .set('authorization', generateToken())
-            .then(response => {
-              response.should.have.status(200);
-              expect(response.body.code).to.be.undefined;
-              done();
-            })
-        )
-      );
-    });
-    it('Should be fail because the offer does not exist', done => {
-      factoryManager.create(factoryOffer).then(off =>
+    let idOffer;
+    factoryManager
+      .create('ActiveOffer')
+      .then(off => {
+        idOffer = off.id;
+        return factoryManager
+          .create(factoryCode, { email, offerId: off.id })
+          .then(() => factoryManager.create(factoryUserOffer, { email, offerId: off.id }));
+      })
+      .then(() =>
         chai
           .request(server)
-          .get(`/offer-app/offers/1236784`)
+          .get(`/offer-app/offers/${idOffer}`)
           .set('authorization', generateToken())
-          .then(err => {
-            err.body.should.have.property('message');
-            expect(err.body.message).to.equal('Offer Not Found');
-            err.body.should.have.property('internal_code');
-            expect(err.body.internal_code).to.equal('offer_not_found');
+          .then(response => {
+            response.should.have.status(200);
+            expect(response.body.code).to.not.be.undefined;
+            dictum.chai(response);
             done();
           })
       );
-    });
   });
-  describe('/offers-public/users POST', () => {
-    it('should be success when the user exist', done => {
-      simple.mock(cognitoService.cognito, 'adminGetUser').returnWith({
+  it('should be success get a offer without code', done => {
+    simple.restore(requestService, 'getPoints');
+    simple.mock(requestService, 'getPoints').resolveWith({
+      address: 'Cochabamba 3254',
+      reference: 'Next to McDonalds',
+      commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
+      posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
+    });
+    factoryManager.create('ActiveOffer').then(off =>
+      factoryManager.create(factoryUserOffer, { email, offerId: 1 }).then(() =>
+        chai
+          .request(server)
+          .get(`/offer-app/offers/${off.id}`)
+          .set('authorization', generateToken())
+          .then(response => {
+            response.should.have.status(200);
+            expect(response.body.code).to.be.undefined;
+            done();
+          })
+      )
+    );
+  });
+  it('Should be fail because the offer does not exist', done => {
+    factoryManager.create(factoryOffer).then(off =>
+      chai
+        .request(server)
+        .get(`/offer-app/offers/1236784`)
+        .set('authorization', generateToken())
+        .then(err => {
+          err.body.should.have.property('message');
+          expect(err.body.message).to.equal('Offer Not Found');
+          err.body.should.have.property('internal_code');
+          expect(err.body.internal_code).to.equal('offer_not_found');
+          done();
+        })
+    );
+  });
+});
+describe('/offers-public/users POST', () => {
+  it('should be success when the user exist', done => {
+    simple.mock(cognitoService.cognito, 'adminGetUser').returnWith({
+      promise: () => Promise.resolve()
+    });
+    chai
+      .request(server)
+      .post(`/offers-public/users`)
+      .send({ email })
+      .set('authorization', generateToken())
+      .then(response => {
+        response.should.have.status(200);
+        expect(response.body.exist).to.be.true;
+        dictum.chai(response);
+        simple.restore(cognitoService.cognito, 'adminGetUser');
+        done();
+      });
+  });
+  it('should be success when the user does not exist', done => {
+    simple.mock(cognitoService.cognito, 'adminGetUser').returnWith({
+      promise: () => Promise.reject({ code: 'UserNotFoundException' })
+    });
+    chai
+      .request(server)
+      .post(`/offers-public/users`)
+      .send({ email })
+      .set('authorization', generateToken())
+      .then(response => {
+        response.should.have.status(200);
+        expect(response.body.exist).to.be.false;
+        simple.restore(cognitoService.cognito, 'adminGetUser');
+        done();
+      });
+  });
+  it('should be fail because an error ocurred in cognito', done => {
+    simple.mock(cognitoService.cognito, 'adminGetUser').returnWith({
+      promise: () => Promise.reject({ code: 'InternalErrorException' })
+    });
+    chai
+      .request(server)
+      .post(`/offers-public/users`)
+      .send({ email })
+      .set('authorization', generateToken())
+      .then(response => {
+        response.body.should.have.property('message');
+        expect(response.body.message).to.equal('InternalErrorException');
+        response.body.should.have.property('internal_code');
+        expect(response.body.internal_code).to.equal('bad_request');
+        done();
+      });
+  });
+  it('should be fail because does not send email', done => {
+    chai
+      .request(server)
+      .post(`/offers-public/users`)
+      .set('authorization', generateToken())
+      .then(response => {
+        response.body.should.have.property('message');
+        expect(response.body.message).to.include('The email is required');
+        response.body.should.have.property('internal_code');
+        expect(response.body.internal_code).to.equal('bad_request');
+        done();
+      });
+  });
+  describe('/offer-app/login GET', () => {
+    it('should be success first login', done => {
+      simple.mock(cognitoService.cognito, 'adminUpdateUserAttributes').returnWith({
         promise: () => Promise.resolve()
       });
       chai
         .request(server)
-        .post(`/offers-public/users`)
-        .send({ email })
+        .put(`/offer-app/login`)
         .set('authorization', generateToken())
         .then(response => {
           response.should.have.status(200);
-          expect(response.body.exist).to.be.true;
           dictum.chai(response);
-          simple.restore(cognitoService.cognito, 'adminGetUser');
           done();
         });
     });
-    it('should be success when the user does not exist', done => {
-      simple.mock(cognitoService.cognito, 'adminGetUser').returnWith({
-        promise: () => Promise.reject({ code: 'UserNotFoundException' })
+    it('should be fail because fail cognito', done => {
+      simple.mock(cognitoService.cognito, 'adminUpdateUserAttributes').returnWith({
+        promise: () => Promise.reject({ code: 'AliasExistsException' })
       });
       chai
         .request(server)
-        .post(`/offers-public/users`)
-        .send({ email })
+        .put(`/offer-app/login`)
         .set('authorization', generateToken())
-        .then(response => {
-          response.should.have.status(200);
-          expect(response.body.exist).to.be.false;
-          simple.restore(cognitoService.cognito, 'adminGetUser');
-          done();
-        });
-    });
-    it('should be fail because an error ocurred in cognito', done => {
-      simple.mock(cognitoService.cognito, 'adminGetUser').returnWith({
-        promise: () => Promise.reject({ code: 'InternalErrorException' })
-      });
-      chai
-        .request(server)
-        .post(`/offers-public/users`)
-        .send({ email })
-        .set('authorization', generateToken())
-        .then(response => {
-          response.body.should.have.property('message');
-          expect(response.body.message).to.equal('InternalErrorException');
-          response.body.should.have.property('internal_code');
-          expect(response.body.internal_code).to.equal('bad_request');
-          done();
-        });
-    });
-    it('should be fail because does not send email', done => {
-      chai
-        .request(server)
-        .post(`/offers-public/users`)
-        .set('authorization', generateToken())
-        .then(response => {
-          response.body.should.have.property('message');
-          expect(response.body.message).to.include('The email is required');
-          response.body.should.have.property('internal_code');
-          expect(response.body.internal_code).to.equal('bad_request');
+        .then(err => {
+          err.should.have.status(400);
+          expect(err.body.message).to.be.eqls('AliasExistsException');
+          expect(err.body.internal_code).to.be.eqls('bad_request');
           done();
         });
     });

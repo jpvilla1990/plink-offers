@@ -9,6 +9,7 @@ const Offer = require('./controllers/offer'),
   code = require('./controllers/code'),
   { sendOfferDisabledByPlink } = require('./services/mailer'),
   auth = require('./middlewares/auth'),
+  user = require('./controllers/user'),
   validator = require('./middlewares/validator');
 
 exports.init = app => {
@@ -39,6 +40,7 @@ exports.init = app => {
   app.get('/offer-app/codes', [auth.requireEmail], userOffer.getCodes);
   app.post('/offer-app/offers/:id/code', [auth.requireEmail], code.createCodeApp);
   app.get('/offer-app/offers/:id', [auth.requireEmail], userOffer.getOffer);
+  app.put('/offer-app/login', [auth.requireEmail], user.updateFirstLogin);
   app.post('/offers-public/users', [validator.checkEmail, validator.validate], userOffer.checkAvailable);
   app.get('/offers-public/terms-and-conditions', termsAndConditions.get);
 };

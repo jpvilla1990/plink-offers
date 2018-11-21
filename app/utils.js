@@ -41,13 +41,15 @@ exports.moment = moment;
 
 exports.mask = email => {
   const userName = email.split('@');
-  if (userName[0].length <= 8) {
-    return `${'*'.repeat(5)}@${userName[1]}`;
-  } else {
-    return `${userName[0].slice(0, HIDE_EMAIL)}${'*'.repeat(4)}@${userName[1].slice(
+  if (userName[0].length <= config.common.server.count_mask_mail + 1) {
+    return `${'*'.repeat(config.common.server.count_mask_mail)}@${userName[1].slice(
       0,
       HIDE_EMAIL
-    )}${'*'.repeat(4)}`;
+    )}${'*'.repeat(config.common.server.count_mask_mail)}`;
+  } else {
+    return `${userName[0].slice(0, HIDE_EMAIL)}${'*'.repeat(
+      config.common.server.count_mask_mail
+    )}@${userName[1].slice(0, HIDE_EMAIL)}${'*'.repeat(config.common.server.count_mask_mail)}`;
   }
 };
 

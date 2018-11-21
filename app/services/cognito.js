@@ -22,3 +22,14 @@ exports.checkEmail = Username =>
       if (err.code === 'UserNotFoundException') return { exist: false };
       throw errors.badRequest(err.code);
     });
+exports.updateFirstLogin = Username =>
+  cognito
+    .adminUpdateUserAttributes({
+      Username,
+      UserPoolId: config.pool_id_users_app,
+      UserAttributes: [{ Name: 'custom:first_login', Value: 'false' }]
+    })
+    .promise()
+    .catch(err => {
+      throw errors.badRequest(err.code);
+    });
