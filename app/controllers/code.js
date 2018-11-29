@@ -5,7 +5,13 @@ const codeService = require('../services/code'),
   uniqueCode = require('../services/uniqueCode'),
   { sendNewCode, sendOfferExpired } = require('../services/mailer'),
   UserOffer = require('../models').user_offer,
-  { OFFER_DISABLED, OFFER_INACTIVE, OFFER_ACTIVE, OFFER_FINISHED } = require('../constants'),
+  {
+    OFFER_DISABLED,
+    OFFER_INACTIVE,
+    OFFER_ACTIVE,
+    OFFER_FINISHED,
+    OFFER_OUT_OF_STOCK
+  } = require('../constants'),
   requestService = require('../services/request'),
   { getOfferStatus } = require('../utils'),
   uuid = require('uuid');
@@ -104,7 +110,8 @@ exports.createCodeApp = (req, res, next) => {
   return Offer.getBy({ id: code.offerId, email: req.email })
     .then(off => {
       if (off) {
-        if (OFFER_ACTIVE === getOfferStatus(off.dataValues)) {
+        const status = getOfferStatus(off.dataValues);
+        if (OFFER_ACTIVE === status) {
           code.code = uuid().slice(0, 8);
           return uniqueCode.verify(code).then(newCode => {
             res.status(201);
@@ -117,7 +124,11 @@ exports.createCodeApp = (req, res, next) => {
             res.end();
           });
         } else {
-          throw errors.offerInactive;
+          throw {
+            [OFFER_OUT_OF_STOCK]: errors.offerOutOfStock,
+            [OFFER_FINISHED]: errors.offerExpire,
+            [OFFER_DISABLED]: errors.offerDisabled
+          }[status];
         }
       } else {
         throw errors.offerNotFound;

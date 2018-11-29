@@ -19,6 +19,7 @@ exports.EXISTING_USER = 'existing_user';
 exports.NONEXISTENTOFFER = 'nonexistent_offer';
 exports.OFFER_DISABLED = 'offer_disabled';
 exports.GROUP_ID_NOT_FOUND = 'group_id_not_found';
+exports.OFFER_OUT_OF_STOCK = 'offer_out_of_stock';
 exports.defaultError = message => internalError(message, exports.DEFAULT_ERROR);
 exports.userUnauthorized = internalError('User is not authorized', exports.USER_UNAUTHORIZED);
 exports.badRequest = message => internalError(message, exports.BAD_REQUEST);
@@ -31,6 +32,7 @@ exports.termsAndConditionsNotFound = internalError(
 exports.codeRedeemed = internalError('Code Redeemed', exports.CODE_REDEEMED);
 exports.offerInactive = internalError('Offer Inactive', exports.OFFER_INACTIVE);
 exports.offerExpire = internalError('Offer Expire', exports.OFFER_EXPIRE);
+exports.offerOutOfStock = internalError('Offer out of stock', exports.OFFER_OUT_OF_STOCK);
 exports.offerNotFound = internalError('Offer Not Found', exports.OFFER_NOT_FOUND);
 exports.existingMail = internalError('Already exist a code for this email', exports.EXISTING_MAIL);
 exports.existingUser = internalError('Already exist a user for this email', exports.EXISTING_USER);

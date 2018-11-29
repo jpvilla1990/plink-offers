@@ -1,5 +1,11 @@
 const moment = require('moment-timezone'),
-  { OFFER_ACTIVE, OFFER_INACTIVE, OFFER_DISABLED, OFFER_FINISHED } = require('./constants'),
+  {
+    OFFER_ACTIVE,
+    OFFER_INACTIVE,
+    OFFER_DISABLED,
+    OFFER_FINISHED,
+    OFFER_OUT_OF_STOCK
+  } = require('./constants'),
   { HIDE_EMAIL } = require('./constants'),
   config = require('../config');
 
@@ -13,7 +19,7 @@ exports.getOfferStatus = offer => {
     if (beforeBegin) {
       return OFFER_INACTIVE;
     } else if (afterBegin && beforeExpires) {
-      return offer.redemptions < offer.maxRedemptions ? OFFER_ACTIVE : OFFER_FINISHED;
+      return offer.redemptions < offer.maxRedemptions ? OFFER_ACTIVE : OFFER_OUT_OF_STOCK;
     } else {
       return OFFER_FINISHED;
     }
