@@ -28,7 +28,7 @@ exports.getImageUrl = (req, res, next) =>
 
 exports.create = (req, res, next) => {
   const offer = {
-    product: req.body.product,
+    product: req.body.product.trim(),
     begin: req.body.begin,
     expiration: req.body.expiration,
     categoryId: req.body.category,

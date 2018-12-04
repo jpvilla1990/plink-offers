@@ -1,5 +1,11 @@
 const moment = require('moment-timezone'),
-  { OFFER_ACTIVE, OFFER_INACTIVE, OFFER_DISABLED, OFFER_FINISHED } = require('./constants'),
+  {
+    OFFER_ACTIVE,
+    OFFER_INACTIVE,
+    OFFER_DISABLED,
+    OFFER_FINISHED,
+    OFFER_OUT_OF_STOCK
+  } = require('./constants'),
   { HIDE_EMAIL } = require('./constants'),
   config = require('../config');
 
@@ -13,7 +19,7 @@ exports.getOfferStatus = offer => {
     if (beforeBegin) {
       return OFFER_INACTIVE;
     } else if (afterBegin && beforeExpires) {
-      return offer.redemptions < offer.maxRedemptions ? OFFER_ACTIVE : OFFER_FINISHED;
+      return offer.redemptions < offer.maxRedemptions ? OFFER_ACTIVE : OFFER_OUT_OF_STOCK;
     } else {
       return OFFER_FINISHED;
     }
@@ -41,13 +47,15 @@ exports.moment = moment;
 
 exports.mask = email => {
   const userName = email.split('@');
-  if (userName[0].length <= 8) {
-    return `${'*'.repeat(5)}@${userName[1]}`;
-  } else {
-    return `${userName[0].slice(0, HIDE_EMAIL)}${'*'.repeat(4)}@${userName[1].slice(
+  if (userName[0].length <= config.common.server.count_mask_mail + 1) {
+    return `${'*'.repeat(config.common.server.count_mask_mail)}@${userName[1].slice(
       0,
       HIDE_EMAIL
-    )}${'*'.repeat(4)}`;
+    )}${'*'.repeat(config.common.server.count_mask_mail)}`;
+  } else {
+    return `${userName[0].slice(0, HIDE_EMAIL)}${'*'.repeat(
+      config.common.server.count_mask_mail
+    )}@${userName[1].slice(0, HIDE_EMAIL)}${'*'.repeat(config.common.server.count_mask_mail)}`;
   }
 };
 

@@ -9,6 +9,7 @@ const chai = require('chai'),
   Code = require('../app/models').code,
   mailer = require('../app/services/mailer'),
   simple = require('simple-mock'),
+  { OFFER_OUT_OF_STOCK } = require('../app/constants'),
   token = require('../test/factories/token'),
   factoryManager = require('../test/factories/factoryManager'),
   factoryCategory = require('../test/factories/category').nameFactory,
@@ -341,6 +342,36 @@ describe('/retail/:id/code/:code GET', () => {
         });
     });
   });
+  it('should be success to get code with offer out of stock', done => {
+    factoryManager.create(factoryOffer, { redemptions: 1, maxRedemptions: 1 }).then(off =>
+      Promise.all([
+        factoryManager.create(factoryUserOffer, { email: 'julian.molina@wolox.com.ar', offerId: off.id }),
+        factoryManager.create(factoryUserOffer, { email: 'julian.molina14@wolox.com.ar', offerId: off.id })
+      ]).then(() =>
+        factoryManager.create(factoryCode, { email: 'julian.molina@wolox.com.ar', offerId: 1 }).then(code =>
+          factoryManager
+            .create(factoryCode, { email: 'julian.molina14@wolox.com.ar', offerId: 1 })
+            .then(codeOutOfStock =>
+              chai
+                .request(server)
+                .post(`/retail/11/code/${code.code}/redeem`)
+                .set('authorization', generateToken())
+                .then(() =>
+                  chai
+                    .request(server)
+                    .get(`/retail/11/code/${codeOutOfStock.code}`)
+                    .set('authorization', generateToken())
+                    .then(res => {
+                      expect(res.status).to.be.eql(200);
+                      expect(res.body.status).to.be.eql(OFFER_OUT_OF_STOCK);
+                      done();
+                    })
+                )
+            )
+        )
+      )
+    );
+  });
   it('should fail get of code because not exist', done => {
     chai
       .request(server)
@@ -369,7 +400,8 @@ describe('/retail/:id/code/:code GET', () => {
   });
 });
 describe('/offer-app/offers/:id/code POST', () => {
-  const generateTokenApp = (email = 'julian.molina@wolox.com.ar') => `bearer ${token.generate({ email })}`;
+  const generateTokenApp = (email = 'julian.molina@wolox.com.ar') =>
+    `bearer ${token.generate({ email, points: '11' })}`;
   it('should be success to create a code', done => {
     factoryManager.create(factoryOffer).then(off =>
       factoryManager

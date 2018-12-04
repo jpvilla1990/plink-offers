@@ -36,7 +36,8 @@ const config = {
       info_retail: process.env.URL_INFO_RETAIL,
       email_new_offer: process.env.EMAIL_OFFER,
       email_plink: process.env.EMAIL_PLINK,
-      url_land: process.env.URL_LAND
+      url_land: process.env.URL_LAND,
+      count_mask_mail: process.env.COUNT_MASK_MAIL || 4
     },
     database: {
       url: process.env.NODE_API_DB_URL,
