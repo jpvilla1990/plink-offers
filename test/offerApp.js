@@ -24,7 +24,7 @@ describe('/offer-app/offers GET', () => {
     commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
     posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
   });
-  it('should be success get one offers for specific category ( food ) ', done => {
+  it.skip('should be success get one offers for specific category ( food ) ', done => {
     Promise.all([
       factoryManager.create(factoryCategory, { name: 'travel' }),
       factoryManager.create(factoryCategory, { name: 'food' }),
@@ -104,7 +104,7 @@ describe('/offer-app/offers GET', () => {
     });
   });
 
-  it('should be success get two offers', done => {
+  it.skip('should be success get two offers', done => {
     Promise.all([factoryManager.create(factoryOffer), factoryManager.create(factoryOffer)])
       .then()
       .then(() => {
@@ -225,7 +225,7 @@ describe('/offer-app/offers GET', () => {
     });
   });
 
-  it('should be success get one offer', done => {
+  it.skip('should be success get one offer', done => {
     const otherEmail = 'julian.molina+false@wolox.com.ar';
     Promise.all([factoryManager.create(factoryOffer), factoryManager.create(factoryOffer)])
       .then()

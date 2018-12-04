@@ -105,11 +105,6 @@ module.exports = (sequelize, DataTypes) => {
           as: 'code',
           where: { email: filter.email },
           required: false
-        },
-        {
-          model: sequelize.models.user_offer,
-          as: 'user_offer',
-          where: { email: filter.email }
         }
       ];
       delete filter.email;
