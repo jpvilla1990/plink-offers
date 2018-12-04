@@ -70,11 +70,6 @@ exports.getAllApp = params => {
         as: 'code',
         where: { email: params.email },
         required: false
-      },
-      {
-        model: sequelize.models.user_offer,
-        as: 'user_offer',
-        where: { email: params.email }
       }
     ]
   };
@@ -129,11 +124,6 @@ exports.getByApp = ({ email, id }) =>
   Offer.findOne({
     where: { id },
     include: [
-      {
-        model: sequelize.models.user_offer,
-        as: 'user_offer',
-        where: { email }
-      },
       {
         model: sequelize.models.category,
         as: 'category'
