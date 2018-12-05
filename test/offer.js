@@ -19,7 +19,13 @@ const chai = require('chai'),
   headerName = config.common.session.header_name,
   Offer = require('../app/models').offer,
   UserOffer = require('../app/models').user_offer,
-  { OFFER_ACTIVE, OFFER_INACTIVE, OFFER_DISABLED, OFFER_FINISHED } = require('../app/constants'),
+  {
+    OFFER_ACTIVE,
+    OFFER_INACTIVE,
+    OFFER_DISABLED,
+    OFFER_FINISHED,
+    OFFER_OUT_OF_STOCK
+  } = require('../app/constants'),
   ZendeskService = require('../app/services/zendesk'),
   should = chai.should(),
   expect = chai.expect,
@@ -174,6 +180,28 @@ describe('/retail/:id/offers GET', () => {
       });
     });
   });
+  it('should be successful for a offer out of stock', done => {
+    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+        factoryManager.create('ExpiredOffer', { maxRedemptions: 1, redemptions: 1 }).then(off => {
+          chai
+            .request(server)
+            .get('/retail/1222/offers?page=0')
+            .set(headerName, tokenExample)
+            .then(res => {
+              res.should.have.status(200);
+              res.body.should.have.property('count');
+              res.body.should.have.property('offers');
+              res.body.offers.length.should.eql(1);
+              res.body.offers[0].status.should.eqls(OFFER_OUT_OF_STOCK);
+              dictum.chai(res);
+              done();
+            });
+        });
+      });
+    });
+  });
+
   it('should be successful  with one page but without limit', done => {
     factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
