@@ -69,5 +69,8 @@ exports.getDataForBack = offers =>
     expires: value.expiration,
     status: exports.getOfferStatus(value.dataValues),
     creationDate: moment(value.dataValues.created_at).format('YYYY-MM-DD'),
-    title: `${value.valueStrategy} en ${value.product}`
+    title: `${value.valueStrategy} en ${value.product}`,
+    description: value.description,
+    special: value.category.special,
+    linkTerms: value.linkTerms
   }));

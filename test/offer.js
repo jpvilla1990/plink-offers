@@ -523,12 +523,17 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
     beforeEach(() =>
       Promise.all([factoryManager.create(factoryCategory), factoryManager.create(factoryTypeOffer)]).then(
         () =>
-          Promise.all([
-            factoryManager.create(factoryOffer, { product: 'hamburguer', nit: 12 }),
-            factoryManager.create(factoryOffer, { product: 'hamburguer with cheese', nit: 34 }),
-            factoryManager.create(factoryOffer, { nit: 1333 }),
-            factoryManager.create(factoryOffer, { nit: 1234 })
-          ])
+          factoryManager
+            .create(factoryCategory, { special: true })
+            .then(cat =>
+              Promise.all([
+                factoryManager.create(factoryOffer, { product: 'hamburguer', nit: 12 }),
+                factoryManager.create(factoryOffer, { product: 'hamburguer with cheese', nit: 34 }),
+                factoryManager.create(factoryOffer, { nit: 1333 }),
+                factoryManager.create(factoryOffer, { nit: 1234 }),
+                factoryManager.create('SpecialOffer', { categoryId: cat.id, description: 'bancolombia' })
+              ])
+            )
       ));
     it('should be successful with filter ', done => {
       chai
@@ -547,7 +552,7 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
         .get(`/back/offers?page=1&limit=2`)
         .then(res => {
           res.should.have.status(200);
-          res.body.pages.should.eqls(2);
+          res.body.pages.should.eqls(3);
           res.body.offers.length.should.eqls(2);
           done();
         });
@@ -582,6 +587,18 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
           res.should.have.status(200);
           res.body.pages.should.eqls(1);
           res.body.offers.length.should.eqls(2);
+          done();
+        });
+    });
+    it('should be successful with filter by description for special offer ', done => {
+      chai
+        .request(server)
+        .get(`/back/offers?filter=banco`)
+        .then(res => {
+          res.should.have.status(200);
+          res.body.pages.should.eqls(1);
+          res.body.offers.length.should.eqls(1);
+          res.body.offers[0].special.should.eqls(true);
           done();
         });
     });
