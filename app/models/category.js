@@ -15,7 +15,6 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true
     }
   );
-
   category.findAllCategories = condition =>
     category.findAll({ where: condition, order: [['special', 'DESC']] }).catch(err => {
       throw errors.databaseError(err.message);
