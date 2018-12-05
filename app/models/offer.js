@@ -67,6 +67,13 @@ module.exports = (sequelize, DataTypes) => {
       },
       ranges: {
         type: DataTypes.STRING
+      },
+      description: {
+        type: DataTypes.STRING
+      },
+      linkTerms: {
+        type: DataTypes.STRING,
+        field: 'link'
       }
     },
     {

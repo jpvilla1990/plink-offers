@@ -193,32 +193,31 @@ describe('/retail/:id/offers GET', () => {
       });
     });
   });
-  it('should be successful with offers ordered', done => {
+  it('should be successful with offers ordered by creation time', done => {
+    // The time is set so that the offers have different creation times.
     Promise.all([
       factoryManager.create(factoryCategory, { name: 'travel' }),
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
       factoryManager.create(factoryOffer, { product: 'first', retail: 1222 })
-    ])
-      .then()
-      .then(() =>
-        setTimeout(
-          () =>
-            factoryManager.create(factoryOffer, { product: 'second', retail: 1222 }).then(() => {
-              chai
-                .request(server)
-                .get('/retail/1222/offers?page=0')
-                .set(headerName, tokenExample)
-                .then(res => {
-                  res.should.have.status(200);
-                  res.body.should.have.property('count');
-                  res.body.should.have.property('offers');
-                  res.body.offers[0].product.should.eql('second');
-                  done();
-                });
-            }),
-          1000
-        )
-      );
+    ]).then(() =>
+      setTimeout(
+        () =>
+          factoryManager.create(factoryOffer, { product: 'second', retail: 1222 }).then(() => {
+            chai
+              .request(server)
+              .get('/retail/1222/offers?page=0')
+              .set(headerName, tokenExample)
+              .then(res => {
+                res.should.have.status(200);
+                res.body.should.have.property('count');
+                res.body.should.have.property('offers');
+                res.body.offers[0].product.should.eql('second');
+                done();
+              });
+          }),
+        1000
+      )
+    );
   });
   it('should be fail because in the query doesnt exist page', done => {
     chai

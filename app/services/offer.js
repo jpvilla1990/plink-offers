@@ -31,9 +31,16 @@ exports.getAllApp = params => {
   const today = utils.moment().format('YYYY-MM-DD'),
     offerFiltering = {
       [Op.and]: [
-        Sequelize.where(Sequelize.fn('lower', Sequelize.col('product')), {
-          [Op.like]: `%${params.name.toLowerCase()}%`
-        }),
+        {
+          [Op.or]: [
+            Sequelize.where(Sequelize.fn('lower', Sequelize.col('product')), {
+              [Op.like]: `%${params.name.toLowerCase()}%`
+            }),
+            Sequelize.where(Sequelize.fn('lower', Sequelize.col('offer.description')), {
+              [Op.like]: `%${params.name.toLowerCase()}%`
+            })
+          ]
+        },
         {
           begin: {
             [Op.lte]: today
@@ -57,7 +64,6 @@ exports.getAllApp = params => {
   if (params.category) offerFiltering.categoryId = params.category;
   const paramsQuery = {
     offset: params.offset,
-    where: offerFiltering,
     limit: params.limit,
     order: [['created_at', 'DESC']],
     include: [
@@ -71,9 +77,11 @@ exports.getAllApp = params => {
         where: { email: params.email },
         required: false
       }
-    ]
+    ],
+    where: offerFiltering,
+    subQuery: false
   };
-  return Offer.findAll(paramsQuery).catch(err => {
+  return Offer.findAndCountAll(paramsQuery).catch(err => {
     throw errors.databaseError(err.message);
   });
 };
@@ -89,6 +97,9 @@ exports.getDataFromOffers = list =>
           product: value.dataValues.product,
           valueStrategy: value.dataValues.valueStrategy,
           expires: value.dataValues.expiration,
+          special: value.dataValues.category.special,
+          description: value.dataValues.description,
+          linkTerms: value.dataValues.linkTerms,
           maxRedemptions: value.dataValues.maxRedemptions,
           begin: value.dataValues.begin,
           retailName: rv.commerce.description,

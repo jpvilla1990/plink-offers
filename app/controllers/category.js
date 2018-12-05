@@ -1,6 +1,12 @@
 const Category = require('../models').category;
 
-exports.getAllCategories = (req, res, next) =>
-  Category.findAll()
+const getAll = condition => Category.findAllCategories(condition);
+
+exports.getAllCategoriesApp = (req, res, next) =>
+  getAll()
+    .then(result => res.send({ result }))
+    .catch(next);
+exports.getAllCategoriesDashboard = (req, res, next) =>
+  getAll({ special: false })
     .then(result => res.send({ result }))
     .catch(next);

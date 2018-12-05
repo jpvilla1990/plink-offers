@@ -17,7 +17,7 @@ exports.init = app => {
   app.get('/image-offer', Offer.getImageUrl);
   app.get('/retail/:id/offers', [auth.requireRetail], Offer.getAll);
   app.post('/offers/:id/code', [validator.checkEmailHash, validator.validate], Code.create);
-  app.get('/categories', category.getAllCategories);
+  app.get('/categories', category.getAllCategoriesDashboard);
   app.get('/type-offers', typeOffer.getAllTypes);
   app.get('/ranges', target.getAgeRanges);
   app.get('/genders', target.getAllGenders);
@@ -35,7 +35,7 @@ exports.init = app => {
   app.patch('/back/offers/:id_offer', Offer.disableOffer(sendOfferDisabledByPlink));
   app.get('/back/offers/:id_offer', Offer.getOffer(offerService.getDataFromRetail));
   app.patch('/retail/:id/offers/:id_offer', [auth.requireRetail], Offer.disableOffer());
-  app.get('/offer-app/categories', category.getAllCategories);
+  app.get('/offer-app/categories', category.getAllCategoriesApp);
   app.get('/offer-app/offers', [auth.requireEmail], userOffer.getAll);
   app.get('/offer-app/codes', [auth.requireEmail], userOffer.getCodes);
   app.post('/offer-app/offers/:id/code', [auth.requireEmail], code.createCodeApp);

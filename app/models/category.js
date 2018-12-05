@@ -7,7 +7,8 @@ module.exports = (sequelize, DataTypes) => {
     'category',
     {
       name: DataTypes.STRING,
-      description: DataTypes.STRING
+      description: DataTypes.STRING,
+      special: DataTypes.BOOLEAN
     },
     {
       paranoid: true,
@@ -15,11 +16,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  category.findAllCategories = () => {
-    return category.findAll().catch(err => {
+  category.findAllCategories = condition =>
+    category.findAll({ where: condition, order: [['special', 'DESC']] }).catch(err => {
       throw errors.databaseError(err.message);
     });
-  };
   category.getBy = (filter, transaction = null) =>
     category.findOne({ where: filter, transaction }).catch(err => {
       throw errors.databaseError(err.message);

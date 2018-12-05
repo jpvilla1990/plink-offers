@@ -84,7 +84,8 @@ const config = {
       pool_id_users_app: process.env.BACK_USERS_POOL_ID,
       s3SignatureVersion: process.env.SIGNATURE_VERSION_S3 || 'v4',
       offers_images_cdn: process.env.OFFERS_IMAGES_CDN || 'images-offers-dev.plink.com.co'
-    }
+    },
+    environment: process.env.NODE_ENV
   }
 };
 
