@@ -122,3 +122,17 @@ factory.define('NoRedemptionsLeftOffer', Offer, {
   nit: 12345,
   active: true
 });
+
+factory.define('SpecialOffer', Offer, {
+  begin: moment().subtract(1, 'days'),
+  expiration: moment().add(10, 'days'),
+  retail: 1222,
+  imageUrl: factory.seq(
+    'Offer.image',
+    n => `'https://s3.amazonaws.com/plink-email-assets/plink_offers/${n}.jpg`
+  ),
+  categoryId: factory.assoc('Category', 'id'),
+  active: true,
+  linkUrl: factory.seq('Offer.link', n => `www.google.com/image-${n}`),
+  description: factory.seq('Offer.description', n => `description${n}`)
+});

@@ -162,7 +162,9 @@ const disable = (search, actionFinally) =>
             CodeService.getOfferRetailForCodes(result).then(data => {
               const dataForMap = search.retail ? result : data;
               return Promise.all(dataForMap.map(value => sendOfferDisabledToUserWithCode(value))).finally(
-                () => actionFinally(offer)
+                () => {
+                  if (!offer.category.special) return actionFinally(offer);
+                }
               );
             })
           )

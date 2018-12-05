@@ -1,5 +1,6 @@
 const EmailUser = require('../models').email_user,
   Offer = require('../models').offer,
+  Category = require('../models').category,
   serviceUserOffer = require('../services/userOffer'),
   serviceOffer = require('../services/offer'),
   serviceCognito = require('../services/cognito'),
@@ -14,11 +15,11 @@ exports.getAll = (req, res, next) => {
   return serviceOffer
     .getAllApp({ offset, limit, email: req.email, category, name })
     .then(userOffers =>
-      Promise.all(serviceOffer.getDataFromOffers(userOffers)).then(offersWithDataRetail => {
+      Promise.all(serviceOffer.getDataFromOffers(userOffers.rows)).then(offersWithDataRetail => {
         res.status(200);
         res.send({
-          pages: Math.ceil(offersWithDataRetail.length / limit),
-          count: offersWithDataRetail.length,
+          pages: Math.ceil(userOffers.count / limit),
+          count: userOffers.count,
           offers: offersWithDataRetail
         });
         res.end();

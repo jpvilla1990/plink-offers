@@ -193,32 +193,31 @@ describe('/retail/:id/offers GET', () => {
       });
     });
   });
-  it('should be successful with offers ordered', done => {
+  it('should be successful with offers ordered by creation time', done => {
+    // The time is set so that the offers have different creation times.
     Promise.all([
       factoryManager.create(factoryCategory, { name: 'travel' }),
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
       factoryManager.create(factoryOffer, { product: 'first', retail: 1222 })
-    ])
-      .then()
-      .then(() =>
-        setTimeout(
-          () =>
-            factoryManager.create(factoryOffer, { product: 'second', retail: 1222 }).then(() => {
-              chai
-                .request(server)
-                .get('/retail/1222/offers?page=0')
-                .set(headerName, tokenExample)
-                .then(res => {
-                  res.should.have.status(200);
-                  res.body.should.have.property('count');
-                  res.body.should.have.property('offers');
-                  res.body.offers[0].product.should.eql('second');
-                  done();
-                });
-            }),
-          1000
-        )
-      );
+    ]).then(() =>
+      setTimeout(
+        () =>
+          factoryManager.create(factoryOffer, { product: 'second', retail: 1222 }).then(() => {
+            chai
+              .request(server)
+              .get('/retail/1222/offers?page=0')
+              .set(headerName, tokenExample)
+              .then(res => {
+                res.should.have.status(200);
+                res.body.should.have.property('count');
+                res.body.should.have.property('offers');
+                res.body.offers[0].product.should.eql('second');
+                done();
+              });
+          }),
+        1000
+      )
+    );
   });
   it('should be fail because in the query doesnt exist page', done => {
     chai
@@ -660,11 +659,11 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
         commerce: { description: 'McDonalds', nit: 1234 },
         posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
       });
-    });
-    it('Should disable an offer and send an email', done => {
       simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
         callback(undefined, true);
       });
+    });
+    it('Should disable an offer and send an email', done => {
       factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
         factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
           factoryManager.create(factoryOffer, { category: rv.id, strategy: r.id, active: true }).then(off => {
@@ -685,10 +684,26 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
         });
       });
     });
+    it('Should disable an offer and dont send an email because the offer is special', done => {
+      factoryManager.create(factoryCategory, { name: 'Bancolombia', special: true }).then(rv =>
+        factoryManager.create('SpecialOffer', { categoryId: rv.id }).then(off =>
+          chai
+            .request(server)
+            .patch(`/back/offers/${off.id}`)
+            .set('authorization', generateToken())
+            .then(res => {
+              res.should.have.status(200);
+              dictum.chai(res);
+              Offer.getBy({ id: off.id }).then(exist => {
+                exist.active.should.eqls(false);
+                mailer.transporter.sendMail.callCount.should.eqls(0);
+                done();
+              });
+            })
+        )
+      );
+    });
     it('Should disable an offer was disabled before and dont send mail', done => {
-      simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
-        callback(undefined, true);
-      });
       factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
         factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
           factoryManager.create('ActiveOffer', { category: rv.id, strategy: r.id }).then(off => {
@@ -713,10 +728,6 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
     });
 
     it('Should not disable a not found offer and not send email', done => {
-      simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
-        callback(undefined, true);
-      });
-
       factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
         factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
           factoryManager.create(factoryOffer, { category: rv.id, strategy: r.id, active: true }).then(off => {
@@ -738,10 +749,6 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
     });
 
     it("Should send email to offer's redeemed code offers", done => {
-      simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
-        callback(undefined, true);
-      });
-
       factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
         factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
           factoryManager.create(factoryOffer, { category: rv.id, strategy: r.id, active: true }).then(off => {
