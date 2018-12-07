@@ -18,14 +18,15 @@ exports.getOfferStatus = offer => {
     const beforeExpires = moment().isSameOrBefore(moment(offer.expiration).endOf('day'));
     if (beforeBegin) {
       return OFFER_INACTIVE;
-    } else if (afterBegin && beforeExpires) {
-      return offer.redemptions < offer.maxRedemptions ? OFFER_ACTIVE : OFFER_OUT_OF_STOCK;
+    } else if (offer.redemptions === offer.maxRedemptions) {
+      return OFFER_OUT_OF_STOCK;
     } else {
-      return OFFER_FINISHED;
+      return afterBegin && beforeExpires ? OFFER_ACTIVE : OFFER_FINISHED;
     }
   }
   return OFFER_DISABLED;
 };
+
 exports.map = off => {
   const send = {
     image: off.dataValues.imageUrl,
@@ -69,5 +70,8 @@ exports.getDataForBack = offers =>
     expires: value.expiration,
     status: exports.getOfferStatus(value.dataValues),
     creationDate: moment(value.dataValues.created_at).format('YYYY-MM-DD'),
-    title: `${value.valueStrategy} en ${value.product}`
+    title: `${value.valueStrategy} en ${value.product}`,
+    description: value.description,
+    special: value.category.special,
+    linkTerms: value.linkTerms
   }));

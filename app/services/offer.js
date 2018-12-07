@@ -12,7 +12,13 @@ exports.getAllBack = params => {
     offset: params.offset,
     where: {},
     limit: params.limit,
-    order: [['created_at', 'DESC']]
+    order: [['created_at', 'DESC']],
+    include: [
+      {
+        model: sequelize.models.category,
+        as: 'category'
+      }
+    ]
   };
   if (params.filter) {
     paramsQuery.where[Op.or] = [
@@ -20,7 +26,10 @@ exports.getAllBack = params => {
         params: [sequelize.col('value_type_offer'), ' en ', sequelize.col('product')],
         value: params.filter
       }),
-      queryHelper.likeByField({ field: 'nit', filter: params.filter })
+      queryHelper.likeByField({ field: 'nit', filter: params.filter }),
+      Sequelize.where(Sequelize.fn('lower', Sequelize.col('offer.description')), {
+        [Op.like]: `%${params.filter.toLowerCase()}%`
+      })
     ];
   }
   return Offer.findAndCountAll(paramsQuery).catch(err => {

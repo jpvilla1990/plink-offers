@@ -19,7 +19,13 @@ const chai = require('chai'),
   headerName = config.common.session.header_name,
   Offer = require('../app/models').offer,
   UserOffer = require('../app/models').user_offer,
-  { OFFER_ACTIVE, OFFER_INACTIVE, OFFER_DISABLED, OFFER_FINISHED } = require('../app/constants'),
+  {
+    OFFER_ACTIVE,
+    OFFER_INACTIVE,
+    OFFER_DISABLED,
+    OFFER_FINISHED,
+    OFFER_OUT_OF_STOCK
+  } = require('../app/constants'),
   ZendeskService = require('../app/services/zendesk'),
   should = chai.should(),
   expect = chai.expect,
@@ -174,6 +180,28 @@ describe('/retail/:id/offers GET', () => {
       });
     });
   });
+  it('should be successful for a offer out of stock', done => {
+    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
+        factoryManager.create('ExpiredOffer', { maxRedemptions: 1, redemptions: 1 }).then(off => {
+          chai
+            .request(server)
+            .get('/retail/1222/offers?page=0')
+            .set(headerName, tokenExample)
+            .then(res => {
+              res.should.have.status(200);
+              res.body.should.have.property('count');
+              res.body.should.have.property('offers');
+              res.body.offers.length.should.eql(1);
+              res.body.offers[0].status.should.eqls(OFFER_OUT_OF_STOCK);
+              dictum.chai(res);
+              done();
+            });
+        });
+      });
+    });
+  });
+
   it('should be successful  with one page but without limit', done => {
     factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
       factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
@@ -523,12 +551,17 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
     beforeEach(() =>
       Promise.all([factoryManager.create(factoryCategory), factoryManager.create(factoryTypeOffer)]).then(
         () =>
-          Promise.all([
-            factoryManager.create(factoryOffer, { product: 'hamburguer', nit: 12 }),
-            factoryManager.create(factoryOffer, { product: 'hamburguer with cheese', nit: 34 }),
-            factoryManager.create(factoryOffer, { nit: 1333 }),
-            factoryManager.create(factoryOffer, { nit: 1234 })
-          ])
+          factoryManager
+            .create(factoryCategory, { special: true })
+            .then(cat =>
+              Promise.all([
+                factoryManager.create(factoryOffer, { product: 'hamburguer', nit: 12 }),
+                factoryManager.create(factoryOffer, { product: 'hamburguer with cheese', nit: 34 }),
+                factoryManager.create(factoryOffer, { nit: 1333 }),
+                factoryManager.create(factoryOffer, { nit: 1234 }),
+                factoryManager.create('SpecialOffer', { categoryId: cat.id, description: 'bancolombia' })
+              ])
+            )
       ));
     it('should be successful with filter ', done => {
       chai
@@ -547,7 +580,7 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
         .get(`/back/offers?page=1&limit=2`)
         .then(res => {
           res.should.have.status(200);
-          res.body.pages.should.eqls(2);
+          res.body.pages.should.eqls(3);
           res.body.offers.length.should.eqls(2);
           done();
         });
@@ -582,6 +615,18 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
           res.should.have.status(200);
           res.body.pages.should.eqls(1);
           res.body.offers.length.should.eqls(2);
+          done();
+        });
+    });
+    it('should be successful with filter by description for special offer ', done => {
+      chai
+        .request(server)
+        .get(`/back/offers?filter=banco`)
+        .then(res => {
+          res.should.have.status(200);
+          res.body.pages.should.eqls(1);
+          res.body.offers.length.should.eqls(1);
+          res.body.offers[0].special.should.eqls(true);
           done();
         });
     });
