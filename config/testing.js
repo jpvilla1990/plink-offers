@@ -12,6 +12,12 @@ exports.config = {
     session: {
       secret: 'some-super-secret',
       algorithm: 'HS256'
+    },
+    zendesk: {
+      api: {
+        host: 'https://test.zendesk.com/api/v2',
+        token: 'token'
+      }
     }
   }
 };

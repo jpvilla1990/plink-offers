@@ -57,15 +57,16 @@ exports.create = (req, res, next) => {
             }).then(() => {
               ZendeskService.findGroupId(config.common.zendesk.group_name)
                 .then(groupId =>
-                  ZendeskService.postTicket(
-                    ZendeskService.newOfferTicket({
+                  ZendeskService.postTicket({
+                    mail: offer.creator,
+                    ticket: ZendeskService.newOfferTicket({
                       nit: dataCommerce.commerce.nit,
                       valueStrategy: newOff.valueStrategy,
                       product: newOff.product,
                       categoryName: category.dataValues.name,
                       groupId
                     })
-                  )
+                  })
                 )
                 .catch(err => serviceRollbar.error(err.message, req));
               res.status(201);
