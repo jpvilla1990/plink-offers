@@ -133,7 +133,10 @@ exports.getDataFromRetail = offer =>
     retailName: retail.commerce.description,
     retailImage: retail.commerce.imageUrl,
     retailAddress: retail.address,
-    retailReference: retail.reference
+    retailReference: retail.reference,
+    description: offer.dataValues.description,
+    linkTerms: offer.dataValues.linkTerms,
+    special: offer.category.special
   }));
 exports.checkOfferAndFormat = (offer, formatter = () => {}) =>
   new Promise((resolve, reject) => {

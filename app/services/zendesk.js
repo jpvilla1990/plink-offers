@@ -2,6 +2,14 @@ const rp = require('request-promise'),
   errors = require('../errors'),
   config = require('../../config');
 
+const requestToZendesk = (uri, body, queryParams = {}) =>
+  rp.post(`${config.common.zendesk.api.host}/${uri}`, {
+    headers: { authorization: `Basic ${config.common.zendesk.api.token}` },
+    json: true,
+    body,
+    qs: queryParams
+  });
+
 exports.newOfferTicket = data => ({
   subject: 'Oferta Creada',
   comment: {
@@ -11,18 +19,19 @@ exports.newOfferTicket = data => ({
   },
   group_id: data.groupId
 });
-exports.postTicket = ticket =>
-  rp({
-    method: 'POST',
-    uri: `${config.common.zendesk.api.host}/tickets.json`,
-    body: {
-      ticket
-    },
-    headers: {
-      Authorization: `Basic ${config.common.zendesk.api.token}`
-    },
-    json: true
-  });
+
+exports.postTicket = ({ mail, ticket }) =>
+  requestToZendesk('users/create_or_update', { user: { email: mail } })
+    .then(zendeskUser =>
+      requestToZendesk(
+        'tickets',
+        { ticket: { ...ticket, requester_id: zendeskUser.user.id } },
+        { async: true }
+      )
+    )
+    .catch(err => {
+      throw errors.defaultError(err.error.message);
+    });
 
 exports.findGroupId = name =>
   rp({

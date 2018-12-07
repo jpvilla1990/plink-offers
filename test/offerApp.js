@@ -54,21 +54,23 @@ describe('/offer-app/offers GET', () => {
     });
   });
 
-  const someOffersWithIncludeTextInName = text => {
-    return Promise.all([
+  const someOffersWithIncludeTextInName = text =>
+    Promise.all([
       factoryManager.create(factoryCategory, { name: 'travel' }),
-      factoryManager.create(factoryCategory, { name: 'shoes' }),
-      factoryManager.create(factoryOffer, { categoryId: 1, product: `${text}landia` }),
-      factoryManager.create(factoryOffer, { categoryId: 2, product: `Z${text}tos Carlitos` })
-    ]).then(() => {
-      return Promise.all([
-        factoryManager.create(factoryCode, { email, offerId: 1 }),
-        factoryManager.create(factoryCode, { email, offerId: 2 }),
-        factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
-        factoryManager.create(factoryUserOffer, { email, offerId: 2 })
-      ]);
-    });
-  };
+      factoryManager.create(factoryCategory, { name: 'shoes' })
+    ]).then(() =>
+      Promise.all([
+        factoryManager.create(factoryOffer, { categoryId: 1, product: `${text}landia` }),
+        factoryManager.create(factoryOffer, { categoryId: 2, product: `Z${text}tos Carlitos` })
+      ]).then(() =>
+        Promise.all([
+          factoryManager.create(factoryCode, { email, offerId: 1 }),
+          factoryManager.create(factoryCode, { email, offerId: 2 }),
+          factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
+          factoryManager.create(factoryUserOffer, { email, offerId: 2 })
+        ])
+      )
+    );
 
   it('should be success get one offers for like product name', done => {
     const text = 'apa';

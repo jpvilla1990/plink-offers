@@ -835,6 +835,21 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
           })
       );
     });
+    it('Should be success get special offer', done => {
+      factoryManager.create(factoryCategory, { special: true }).then(({ id }) =>
+        factoryManager.create('SpecialOffer', { categoryId: id }).then(off =>
+          chai
+            .request(server)
+            .get(`/back/offers/${off.id}`)
+            .set('authorization', generateToken())
+            .then(res => {
+              res.should.have.status(200);
+              res.body.special.should.eql(true);
+              done();
+            })
+        )
+      );
+    });
     it('Should be fail because the offer does not exist', done => {
       factoryManager.create(factoryOffer).then(off =>
         chai

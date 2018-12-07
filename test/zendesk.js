@@ -1,10 +1,13 @@
 const nock = require('nock');
-const chai = require('chai');
-const config = require('../config');
 const ZendeskService = require('../app/services/zendesk');
 const ZendeskMockHelper = require('./mock-helpers/zendesk');
 
-const should = chai.should();
+const mockZendesk = (code, uri = '', message = {}) =>
+  nock(`https://test.zendesk.com/api/v2`)
+    .persist()
+    .post(`/${uri}`)
+    .query(true)
+    .reply(code, message);
 
 describe('findGroupId(name)', () => {
   it('Should return the groupId of the group', done => {
@@ -39,7 +42,8 @@ describe('findGroupId(name)', () => {
       categoryName: 'Comida',
       groupId: 12345
     });
-    ZendeskMockHelper.mockZendeskRequestForPostingTicket(ticket);
-    ZendeskService.postTicket(ticket).then(res => done());
+    mockZendesk(200, 'tickets');
+    mockZendesk(200, 'users/create_or_update', { user: { id: 1 } });
+    ZendeskService.postTicket({ mail: 'test@test.com', ticket }).then(res => done());
   });
 });
