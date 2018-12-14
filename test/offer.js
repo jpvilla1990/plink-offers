@@ -41,7 +41,8 @@ const chai = require('chai'),
     purpose: 'Atraer clientes',
     url: 'https://s3.amazonaws.com/plink-email-assets/plink_offers/bg_general.png',
     genders: ['Male', 'Female'],
-    ranges: ['smaller than 17 years', '18 to 23']
+    ranges: ['smaller than 17 years', '18 to 23'],
+    posId: 122
   },
   offerWithoutProduct = {
     begin: '2017-02-13',
@@ -53,7 +54,8 @@ const chai = require('chai'),
     purpose: 'Atraer clientes',
     url: 'https://s3.amazonaws.com/plink-email-assets/plink_offers/bg_general.png',
     genders: ['Male', 'Female'],
-    ranges: ['smaller than 17 years', '18 to 23']
+    ranges: ['smaller than 17 years', '18 to 23'],
+    posId: 122
   },
   offerWithCategoryWrong = {
     product: '2x1 en McDuo',
@@ -66,7 +68,8 @@ const chai = require('chai'),
     purpose: 'Atraer clientes',
     url: 'https://s3.amazonaws.com/plink-email-assets/plink_offers/bg_general.png',
     genders: ['Male', 'Female'],
-    ranges: ['smaller than 17 years', '18 to 23']
+    ranges: ['smaller than 17 years', '18 to 23'],
+    posId: 122
   },
   tokenExample = `test ${token.generate({ points: '1222,1444,1333' })}`;
 
@@ -622,18 +625,6 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
           expect(res.body.pages).to.be.eql(1);
           expect(res.body.offers.length).to.be.eql(1);
           expect(res.body.offers[0].special).to.be.true;
-          done();
-        });
-    });
-    it('should be successful with filter by description for special offer ', done => {
-      chai
-        .request(server)
-        .get(`/back/offers?filter=banco`)
-        .then(res => {
-          res.should.have.status(200);
-          res.body.pages.should.eqls(1);
-          res.body.offers.length.should.eqls(1);
-          res.body.offers[0].special.should.eqls(true);
           done();
         });
     });

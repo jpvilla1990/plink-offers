@@ -37,6 +37,7 @@ exports.create = (req, res, next) => {
     purpose: req.body.purpose,
     valueStrategy: req.body.valueStrategy,
     imageUrl: req.body.url,
+    posId: req.body.posId,
     ranges: req.body.ranges.join(','),
     genders: req.body.genders.join(',')
   };

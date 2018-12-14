@@ -74,6 +74,10 @@ module.exports = (sequelize, DataTypes) => {
       linkTerms: {
         type: DataTypes.STRING,
         field: 'link'
+      },
+      posId: {
+        type: DataTypes.INTEGER,
+        field: 'pos_id'
       }
     },
     {
