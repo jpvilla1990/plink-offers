@@ -44,7 +44,7 @@
     "body-parser": "^1.18.3",
     "cron": "^1.4.1",
     "dictum": "0.0.0",
-    "email-templates": "^4.0.4",
+    "email-templates": "^5.0.1",
     "express": "^4.16.3",
     "express-validator": "^5.3.0",
     "i18next": "^11.9.0",

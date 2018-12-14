@@ -1,6 +1,7 @@
 const chai = require('chai'),
   dictum = require('dictum.js'),
   server = require('../app'),
+  expect = chai.expect,
   factoryManager = require('./factories/factoryManager');
 
 describe('/genders GET', () => {
@@ -10,9 +11,9 @@ describe('/genders GET', () => {
         .request(server)
         .get('/genders')
         .then(response => {
-          response.should.have.status(200);
-          response.body.should.have.property('result');
-          response.body.result.length.should.be.equal(4);
+          expect(response.status).to.be.eql(200);
+          expect(response.body).to.have.property('result');
+          expect(response.body.result.length).to.be.eql(4);
           dictum.chai(response);
           done();
         });
@@ -26,9 +27,9 @@ describe('/ranges GET', () => {
         .request(server)
         .get('/ranges')
         .then(response => {
-          response.should.have.status(200);
-          response.body.should.have.property('result');
-          response.body.result.length.should.be.equal(4);
+          expect(response.status).to.be.eql(200);
+          expect(response.body).to.have.property('result');
+          expect(response.body.result.length).to.be.eql(4);
           dictum.chai(response);
           done();
         });

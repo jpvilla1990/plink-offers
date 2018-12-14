@@ -2,14 +2,13 @@ const chai = require('chai'),
   expect = chai.expect,
   dictum = require('dictum.js'),
   server = require('./../app'),
-  should = chai.should(),
   moment = require('moment'),
   requestService = require('../app/services/request'),
   Offer = require('../app/models').offer,
   Code = require('../app/models').code,
   mailer = require('../app/services/mailer'),
   simple = require('simple-mock'),
-  { OFFER_OUT_OF_STOCK } = require('../app/constants'),
+  { OFFER_OUT_OF_STOCK, OFFER_EXPIRED } = require('../app/constants'),
   token = require('../test/factories/token'),
   factoryManager = require('../test/factories/factoryManager'),
   factoryCategory = require('../test/factories/category').nameFactory,
@@ -17,6 +16,7 @@ const chai = require('chai'),
   factoryOffer = require('../test/factories/offer').nameFactory,
   factoryUserOffer = require('../test/factories/userOffer').nameFactory,
   i18next = require('i18next'),
+  expectedErrorKeys = ['message', 'internal_code'],
   factoryCode = require('../test/factories/code').nameFactory;
 
 const offerWithRetail = {
@@ -56,12 +56,14 @@ describe('/offers/:id/code POST', () => {
           .post(`/offers/1/code`)
           .send({ email: newEmailUser.hashEmail })
           .then(json => {
-            json.should.have.status(201);
+            expect(json.status).to.be.eql(201);
             Offer.getBy({ id: 1 }).then(after => {
-              after.codes.should.eqls(1);
+              expect(after.codes).to.be.eql(1);
             });
-            mailer.transporter.sendMail.lastCall.args[0].subject.should.equal(i18next.t(`newCode.subject`));
-            mailer.transporter.sendMail.lastCall.args[0].to.should.equal(newEmailUser.email);
+            expect(mailer.transporter.sendMail.lastCall.args[0].subject).to.be.eql(
+              i18next.t(`newCode.subject`)
+            );
+            expect(mailer.transporter.sendMail.lastCall.args[0].to).to.be.eql(newEmailUser.email);
             dictum.chai(json);
             done();
           })
@@ -86,15 +88,16 @@ describe('/offers/:id/code POST', () => {
                 .post(`/offers/${before.id}/code`)
                 .send({ email: newEmailUser.hashEmail })
                 .then(json => {
-                  json.should.have.status(400);
-                  json.should.be.json;
-                  json.body.should.have.property('message');
-                  json.body.should.have.property('internal_code');
-                  json.body.internal_code.should.be.equal('offer_expire');
-                  mailer.transporter.sendMail.lastCall.args[0].subject.should.eqls(
+                  expect(json.status).to.be.eql(400);
+                  expect(json).to.be.json;
+                  expect(json.body).to.have.all.keys(expectedErrorKeys);
+                  expect(json.body.internal_code).to.be.eql('offer_expire');
+                  expect(mailer.transporter.sendMail.lastCall.args[0].subject).to.be.eql(
                     i18next.t(`finished.subject`)
                   );
-                  mailer.transporter.sendMail.lastCall.args[0].to.should.eqls('julian.molina@wolox.com.ar');
+                  expect(mailer.transporter.sendMail.lastCall.args[0].to).to.be.eql(
+                    'julian.molina@wolox.com.ar'
+                  );
                   done();
                 });
             });
@@ -110,11 +113,10 @@ describe('/offers/:id/code POST', () => {
           .post(`/offers/23/code`)
           .send({ email: 'julian.molina@wolox.com.ar' })
           .then(json => {
-            json.should.have.status(404);
-            json.should.be.json;
-            json.body.should.have.property('message');
-            json.body.should.have.property('internal_code');
-            json.body.internal_code.should.be.equal('offer_not_found');
+            expect(json.status).to.be.eql(404);
+            expect(json).to.be.json;
+            expect(json.body).to.have.all.keys(expectedErrorKeys);
+            expect(json.body.internal_code).to.be.eql('offer_not_found');
             done();
           });
       });
@@ -135,11 +137,10 @@ describe('/offers/:id/code POST', () => {
               .post(`/offers/1/code`)
               .send({ email: newEmailUser.hashEmail })
               .then(json => {
-                json.should.have.status(400);
-                json.should.be.json;
-                json.body.should.have.property('message');
-                json.body.should.have.property('internal_code');
-                json.body.internal_code.should.be.equal('existing_mail');
+                expect(json.status).to.be.eql(400);
+                expect(json).to.be.json;
+                expect(json.body).to.have.all.keys(expectedErrorKeys);
+                expect(json.body.internal_code).to.be.eql('existing_mail');
                 done();
               })
           )
@@ -160,11 +161,10 @@ describe('/offers/:id/code POST', () => {
             .post(`/offers/1/code`)
             .send({ email: newEmailUser.hashEmail })
             .then(json => {
-              json.should.have.status(400);
-              json.should.be.json;
-              json.body.should.have.property('message');
-              json.body.should.have.property('internal_code');
-              json.body.internal_code.should.be.equal('offer_disabled');
+              expect(json.status).to.be.eql(400);
+              expect(json).to.be.json;
+              expect(json.body).to.have.all.keys(expectedErrorKeys);
+              expect(json.body.internal_code).to.be.eql('offer_disabled');
               done();
             })
         )
@@ -184,11 +184,10 @@ describe('/offers/:id/code POST', () => {
           .post(`/offers/1/code`)
           .send({ email: 'hash400' })
           .then(json => {
-            json.should.have.status(404);
-            json.should.be.json;
-            json.body.should.have.property('message');
-            json.body.should.have.property('internal_code');
-            json.body.internal_code.should.be.equal('user_not_found');
+            expect(json.status).to.be.eql(404);
+            expect(json).to.be.json;
+            expect(json.body).to.have.all.keys(expectedErrorKeys);
+            expect(json.body.internal_code).to.be.eql('user_not_found');
             done();
           })
       )
@@ -207,12 +206,14 @@ describe('/offers/:id/code POST', () => {
           .post(`/offers/1/code`)
           .send({ email: newEmailUser.hashEmail })
           .then(json => {
-            json.should.have.status(201);
+            expect(json.status).to.be.eql(201);
             Offer.getBy({ id: 1 }).then(after => {
-              after.codes.should.eqls(1);
+              expect(after.codes).to.be.eql(1);
             });
-            mailer.transporter.sendMail.lastCall.args[0].subject.should.equal(i18next.t(`newCode.subject`));
-            mailer.transporter.sendMail.lastCall.args[0].to.should.equal(newEmailUser.email);
+            expect(mailer.transporter.sendMail.lastCall.args[0].subject).to.be.equal(
+              i18next.t(`newCode.subject`)
+            );
+            expect(mailer.transporter.sendMail.lastCall.args[0].to).to.be.equal(newEmailUser.email);
             done();
           })
       )
@@ -221,7 +222,6 @@ describe('/offers/:id/code POST', () => {
 });
 
 const generateToken = (points = '11') => `bearer ${token.generate({ points })}`;
-
 describe('/retail/:id/code/:code/redeem PATCH', () => {
   it('should success redeem of code', done => {
     factoryManager.create(factoryCode).then(code => {
@@ -230,7 +230,7 @@ describe('/retail/:id/code/:code/redeem PATCH', () => {
         .patch(`/retail/11/code/${code.code}/redeem`)
         .set('authorization', generateToken())
         .then(response => {
-          response.should.have.status(200);
+          expect(response.status).to.be.eql(200);
           dictum.chai(response);
           done();
         });
@@ -242,11 +242,10 @@ describe('/retail/:id/code/:code/redeem PATCH', () => {
         .request(server)
         .patch(`/retail/11/code/12333/redeem`)
         .set('authorization', generateToken())
-        .then(res => {
-          res.should.have.status(404);
-          res.body.should.have.property('internal_code');
-          res.body.should.have.property('message');
-          res.body.internal_code.should.be.equal('code_not_found');
+        .then(err => {
+          expect(err.status).to.be.eql(404);
+          expect(err.body).to.have.all.keys(expectedErrorKeys);
+          expect(err.body.internal_code).to.be.eql('code_not_found');
           done();
         });
     });
@@ -257,11 +256,10 @@ describe('/retail/:id/code/:code/redeem PATCH', () => {
         .request(server)
         .patch(`/retail/122/code/12333/redeem`)
         .set('authorization', generateToken())
-        .then(res => {
-          res.should.have.status(401);
-          res.body.should.have.property('internal_code');
-          res.body.should.have.property('message');
-          res.body.internal_code.should.be.equal('user_unauthorized');
+        .then(err => {
+          expect(err.status).to.be.eql(401);
+          expect(err.body).to.have.all.keys(expectedErrorKeys);
+          expect(err.body.internal_code).to.be.eql('user_unauthorized');
           done();
         });
     });
@@ -272,11 +270,10 @@ describe('/retail/:id/code/:code/redeem PATCH', () => {
         .request(server)
         .patch(`/retail/11/code/${code.code}/redeem`)
         .set('authorization', generateToken())
-        .then(response => {
-          response.should.have.status(400);
-          response.body.should.have.property('internal_code');
-          response.body.should.have.property('message');
-          response.body.internal_code.should.be.equal('code_redeemed');
+        .then(err => {
+          expect(err.status).to.be.eql(400);
+          expect(err.body).to.have.all.keys(expectedErrorKeys);
+          expect(err.body.internal_code).to.be.eql('code_redeemed');
           done();
         });
     });
@@ -290,11 +287,10 @@ describe('/retail/:id/code/:code/redeem PATCH', () => {
             .request(server)
             .patch(`/retail/11/code/${code.code}/redeem`)
             .set('authorization', generateToken())
-            .then(response => {
-              response.should.have.status(400);
-              response.body.should.have.property('internal_code');
-              response.body.should.have.property('message');
-              response.body.internal_code.should.be.equal('offer_inactive');
+            .then(err => {
+              expect(err.status).to.be.eql(400);
+              expect(err.body).to.have.all.keys(expectedErrorKeys);
+              expect(err.body.internal_code).to.be.eql('offer_inactive');
               done();
             });
         })
@@ -307,11 +303,10 @@ describe('/retail/:id/code/:code/redeem PATCH', () => {
           .request(server)
           .patch(`/retail/11/code/${code.code}/redeem`)
           .set('authorization', generateToken())
-          .then(response => {
-            response.should.have.status(400);
-            response.body.should.have.property('internal_code');
-            response.body.should.have.property('message');
-            response.body.internal_code.should.be.equal('offer_disabled');
+          .then(err => {
+            expect(err.status).to.be.eql(400);
+            expect(err.body).to.have.all.keys(expectedErrorKeys);
+            expect(err.body.internal_code).to.be.eql('offer_disabled');
             done();
           });
       })
@@ -327,7 +322,7 @@ describe('/retail/:id/code/:code GET', () => {
         .get(`/retail/11/code/${code.code}`)
         .set('authorization', generateToken())
         .then(response => {
-          response.should.have.status(200);
+          expect(response.status).to.be.eql(200);
           expect(response.body).to.have.all.keys([
             'image',
             'email',
@@ -336,7 +331,7 @@ describe('/retail/:id/code/:code GET', () => {
             'status',
             'product'
           ]);
-          response.body.email.should.eqls('jul****@wol****');
+          expect(response.body.email).to.be.eql('jul****@wol****');
           dictum.chai(response);
           done();
         });
@@ -377,11 +372,10 @@ describe('/retail/:id/code/:code GET', () => {
       .request(server)
       .get(`/retail/11/code/11`)
       .set('authorization', generateToken())
-      .then(response => {
-        response.body.should.have.property('internal_code');
-        response.body.should.have.property('message');
-        response.body.internal_code.should.be.equal('code_not_found');
-        response.should.have.status(404);
+      .then(err => {
+        expect(err.status).to.be.eql(404);
+        expect(err.body).to.have.all.keys(expectedErrorKeys);
+        expect(err.body.internal_code).to.be.eql('code_not_found');
         done();
       });
   });
@@ -390,11 +384,10 @@ describe('/retail/:id/code/:code GET', () => {
       .request(server)
       .get(`/retail/112/code/11`)
       .set('authorization', generateToken())
-      .then(response => {
-        response.body.should.have.property('internal_code');
-        response.body.should.have.property('message');
-        response.body.internal_code.should.be.equal('user_unauthorized');
-        response.should.have.status(401);
+      .then(err => {
+        expect(err.status).to.be.eql(401);
+        expect(err.body).to.have.all.keys(expectedErrorKeys);
+        expect(err.body.internal_code).to.be.eql('user_unauthorized');
         done();
       });
   });
@@ -412,9 +405,9 @@ describe('/offer-app/offers/:id/code POST', () => {
             .post(`/offer-app/offers/${off.id}/code`)
             .set('authorization', generateTokenApp())
             .then(response => {
-              response.should.have.status(201);
+              expect(response.status).to.be.eql(201);
               Offer.getBy({ id: 1 }).then(after => {
-                after.codes.should.eqls(1);
+                expect(after.codes).to.be.eql(1);
               });
               expect(response.body).to.have.all.keys(['product', 'valueStrategy', 'expires', 'code']);
               done();
@@ -428,10 +421,9 @@ describe('/offer-app/offers/:id/code POST', () => {
         .request(server)
         .post(`/offer-app/offers/1345/code`)
         .set('authorization', generateTokenApp())
-        .then(response => {
-          response.should.have.status(404);
-          response.body.should.have.property('internal_code');
-          response.body.should.have.property('message');
+        .then(err => {
+          expect(err.status).to.be.eql(404);
+          expect(err.body).to.have.all.keys(expectedErrorKeys);
           done();
         })
     );
@@ -443,10 +435,9 @@ describe('/offer-app/offers/:id/code POST', () => {
           .request(server)
           .post(`/offer-app/offers/1/code`)
           .set('authorization', generateTokenApp())
-          .then(response => {
-            response.should.have.status(404);
-            response.body.should.have.property('internal_code');
-            response.body.should.have.property('message');
+          .then(err => {
+            expect(err.status).to.be.eql(404);
+            expect(err.body).to.have.all.keys(expectedErrorKeys);
             done();
           })
       )

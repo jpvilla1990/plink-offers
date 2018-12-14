@@ -5,7 +5,7 @@ const chai = require('chai'),
   requestService = require('../app/services/request'),
   simple = require('simple-mock'),
   expect = chai.expect,
-  { OFFER_OUT_OF_STOCK } = require('../app/constants'),
+  { OFFER_OUT_OF_STOCK, OFFER_ACTIVE, OFFER_FINISHED, OFFER_DISABLED } = require('../app/constants'),
   token = require('../test/factories/token'),
   cognitoService = require('../app/services/cognito'),
   factoryManager = require('../test/factories/factoryManager'),
@@ -13,6 +13,7 @@ const chai = require('chai'),
   factoryCategory = require('../test/factories/category').nameFactory,
   factoryUserOffer = require('../test/factories/userOffer').nameFactory,
   factoryCode = require('../test/factories/code').nameFactory,
+  expectedErrorKeys = ['message', 'internal_code'],
   email = 'julian.molina@wolox.com.ar';
 
 const generateToken = (mail = email) => `bearer ${token.generate({ email: mail, points: '11' })}`;
@@ -44,9 +45,9 @@ describe('/offer-app/offers GET', () => {
           .get(`/offer-app/offers?page=0&category=2`)
           .set('authorization', generateToken())
           .then(response => {
-            response.should.have.status(200);
-            response.body.count.should.eqls(1);
-            response.body.offers.length.should.eqls(1);
+            expect(response.status).to.be.eql(200);
+            expect(response.body.count).to.be.eql(1);
+            expect(response.body.offers.length).to.be.eql(1);
             dictum.chai(response);
             done();
           });
@@ -80,11 +81,11 @@ describe('/offer-app/offers GET', () => {
         .get(`/offer-app/offers?page=0&name=${text}`)
         .set('authorization', generateToken())
         .then(response => {
-          response.should.have.status(200);
-          response.body.count.should.eqls(2);
-          response.body.offers.length.should.eqls(2);
-          response.body.offers[0].product.toLowerCase().should.include(text);
-          response.body.offers[1].product.toLowerCase().should.include(text);
+          expect(response.status).to.be.eql(200);
+          expect(response.body.count).to.be.eql(2);
+          expect(response.body.offers.length).to.be.eql(2);
+          expect(response.body.offers[0].product.toLowerCase()).to.include(text);
+          expect(response.body.offers[1].product.toLowerCase()).to.include(text);
           done();
         });
     });
@@ -100,11 +101,11 @@ describe('/offer-app/offers GET', () => {
             .get(`/offer-app/offers?page=0&name=${text}`)
             .set('authorization', generateToken())
             .then(response => {
-              response.should.have.status(200);
-              response.body.count.should.eqls(2);
-              response.body.offers.length.should.eqls(2);
-              response.body.offers[0].product.toLowerCase().should.include(text);
-              response.body.offers[1].product.toLowerCase().should.include(text);
+              expect(response.status).to.be.eql(200);
+              expect(response.body.count).to.be.eql(2);
+              expect(response.body.offers.length).to.be.eql(2);
+              expect(response.body.offers[0].product.toLowerCase()).to.include(text);
+              expect(response.body.offers[1].product.toLowerCase()).to.include(text);
               done();
             })
         )
@@ -120,9 +121,9 @@ describe('/offer-app/offers GET', () => {
         .get(`/offer-app/offers?page=0&name=xyz`)
         .set('authorization', generateToken())
         .then(response => {
-          response.should.have.status(200);
-          response.body.count.should.eqls(0);
-          response.body.offers.length.should.eqls(0);
+          expect(response.status).to.be.eql(200);
+          expect(response.body.count).to.be.eql(0);
+          expect(response.body.offers.length).to.be.eql(0);
           done();
         });
     });
@@ -141,9 +142,9 @@ describe('/offer-app/offers GET', () => {
           .get(`/offer-app/offers?page=0`)
           .set('authorization', generateToken())
           .then(response => {
-            response.should.have.status(200);
-            response.body.count.should.eqls(2);
-            response.body.offers.length.should.eqls(2);
+            expect(response.status).to.be.eql(200);
+            expect(response.body.count).to.be.eql(2);
+            expect(response.body.offers.length).to.be.eql(2);
             done();
           });
       });
@@ -163,9 +164,9 @@ describe('/offer-app/offers GET', () => {
           .get(`/offer-app/offers?page=0`)
           .set('authorization', generateToken())
           .then(response => {
-            response.should.have.status(200);
-            response.body.count.should.eqls(0);
-            response.body.offers.length.should.eqls(0);
+            expect(response.status).to.be.eql(200);
+            expect(response.body.count).to.be.eql(0);
+            expect(response.body.offers.length).to.be.eql(0);
             done();
           });
       });
@@ -185,9 +186,9 @@ describe('/offer-app/offers GET', () => {
           .get(`/offer-app/offers?page=0`)
           .set('authorization', generateToken())
           .then(response => {
-            response.should.have.status(200);
-            response.body.count.should.eqls(0);
-            response.body.offers.length.should.eqls(0);
+            expect(response.status).to.be.eql(200);
+            expect(response.body.count).to.be.eql(0);
+            expect(response.body.offers.length).to.be.eql(0);
             done();
           });
       });
@@ -210,9 +211,9 @@ describe('/offer-app/offers GET', () => {
           .get(`/offer-app/offers?page=0`)
           .set('authorization', generateToken())
           .then(response => {
-            response.should.have.status(200);
-            response.body.count.should.eqls(0);
-            response.body.offers.length.should.eqls(0);
+            expect(response.status).to.be.eql(200);
+            expect(response.body.count).to.be.eql(0);
+            expect(response.body.offers.length).to.be.eql(0);
             done();
           });
       });
@@ -225,9 +226,9 @@ describe('/offer-app/offers GET', () => {
         .get(`/offer-app/offers?page=0`)
         .set('authorization', generateToken())
         .then(response => {
-          response.should.have.status(200);
-          response.body.count.should.eqls(0);
-          response.body.offers.length.should.eqls(0);
+          expect(response.status).to.be.eql(200);
+          expect(response.body.count).to.be.eql(0);
+          expect(response.body.offers.length).to.be.eql(0);
           done();
         });
     });
@@ -247,9 +248,9 @@ describe('/offer-app/offers GET', () => {
           .get(`/offer-app/offers?page=0`)
           .set('authorization', generateToken())
           .then(response => {
-            response.should.have.status(200);
-            response.body.count.should.eqls(1);
-            response.body.offers.length.should.eqls(1);
+            expect(response.status).to.be.eql(200);
+            expect(response.body.count).to.be.eql(1);
+            expect(response.body.offers.length).to.be.eql(1);
             done();
           });
       });
@@ -261,8 +262,9 @@ describe('/offer-app/offers GET', () => {
       .get(`/offer-app/offers?`)
       .set('authorization', generateToken())
       .then(response => {
-        response.should.have.status(200);
-        response.body.offers.length.should.eqls(0);
+        expect(response.status).to.be.eql(200);
+        expect(response.body.count).to.be.eql(0);
+        expect(response.body.offers.length).to.be.eql(0);
         done();
       });
   });
@@ -275,10 +277,9 @@ describe('/offer-app/offers GET', () => {
           .get(`/offer-app/offers`)
           .set('authorization', generateToken())
           .then(response => {
-            response.should.have.status(500);
-            response.body.should.have.property('message');
+            expect(response.status).to.be.eql(500);
+            expect(response.body).to.have.all.keys(expectedErrorKeys);
             expect(response.body.message).to.equal('Error when tried to obtain data from commerce');
-            response.body.should.have.property('internal_code');
             expect(response.body.internal_code).to.equal('default_error');
             done();
           })
@@ -301,10 +302,10 @@ describe('/offer-app/offers GET', () => {
               .get(`/offer-app/offers?`)
               .set('authorization', generateToken())
               .then(response => {
-                response.should.have.status(200);
-                response.body.pages.should.be.eql(1);
-                response.body.count.should.eqls(5);
-                response.body.offers.length.should.eqls(5);
+                expect(response.status).to.be.eql(200);
+                expect(response.body.pages).to.be.eql(1);
+                expect(response.body.count).to.be.eql(5);
+                expect(response.body.offers.length).to.be.eql(5);
                 done();
               });
           })
@@ -327,10 +328,10 @@ describe('/offer-app/offers GET', () => {
             .get(`/offer-app/offers`)
             .set('authorization', generateToken())
             .then(response => {
-              response.should.have.status(200);
-              response.body.pages.should.be.eql(1);
-              response.body.count.should.eqls(4);
-              response.body.offers.length.should.eqls(4);
+              expect(response.status).to.be.eql(200);
+              expect(response.body.pages).to.be.eql(1);
+              expect(response.body.count).to.be.eql(4);
+              expect(response.body.offers.length).to.be.eql(4);
               done();
             });
         })
@@ -346,8 +347,8 @@ describe('/offer-app/codes GET', () => {
       .get(`/offer-app/codes`)
       .set('authorization', generateToken())
       .then(response => {
-        response.should.have.status(200);
-        response.body.codes.length.should.eqls(0);
+        expect(response.status).to.be.eql(200);
+        expect(response.body.codes.length).to.be.eql(0);
         done();
       });
   });
@@ -366,9 +367,9 @@ describe('/offer-app/codes GET', () => {
                 .get(`/offer-app/codes?page=0`)
                 .set('authorization', generateToken())
                 .then(response => {
-                  response.should.have.status(200);
-                  response.body.count.should.eqls(2);
-                  response.body.codes.length.should.eqls(2);
+                  expect(response.status).to.be.eql(200);
+                  expect(response.body.count).to.be.eql(2);
+                  expect(response.body.codes.length).to.be.eql(2);
                   dictum.chai(response);
                   done();
                 });
@@ -392,9 +393,9 @@ describe('/offer-app/codes GET', () => {
                 .get(`/offer-app/codes?page=0`)
                 .set('authorization', generateToken())
                 .then(response => {
-                  response.should.have.status(200);
-                  response.body.count.should.eqls(1);
-                  response.body.codes.length.should.eqls(1);
+                  expect(response.status).to.be.eql(200);
+                  expect(response.body.count).to.be.eql(1);
+                  expect(response.body.codes.length).to.be.eql(1);
                   done();
                 });
             });
@@ -418,9 +419,9 @@ describe('/offer-app/codes GET', () => {
                 .get(`/offer-app/codes?page=0`)
                 .set('authorization', generateToken())
                 .then(response => {
-                  response.should.have.status(200);
-                  response.body.count.should.eqls(1);
-                  response.body.codes.length.should.eqls(1);
+                  expect(response.status).to.be.eql(200);
+                  expect(response.body.count).to.be.eql(1);
+                  expect(response.body.codes.length).to.be.eql(1);
                   done();
                 });
             });
@@ -450,15 +451,14 @@ describe('/offer-app/codes GET', () => {
         .get(`/offer-app/codes?page=0`)
         .set('authorization', generateToken())
         .then(response => {
-          response.should.have.status(200);
-          response.body.count.should.eqls(4);
-          response.body.codes[0].status.should.eqls('active');
-          response.body.codes[1].status.should.eqls('active');
-          response.body.codes[1].dateRedemption.should.eqls(moment().format('YYYY-MM-DD'));
-          response.body.codes[2].status.should.eqls('finished');
-          response.body.codes[3].status.should.eqls('disabled');
-          response.body.pages.should.eqls(1);
-          response.body.count.should.eqls(4);
+          expect(response.status).to.be.eql(200);
+          expect(response.body.count).to.be.eql(4);
+          expect(response.body.pages).to.be.eql(1);
+          expect(response.body.codes[0].status).to.be.eql(OFFER_ACTIVE);
+          expect(response.body.codes[1].status).to.be.eql(OFFER_ACTIVE);
+          expect(response.body.codes[1].dateRedemption).to.be.eql(moment().format('YYYY-MM-DD'));
+          expect(response.body.codes[2].status).to.be.eql(OFFER_FINISHED);
+          expect(response.body.codes[3].status).to.be.eql(OFFER_DISABLED);
           done();
         })
     );
@@ -515,7 +515,6 @@ describe('/offer-app/offers/:id_offer GET', () => {
           .get(`/offer-app/offers/${idOffer}`)
           .set('authorization', generateToken())
           .then(response => {
-            response.should.have.status(200);
             expect(response.body.code).to.not.be.undefined;
             dictum.chai(response);
             done();
@@ -537,7 +536,7 @@ describe('/offer-app/offers/:id_offer GET', () => {
           .get(`/offer-app/offers/${off.id}`)
           .set('authorization', generateToken())
           .then(response => {
-            response.should.have.status(200);
+            expect(response.status).to.be.eql(200);
             expect(response.body.code).to.be.undefined;
             done();
           })
@@ -551,9 +550,8 @@ describe('/offer-app/offers/:id_offer GET', () => {
         .get(`/offer-app/offers/1236784`)
         .set('authorization', generateToken())
         .then(err => {
-          err.body.should.have.property('message');
+          expect(err.body).to.have.all.keys(expectedErrorKeys);
           expect(err.body.message).to.equal('Offer Not Found');
-          err.body.should.have.property('internal_code');
           expect(err.body.internal_code).to.equal('offer_not_found');
           done();
         })
@@ -571,7 +569,7 @@ describe('/offers-public/users POST', () => {
       .send({ email })
       .set('authorization', generateToken())
       .then(response => {
-        response.should.have.status(200);
+        expect(response.status).to.be.eql(200);
         expect(response.body.exist).to.be.true;
         dictum.chai(response);
         simple.restore(cognitoService.cognito, 'adminGetUser');
@@ -588,7 +586,7 @@ describe('/offers-public/users POST', () => {
       .send({ email })
       .set('authorization', generateToken())
       .then(response => {
-        response.should.have.status(200);
+        expect(response.status).to.be.eql(200);
         expect(response.body.exist).to.be.false;
         simple.restore(cognitoService.cognito, 'adminGetUser');
         done();
@@ -603,11 +601,10 @@ describe('/offers-public/users POST', () => {
       .post(`/offers-public/users`)
       .send({ email })
       .set('authorization', generateToken())
-      .then(response => {
-        response.body.should.have.property('message');
-        expect(response.body.message).to.equal('InternalErrorException');
-        response.body.should.have.property('internal_code');
-        expect(response.body.internal_code).to.equal('bad_request');
+      .then(err => {
+        expect(err.body).to.have.all.keys(expectedErrorKeys);
+        expect(err.body.message).to.equal('InternalErrorException');
+        expect(err.body.internal_code).to.equal('bad_request');
         done();
       });
   });
@@ -616,11 +613,10 @@ describe('/offers-public/users POST', () => {
       .request(server)
       .post(`/offers-public/users`)
       .set('authorization', generateToken())
-      .then(response => {
-        response.body.should.have.property('message');
-        expect(response.body.message).to.include('The email is required');
-        response.body.should.have.property('internal_code');
-        expect(response.body.internal_code).to.equal('bad_request');
+      .then(err => {
+        expect(err.body).to.have.all.keys(expectedErrorKeys);
+        expect(err.body.message).to.include('The email is required');
+        expect(err.body.internal_code).to.equal('bad_request');
         done();
       });
   });
@@ -634,7 +630,7 @@ describe('/offers-public/users POST', () => {
         .put(`/offer-app/login`)
         .set('authorization', generateToken())
         .then(response => {
-          response.should.have.status(200);
+          expect(response.status).to.be.eql(200);
           dictum.chai(response);
           done();
         });
@@ -648,7 +644,7 @@ describe('/offers-public/users POST', () => {
         .put(`/offer-app/login`)
         .set('authorization', generateToken())
         .then(err => {
-          err.should.have.status(400);
+          expect(err.status).to.be.eql(400);
           expect(err.body.message).to.be.eqls('AliasExistsException');
           expect(err.body.internal_code).to.be.eqls('bad_request');
           done();
