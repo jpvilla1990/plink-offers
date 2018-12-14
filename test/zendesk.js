@@ -26,6 +26,8 @@ describe('findGroupId(name)', () => {
     const groupName = 'Sarlanga';
     const groupId = 1234;
     ZendeskMockHelper.mockZendeskRequestForNotFoundGroupId(groupName, groupId);
+    mockZendesk(200, 'tickets');
+    mockZendesk(200, 'users/create_or_update', { user: { id: 1 } });
     ZendeskService.findGroupId(groupName)
       .then(() => done(new Error('Should not be called')))
       .catch(err => {

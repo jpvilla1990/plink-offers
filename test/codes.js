@@ -3,19 +3,13 @@ const chai = require('chai'),
   dictum = require('dictum.js'),
   server = require('./../app'),
   moment = require('moment'),
-  requestService = require('../app/services/request'),
   Offer = require('../app/models').offer,
-  Code = require('../app/models').code,
-  mailer = require('../app/services/mailer'),
-  simple = require('simple-mock'),
-  { OFFER_OUT_OF_STOCK, OFFER_EXPIRED } = require('../app/constants'),
+  { OFFER_OUT_OF_STOCK } = require('../app/constants'),
   token = require('../test/factories/token'),
   factoryManager = require('../test/factories/factoryManager'),
   factoryCategory = require('../test/factories/category').nameFactory,
   factoryTypeOffer = require('../test/factories/typeOffer').nameFactory,
   factoryOffer = require('../test/factories/offer').nameFactory,
-  factoryUserOffer = require('../test/factories/userOffer').nameFactory,
-  i18next = require('i18next'),
   expectedErrorKeys = ['message', 'internal_code'],
   factoryCode = require('../test/factories/code').nameFactory;
 
@@ -31,195 +25,6 @@ const offerWithRetail = {
   purpose: 'Atraer clientes',
   extension: 'jpg'
 };
-describe('/offers/:id/code POST', () => {
-  offerWithRetail.retail = 1222;
-  beforeEach(() => {
-    simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
-      callback(undefined, true);
-    });
-    simple.mock(requestService, 'getPoints').resolveWith({
-      address: 'Cochabamba 3254',
-      reference: 'Next to McDonalds',
-      commerce: { description: 'McDonalds', nit: 1234 },
-      posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
-    });
-  });
-  it('should be successful', done => {
-    Promise.all([
-      factoryManager.create(factoryCategory, { name: 'travel' }),
-      factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
-      factoryManager.create(factoryOffer, { retail: 1222 })
-    ]).then(() =>
-      factoryManager.create(factoryUserOffer, { offerId: 1 }).then(newEmailUser =>
-        chai
-          .request(server)
-          .post(`/offers/1/code`)
-          .send({ email: newEmailUser.hashEmail })
-          .then(json => {
-            expect(json.status).to.be.eql(201);
-            Offer.getBy({ id: 1 }).then(after => {
-              expect(after.codes).to.be.eql(1);
-            });
-            expect(mailer.transporter.sendMail.lastCall.args[0].subject).to.be.eql(
-              i18next.t(`newCode.subject`)
-            );
-            expect(mailer.transporter.sendMail.lastCall.args[0].to).to.be.eql(newEmailUser.email);
-            dictum.chai(json);
-            done();
-          })
-      )
-    );
-  });
-  it('should be fail because the offer expired', done => {
-    offerWithRetail.expiration = moment()
-      .subtract(2, 'days')
-      .format('YYYY-MM-DD');
-    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
-      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
-        factoryManager.create(factoryOffer, offerWithRetail).then(before => {
-          factoryManager
-            .create(factoryUserOffer, {
-              email: 'julian.molina@wolox.com.ar',
-              offer_id: before.id
-            })
-            .then(newEmailUser => {
-              chai
-                .request(server)
-                .post(`/offers/${before.id}/code`)
-                .send({ email: newEmailUser.hashEmail })
-                .then(json => {
-                  expect(json.status).to.be.eql(400);
-                  expect(json).to.be.json;
-                  expect(json.body).to.have.all.keys(expectedErrorKeys);
-                  expect(json.body.internal_code).to.be.eql('offer_expire');
-                  expect(mailer.transporter.sendMail.lastCall.args[0].subject).to.be.eql(
-                    i18next.t(`finished.subject`)
-                  );
-                  expect(mailer.transporter.sendMail.lastCall.args[0].to).to.be.eql(
-                    'julian.molina@wolox.com.ar'
-                  );
-                  done();
-                });
-            });
-        });
-      });
-    });
-  });
-  it('should be fail because the offer does not exist', done => {
-    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
-      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
-        chai
-          .request(server)
-          .post(`/offers/23/code`)
-          .send({ email: 'julian.molina@wolox.com.ar' })
-          .then(json => {
-            expect(json.status).to.be.eql(404);
-            expect(json).to.be.json;
-            expect(json.body).to.have.all.keys(expectedErrorKeys);
-            expect(json.body.internal_code).to.be.eql('offer_not_found');
-            done();
-          });
-      });
-    });
-  });
-  it('should be fail because already exist code for email', done => {
-    Promise.all([
-      factoryManager.create(factoryCategory, { name: 'travel' }),
-      factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
-      factoryManager.create(factoryOffer, { retail: 1222 })
-    ]).then(() =>
-      factoryManager.create(factoryCode, { email: 'julian.molina@wolox.com.ar', offerId: 1 }).then(() =>
-        factoryManager
-          .create(factoryUserOffer, { email: 'julian.molina@wolox.com.ar', offerId: 1 })
-          .then(newEmailUser =>
-            chai
-              .request(server)
-              .post(`/offers/1/code`)
-              .send({ email: newEmailUser.hashEmail })
-              .then(json => {
-                expect(json.status).to.be.eql(400);
-                expect(json).to.be.json;
-                expect(json.body).to.have.all.keys(expectedErrorKeys);
-                expect(json.body.internal_code).to.be.eql('existing_mail');
-                done();
-              })
-          )
-      )
-    );
-  });
-  it('should be fail because the offer was disabled', done => {
-    Promise.all([
-      factoryManager.create(factoryCategory, { name: 'travel' }),
-      factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
-      factoryManager.create(factoryOffer, { retail: 1222, active: false })
-    ]).then(() =>
-      factoryManager
-        .create(factoryUserOffer, { email: 'julian.molina@wolox.com.ar', offerId: 1 })
-        .then(newEmailUser =>
-          chai
-            .request(server)
-            .post(`/offers/1/code`)
-            .send({ email: newEmailUser.hashEmail })
-            .then(json => {
-              expect(json.status).to.be.eql(400);
-              expect(json).to.be.json;
-              expect(json.body).to.have.all.keys(expectedErrorKeys);
-              expect(json.body.internal_code).to.be.eql('offer_disabled');
-              done();
-            })
-        )
-    );
-  });
-  it('should be fail because the user does not exist', done => {
-    Promise.all([
-      factoryManager.create(factoryCategory, { name: 'travel' }),
-      factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
-      factoryManager.create('ActiveOffer', { retail: 1222 })
-    ]).then(() =>
-      Promise.all([
-        factoryManager.create(factoryUserOffer, { email: 'julian.molina@wolox.com.ar', offerId: 1 })
-      ]).then(() =>
-        chai
-          .request(server)
-          .post(`/offers/1/code`)
-          .send({ email: 'hash400' })
-          .then(json => {
-            expect(json.status).to.be.eql(404);
-            expect(json).to.be.json;
-            expect(json.body).to.have.all.keys(expectedErrorKeys);
-            expect(json.body.internal_code).to.be.eql('user_not_found');
-            done();
-          })
-      )
-    );
-  });
-  it('should be fail because getPoints does not work', done => {
-    simple.restore(requestService, 'getPoints');
-    Promise.all([
-      factoryManager.create(factoryCategory, { name: 'travel' }),
-      factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
-      factoryManager.create(factoryOffer, { retail: 1222 })
-    ]).then(() =>
-      factoryManager.create(factoryUserOffer, { offerId: 1 }).then(newEmailUser =>
-        chai
-          .request(server)
-          .post(`/offers/1/code`)
-          .send({ email: newEmailUser.hashEmail })
-          .then(json => {
-            expect(json.status).to.be.eql(201);
-            Offer.getBy({ id: 1 }).then(after => {
-              expect(after.codes).to.be.eql(1);
-            });
-            expect(mailer.transporter.sendMail.lastCall.args[0].subject).to.be.equal(
-              i18next.t(`newCode.subject`)
-            );
-            expect(mailer.transporter.sendMail.lastCall.args[0].to).to.be.equal(newEmailUser.email);
-            done();
-          })
-      )
-    );
-  });
-});
 
 const generateToken = (points = '11') => `bearer ${token.generate({ points })}`;
 describe('/retail/:id/code/:code/redeem PATCH', () => {
@@ -339,31 +144,26 @@ describe('/retail/:id/code/:code GET', () => {
   });
   it('should be success to get code with offer out of stock', done => {
     factoryManager.create(factoryOffer, { redemptions: 1, maxRedemptions: 1 }).then(off =>
-      Promise.all([
-        factoryManager.create(factoryUserOffer, { email: 'julian.molina@wolox.com.ar', offerId: off.id }),
-        factoryManager.create(factoryUserOffer, { email: 'julian.molina14@wolox.com.ar', offerId: off.id })
-      ]).then(() =>
-        factoryManager.create(factoryCode, { email: 'julian.molina@wolox.com.ar', offerId: 1 }).then(code =>
-          factoryManager
-            .create(factoryCode, { email: 'julian.molina14@wolox.com.ar', offerId: 1 })
-            .then(codeOutOfStock =>
-              chai
-                .request(server)
-                .post(`/retail/11/code/${code.code}/redeem`)
-                .set('authorization', generateToken())
-                .then(() =>
-                  chai
-                    .request(server)
-                    .get(`/retail/11/code/${codeOutOfStock.code}`)
-                    .set('authorization', generateToken())
-                    .then(res => {
-                      expect(res.status).to.be.eql(200);
-                      expect(res.body.status).to.be.eql(OFFER_OUT_OF_STOCK);
-                      done();
-                    })
-                )
-            )
-        )
+      factoryManager.create(factoryCode, { email: 'julian.molina@wolox.com.ar', offerId: 1 }).then(code =>
+        factoryManager
+          .create(factoryCode, { email: 'julian.molina14@wolox.com.ar', offerId: 1 })
+          .then(codeOutOfStock =>
+            chai
+              .request(server)
+              .post(`/retail/11/code/${code.code}/redeem`)
+              .set('authorization', generateToken())
+              .then(() =>
+                chai
+                  .request(server)
+                  .get(`/retail/11/code/${codeOutOfStock.code}`)
+                  .set('authorization', generateToken())
+                  .then(res => {
+                    expect(res.status).to.be.eql(200);
+                    expect(res.body.status).to.be.eql(OFFER_OUT_OF_STOCK);
+                    done();
+                  })
+              )
+          )
       )
     );
   });
@@ -397,22 +197,18 @@ describe('/offer-app/offers/:id/code POST', () => {
     `bearer ${token.generate({ email, points: '11' })}`;
   it('should be success to create a code', done => {
     factoryManager.create(factoryOffer).then(off =>
-      factoryManager
-        .create(factoryUserOffer, { email: 'julian.molina@wolox.com.ar', offerId: off.id })
-        .then(() =>
-          chai
-            .request(server)
-            .post(`/offer-app/offers/${off.id}/code`)
-            .set('authorization', generateTokenApp())
-            .then(response => {
-              expect(response.status).to.be.eql(201);
-              Offer.getBy({ id: 1 }).then(after => {
-                expect(after.codes).to.be.eql(1);
-              });
-              expect(response.body).to.have.all.keys(['product', 'valueStrategy', 'expires', 'code']);
-              done();
-            })
-        )
+      chai
+        .request(server)
+        .post(`/offer-app/offers/${off.id}/code`)
+        .set('authorization', generateTokenApp())
+        .then(response => {
+          expect(response.status).to.be.eql(201);
+          Offer.getBy({ id: 1 }).then(after => {
+            expect(after.codes).to.be.eql(1);
+          });
+          expect(response.body).to.have.all.keys(['product', 'valueStrategy', 'expires', 'code']);
+          done();
+        })
     );
   });
   it('should fail because the offer doesnt exist', done => {
@@ -428,16 +224,81 @@ describe('/offer-app/offers/:id/code POST', () => {
         })
     );
   });
-  it.skip('should fail because the user try to create a code for a another different user offer', done => {
-    factoryManager.create(factoryOffer).then(off =>
-      factoryManager.create(factoryUserOffer, { email: 'domain@fake.com.ar', offerId: off.id }).then(() =>
+  it('should be fail because the offer expired', done => {
+    offerWithRetail.expiration = moment()
+      .subtract(2, 'days')
+      .format('YYYY-MM-DD');
+    factoryManager.create(factoryCategory, { name: 'travel' }).then(() =>
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(() =>
+        factoryManager.create(factoryOffer, offerWithRetail).then(before =>
+          chai
+            .request(server)
+            .post(`/offer-app/offers/${before.id}/code`)
+            .set('authorization', generateTokenApp())
+            .then(json => {
+              expect(json.status).to.be.eql(400);
+              expect(json).to.be.json;
+              expect(json.body).to.have.all.keys(expectedErrorKeys);
+              expect(json.body.internal_code).to.be.eql('offer_expire');
+              done();
+            })
+        )
+      )
+    );
+  });
+  it('should be fail because the offer does not exist', done => {
+    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
         chai
           .request(server)
-          .post(`/offer-app/offers/1/code`)
+          .post(`/offer-app/offers/23/code`)
           .set('authorization', generateTokenApp())
-          .then(err => {
-            expect(err.status).to.be.eql(404);
-            expect(err.body).to.have.all.keys(expectedErrorKeys);
+          .then(json => {
+            expect(json.status).to.be.eql(404);
+            expect(json).to.be.json;
+            expect(json.body).to.have.all.keys(expectedErrorKeys);
+            expect(json.body.internal_code).to.be.eql('offer_not_found');
+            done();
+          });
+      });
+    });
+  });
+  it('should be fail because already exist code for email', done => {
+    Promise.all([
+      factoryManager.create(factoryCategory, { name: 'travel' }),
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' }),
+      factoryManager.create(factoryOffer, { retail: 1222 })
+    ]).then(() =>
+      factoryManager.create(factoryCode, { email: 'julian.molina@wolox.com.ar', offerId: 1 }).then(({ id }) =>
+        chai
+          .request(server)
+          .post(`/offer-app/offers/${id}/code`)
+          .set('authorization', generateTokenApp())
+          .then(json => {
+            expect(json.status).to.be.eql(400);
+            expect(json).to.be.json;
+            expect(json.body).to.have.all.keys(expectedErrorKeys);
+            expect(json.body.internal_code).to.be.eql('existing_mail');
+            done();
+          })
+      )
+    );
+  });
+  it('should be fail because the offer was disabled', done => {
+    Promise.all([
+      factoryManager.create(factoryCategory, { name: 'travel' }),
+      factoryManager.create(factoryTypeOffer, { description: 'percentage' })
+    ]).then(() =>
+      factoryManager.create(factoryOffer, { retail: 1222, active: false }).then(({ id }) =>
+        chai
+          .request(server)
+          .post(`/offer-app/offers/${id}/code`)
+          .set('authorization', generateTokenApp())
+          .then(json => {
+            expect(json.status).to.be.eql(400);
+            expect(json).to.be.json;
+            expect(json.body).to.have.all.keys(expectedErrorKeys);
+            expect(json.body.internal_code).to.be.eql('offer_disabled');
             done();
           })
       )

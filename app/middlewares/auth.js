@@ -33,7 +33,7 @@ exports.requireEmail = (req, res, next) => {
   if (!user.email) {
     next(errors.userUnauthorized);
   } else {
-    req.email = user.email;
+    req.user = user;
     next();
   }
 };

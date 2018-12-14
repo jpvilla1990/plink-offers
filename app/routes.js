@@ -5,7 +5,7 @@ const Offer = require('./controllers/offer'),
   termsAndConditions = require('./controllers/termsAndConditions'),
   offerService = require('./services/offer'),
   typeOffer = require('./controllers/typeOffer'),
-  userOffer = require('./controllers/userOffer'),
+  userOffer = require('./controllers/userApp'),
   code = require('./controllers/code'),
   { sendOfferDisabledByPlink } = require('./services/mailer'),
   auth = require('./middlewares/auth'),
@@ -16,7 +16,6 @@ exports.init = app => {
   app.post('/retail/:id/offers', [auth.requireRetail, validator.checkAll, validator.validate], Offer.create);
   app.get('/image-offer', Offer.getImageUrl);
   app.get('/retail/:id/offers', [auth.requireRetail], Offer.getAll);
-  app.post('/offers/:id/code', [validator.checkEmailHash, validator.validate], Code.create);
   app.get('/categories', category.getAllCategoriesDashboard);
   app.get('/type-offers', typeOffer.getAllTypes);
   app.get('/ranges', target.getAgeRanges);
@@ -38,7 +37,6 @@ exports.init = app => {
   app.get('/offer-app/categories', category.getAllCategoriesApp);
   app.get('/offer-app/offers', [auth.requireEmail], userOffer.getAll);
   app.get('/offer-app/codes', [auth.requireEmail], userOffer.getCodes);
-  app.post('/offer-app/offers/:id/code', [auth.requireEmail], code.createCodeApp);
   app.get('/offer-app/offers/:id', [auth.requireEmail], userOffer.getOffer);
   app.put('/offer-app/login', [auth.requireEmail], user.updateFirstLogin);
   app.post('/offers-public/users', [validator.checkEmail, validator.validate], userOffer.checkAvailable);

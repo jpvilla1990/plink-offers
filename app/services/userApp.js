@@ -1,10 +1,7 @@
 const { getOfferStatus, moment } = require('../utils'),
   constants = require('../constants'),
-  requestService = require('./request'),
+  requestService = require('./points'),
   Sequelize = require('sequelize'),
-  utils = require('../utils'),
-  sequelize = require('../models').sequelize,
-  UserOffer = require('../models').user_offer,
   Op = Sequelize.Op;
 
 exports.getDataFromOffers = list => {

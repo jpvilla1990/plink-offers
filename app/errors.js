@@ -41,3 +41,8 @@ exports.userNotFound = internalError('User not found', exports.USER_NOT_FOUND);
 exports.offerDisabled = internalError('Offer Disabled', exports.OFFER_DISABLED);
 exports.points = internalError('Error when tried to obtain data from commerce', exports.DEFAULT_ERROR);
 exports.zendeskGroupIdNotFound = internalError('Group id for zendesk not found', exports.GROUP_ID_NOT_FOUND);
+exports.recommendationServiceFail = message =>
+  internalError(
+    `Error when tried to obtain data from document number because ${message}`,
+    exports.DEFAULT_ERROR
+  );

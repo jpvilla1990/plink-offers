@@ -18,6 +18,9 @@ exports.config = {
         host: 'https://test.zendesk.com/api/v2',
         token: 'token'
       }
+    },
+    server: {
+      info_pos_id: 'https://test.apigateway.com'
     }
   }
 };

@@ -9,17 +9,14 @@ const chai = require('chai'),
   factoryTypeOffer = require('../test/factories/typeOffer').nameFactory,
   factoryOffer = require('../test/factories/offer').nameFactory,
   factoryCode = require('../test/factories/code').nameFactory,
-  factoryUserOffer = require('./factories/userOffer').nameFactory,
-  requestService = require('../app/services/request'),
+  requestService = require('../app/services/points'),
   rollbarService = require('../app/services/rollbar'),
   simple = require('simple-mock'),
   token = require('./factories/token'),
-  JobCreator = require('../app/jobs/creatorUserOffer'),
   mailer = require('../app/services/mailer'),
   headerName = config.common.session.header_name,
   Offer = require('../app/models').offer,
   expectedErrorKeys = ['message', 'internal_code'],
-  UserOffer = require('../app/models').user_offer,
   {
     OFFER_ACTIVE,
     OFFER_INACTIVE,
@@ -347,58 +344,6 @@ it('should be successful with one disabled offer (disabled)', done => {
             done();
           });
       });
-    });
-  });
-});
-
-describe('job creator', () => {
-  let offerId;
-  beforeEach(() =>
-    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv =>
-      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r =>
-        factoryManager.create(factoryOffer, { category: rv.id, strategy: r.id }).then(off => {
-          offerId = off.id;
-          simple.mock(JobCreator.sqs, 'receiveMessage').returnWith({
-            promise: () =>
-              Promise.resolve({
-                Messages: [
-                  {
-                    Attributes: { MessageDeduplicationId: off.id },
-                    Body: '{"mails":[{"mail":"julian.molina@wolox.com.ar","name":"julian"}]}'
-                  }
-                ]
-              })
-          });
-          simple.mock(JobCreator.sqs, 'deleteMessage').returnWith({
-            promise: () => Promise.resolve({})
-          });
-        })
-      )
-    ));
-  it('should be fail because the user offer already exist ', done => {
-    factoryManager
-      .create(factoryUserOffer, {
-        offerId,
-        email: 'julian.molina@wolox.com.ar'
-      })
-      .then(() =>
-        JobCreator.creatorUserOffer().then(() =>
-          UserOffer.findAll({ where: { email: 'julian.molina@wolox.com.ar' } }).then(exist => {
-            expect(exist.length).to.be.eqls(1);
-            done();
-          })
-        )
-      );
-  });
-
-  it('Should be successful for create a new user offer ', done => {
-    factoryManager.create('DisabledOffer').then(off => {
-      JobCreator.creatorUserOffer().then(() =>
-        UserOffer.findOne({ where: { email: 'julian.molina@wolox.com.ar' } }).then(exist => {
-          expect(exist).not.be.null;
-          done();
-        })
-      );
     });
   });
 });

@@ -22,7 +22,8 @@ factory.define(exports.nameFactory, Offer, {
   nit: 12345,
   active: true,
   genders: 'Male,Female',
-  ranges: 'smaller than 17 years,18 to 23'
+  ranges: 'smaller than 17 years,18 to 23',
+  posId: 1234
 });
 
 factory.define('ActiveOffer', Offer, {
@@ -43,7 +44,8 @@ factory.define('ActiveOffer', Offer, {
   nit: 12345,
   active: true,
   genders: 'Male,Female',
-  ranges: 'smaller than 17 years,18 to 23'
+  ranges: 'smaller than 17 years,18 to 23',
+  posId: 1234
 });
 
 factory.define('DisabledOffer', Offer, {
@@ -63,7 +65,8 @@ factory.define('DisabledOffer', Offer, {
   categoryId: factory.assoc('Category', 'id'),
   nit: 12345,
   active: false,
-  dateInactive: moment()
+  dateInactive: moment(),
+  posId: 1234
 });
 
 factory.define('ExpiredOffer', Offer, {
@@ -82,7 +85,8 @@ factory.define('ExpiredOffer', Offer, {
   valueStrategy: '10%',
   categoryId: factory.assoc('Category', 'id'),
   nit: 12345,
-  active: true
+  active: true,
+  posId: 1234
 });
 
 factory.define('NotBeganOffer', Offer, {
@@ -101,7 +105,8 @@ factory.define('NotBeganOffer', Offer, {
   valueStrategy: '10%',
   categoryId: factory.assoc('Category', 'id'),
   nit: 12345,
-  active: true
+  active: true,
+  posId: 1234
 });
 
 factory.define('NoRedemptionsLeftOffer', Offer, {
@@ -120,7 +125,8 @@ factory.define('NoRedemptionsLeftOffer', Offer, {
   valueStrategy: '10%',
   categoryId: factory.assoc('Category', 'id'),
   nit: 12345,
-  active: true
+  active: true,
+  posId: 1234
 });
 
 factory.define('SpecialOffer', Offer, {
@@ -134,5 +140,6 @@ factory.define('SpecialOffer', Offer, {
   categoryId: factory.assoc('Category', 'id'),
   active: true,
   linkUrl: factory.seq('Offer.link', n => `www.google.com/image-${n}`),
-  description: factory.seq('Offer.description', n => `description${n}`)
+  description: factory.seq('Offer.description', n => `description${n}`),
+  posId: 1234
 });

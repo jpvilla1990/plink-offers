@@ -3,7 +3,7 @@ const User = require('../models').user,
 
 exports.updateFirstLogin = (req, res, next) =>
   cognitoService
-    .updateFirstLogin(req.email)
+    .updateFirstLogin(req.user.email)
     .then(() => {
       res.status(200).end();
     })

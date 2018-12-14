@@ -4,7 +4,6 @@ const codeService = require('../services/code'),
   Offer = require('../models').offer,
   uniqueCode = require('../services/uniqueCode'),
   { sendNewCode, sendOfferExpired } = require('../services/mailer'),
-  UserOffer = require('../models').user_offer,
   {
     OFFER_DISABLED,
     OFFER_INACTIVE,
@@ -12,7 +11,6 @@ const codeService = require('../services/code'),
     OFFER_FINISHED,
     OFFER_OUT_OF_STOCK
   } = require('../constants'),
-  requestService = require('../services/request'),
   { getOfferStatus } = require('../utils'),
   uuid = require('uuid');
 
@@ -30,60 +28,6 @@ const changeCode = code => {
   return result;
 };
 
-exports.create = (req, res, next) => {
-  const code = {
-    hashEmail: req.body.email,
-    offerId: parseInt(req.params.id)
-  };
-  return Offer.getBy({ id: code.offerId })
-    .then(off => {
-      if (off) {
-        const status = getOfferStatus(off.dataValues);
-        return UserOffer.getBy({ hashEmail: code.hashEmail, offer_id: code.offerId }).then(userEmail => {
-          if (userEmail) {
-            return requestService
-              .getPoints(off.dataValues.retail)
-              .then(dataCommerce => {
-                code.email = userEmail.email;
-                if (status === OFFER_ACTIVE) {
-                  code.code = uuid().slice(0, 8);
-                  return uniqueCode.verify(code).then(newCode =>
-                    sendNewCode({
-                      offer: off.dataValues,
-                      code: { ...newCode.dataValues, email: userEmail.email },
-                      dataCommerce,
-                      nameCategory: off.category.dataValues.name
-                    }).then(() => {
-                      res.status(201);
-                      res.end();
-                    })
-                  );
-                } else {
-                  return sendOfferExpired({
-                    offer: off.dataValues,
-                    code,
-                    dataCommerce,
-                    nameCategory: off.category.dataValues.name
-                  }).then(() => {
-                    throw {
-                      [OFFER_INACTIVE]: errors.offerInactive,
-                      [OFFER_FINISHED]: errors.offerExpire,
-                      [OFFER_DISABLED]: errors.offerDisabled
-                    }[status];
-                  });
-                }
-              })
-              .catch(err => next(err));
-          } else {
-            throw errors.userNotFound;
-          }
-        });
-      } else {
-        throw errors.offerNotFound;
-      }
-    })
-    .catch(next);
-};
 exports.redeemCode = ({ params }, res, next) =>
   codeService
     .redeemCode({ retailId: params.id, code: params.code })
@@ -105,9 +49,9 @@ exports.getCode = ({ params }, res, next) =>
 exports.createCodeApp = (req, res, next) => {
   const code = {
     offerId: req.params.id,
-    email: req.email
+    email: req.user.email
   };
-  return Offer.getBy({ id: code.offerId, email: req.email })
+  return Offer.getBy({ id: code.offerId, email: code.email })
     .then(off => {
       if (off) {
         const status = getOfferStatus(off.dataValues);
