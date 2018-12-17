@@ -1,7 +1,7 @@
 const sequelize = require('../models').sequelize,
   Offer = require('../models').offer,
   errors = require('../errors'),
-  requestService = require('../services/request'),
+  requestService = require('../services/points'),
   Sequelize = require('sequelize'),
   queryHelper = require('../services/queryHelper'),
   utils = require('../utils'),
@@ -67,6 +67,11 @@ exports.getAllApp = params => {
         },
         {
           active: true
+        },
+        {
+          posId: {
+            [Op.in]: params.posIds
+          }
         }
       ]
     };

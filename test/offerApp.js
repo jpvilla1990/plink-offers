@@ -2,51 +2,80 @@ const chai = require('chai'),
   dictum = require('dictum.js'),
   moment = require('moment'),
   server = require('./../app'),
-  requestService = require('../app/services/request'),
+  requestService = require('../app/services/points'),
   simple = require('simple-mock'),
   expect = chai.expect,
-  { OFFER_OUT_OF_STOCK } = require('../app/constants'),
+  { OFFER_OUT_OF_STOCK, OFFER_ACTIVE, OFFER_FINISHED, OFFER_DISABLED } = require('../app/constants'),
   token = require('../test/factories/token'),
   cognitoService = require('../app/services/cognito'),
   factoryManager = require('../test/factories/factoryManager'),
   factoryOffer = require('../test/factories/offer').nameFactory,
   factoryCategory = require('../test/factories/category').nameFactory,
-  factoryUserOffer = require('../test/factories/userOffer').nameFactory,
   factoryCode = require('../test/factories/code').nameFactory,
-  email = 'julian.molina@wolox.com.ar';
+  config = require('../config'),
+  expectedErrorKeys = ['message', 'internal_code'],
+  nock = require('nock'),
+  email = 'julian.molina@wolox.com.ar',
+  responseMockPosId = {
+    Count: 1,
+    Items: [
+      {
+        commerce_ids: {
+          L: [
+            {
+              N: '14776264'
+            },
+            {
+              N: '12903332'
+            }
+          ]
+        },
+        customerid: {
+          S: 39832486
+        }
+      }
+    ],
+    ScannedCount: 1
+  };
 
 const generateToken = (mail = email) => `bearer ${token.generate({ email: mail, points: '11' })}`;
-
+const mockPosId = (documentNumber, code = 200, response = {}) =>
+  nock(config.common.server.info_pos_id)
+    .persist()
+    .get(`/${documentNumber}`)
+    .query(true)
+    .reply(code, response);
 describe('/offer-app/offers GET', () => {
-  simple.mock(requestService, 'getPoints').resolveWith({
-    address: 'Cochabamba 3254',
-    reference: 'Next to McDonalds',
-    commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
-    posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
+  beforeEach(() => {
+    simple.mock(requestService, 'getPoints').resolveWith({
+      address: 'Cochabamba 3254',
+      reference: 'Next to McDonalds',
+      commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
+      posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
+    });
+    mockPosId(39832486, 200, responseMockPosId);
   });
-  it.skip('should be success get one offers for specific category ( food ) ', done => {
+
+  it('should be success get one offers for specific category ( food ) ', done => {
     Promise.all([
       factoryManager.create(factoryCategory, { name: 'travel' }),
       factoryManager.create(factoryCategory, { name: 'food' }),
-      factoryManager.create(factoryOffer, { categoryId: 1 }),
-      factoryManager.create(factoryOffer, { categoryId: 2 }),
-      factoryManager.create(factoryOffer, { categoryId: 2 })
+      factoryManager.create(factoryOffer, { categoryId: 1, posId: 14776264 }),
+      factoryManager.create(factoryOffer, { categoryId: 2, posId: 12903332 }),
+      factoryManager.create(factoryOffer, { categoryId: 2, posId: 149761 })
     ]).then(() => {
       Promise.all([
         factoryManager.create(factoryCode, { email, offerId: 1 }),
-        factoryManager.create(factoryCode, { email, offerId: 2 }),
-        factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
-        factoryManager.create(factoryUserOffer, { email, offerId: 2 }),
-        factoryManager.create(factoryUserOffer, { email: 'domain@fake.com.ar', offerId: 2 })
+        factoryManager.create(factoryCode, { email, offerId: 2 })
       ]).then(() => {
         chai
           .request(server)
           .get(`/offer-app/offers?page=0&category=2`)
           .set('authorization', generateToken())
           .then(response => {
-            response.should.have.status(200);
-            response.body.count.should.eqls(1);
-            response.body.offers.length.should.eqls(1);
+            expect(response.status).to.be.eql(200);
+            expect(response.body.count).to.be.eql(1);
+            expect(response.body.offers.length).to.be.eql(1);
             dictum.chai(response);
             done();
           });
@@ -60,14 +89,16 @@ describe('/offer-app/offers GET', () => {
       factoryManager.create(factoryCategory, { name: 'shoes' })
     ]).then(() =>
       Promise.all([
-        factoryManager.create(factoryOffer, { categoryId: 1, product: `${text}landia` }),
-        factoryManager.create(factoryOffer, { categoryId: 2, product: `Z${text}tos Carlitos` })
+        factoryManager.create(factoryOffer, { categoryId: 1, product: `${text}landia`, posId: 14776264 }),
+        factoryManager.create(factoryOffer, {
+          categoryId: 2,
+          product: `Z${text}tos Carlitos`,
+          posId: 12903332
+        })
       ]).then(() =>
         Promise.all([
           factoryManager.create(factoryCode, { email, offerId: 1 }),
-          factoryManager.create(factoryCode, { email, offerId: 2 }),
-          factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
-          factoryManager.create(factoryUserOffer, { email, offerId: 2 })
+          factoryManager.create(factoryCode, { email, offerId: 2 })
         ])
       )
     );
@@ -80,11 +111,11 @@ describe('/offer-app/offers GET', () => {
         .get(`/offer-app/offers?page=0&name=${text}`)
         .set('authorization', generateToken())
         .then(response => {
-          response.should.have.status(200);
-          response.body.count.should.eqls(2);
-          response.body.offers.length.should.eqls(2);
-          response.body.offers[0].product.toLowerCase().should.include(text);
-          response.body.offers[1].product.toLowerCase().should.include(text);
+          expect(response.status).to.be.eql(200);
+          expect(response.body.count).to.be.eql(2);
+          expect(response.body.offers.length).to.be.eql(2);
+          expect(response.body.offers[0].product.toLowerCase()).to.include(text);
+          expect(response.body.offers[1].product.toLowerCase()).to.include(text);
           done();
         });
     });
@@ -100,11 +131,11 @@ describe('/offer-app/offers GET', () => {
             .get(`/offer-app/offers?page=0&name=${text}`)
             .set('authorization', generateToken())
             .then(response => {
-              response.should.have.status(200);
-              response.body.count.should.eqls(2);
-              response.body.offers.length.should.eqls(2);
-              response.body.offers[0].product.toLowerCase().should.include(text);
-              response.body.offers[1].product.toLowerCase().should.include(text);
+              expect(response.status).to.be.eql(200);
+              expect(response.body.count).to.be.eql(2);
+              expect(response.body.offers.length).to.be.eql(2);
+              expect(response.body.offers[0].product.toLowerCase()).to.include(text);
+              expect(response.body.offers[1].product.toLowerCase()).to.include(text);
               done();
             })
         )
@@ -120,30 +151,31 @@ describe('/offer-app/offers GET', () => {
         .get(`/offer-app/offers?page=0&name=xyz`)
         .set('authorization', generateToken())
         .then(response => {
-          response.should.have.status(200);
-          response.body.count.should.eqls(0);
-          response.body.offers.length.should.eqls(0);
+          expect(response.status).to.be.eql(200);
+          expect(response.body.count).to.be.eql(0);
+          expect(response.body.offers.length).to.be.eql(0);
           done();
         });
     });
   });
 
-  it.skip('should be success get two offers', done => {
-    Promise.all([factoryManager.create(factoryOffer), factoryManager.create(factoryOffer)]).then(() => {
+  it('should be success get two offers', done => {
+    Promise.all([
+      factoryManager.create(factoryOffer, { posId: 14776264 }),
+      factoryManager.create(factoryOffer, { posId: 14776264 })
+    ]).then(() => {
       Promise.all([
         factoryManager.create(factoryCode, { email, offerId: 1 }),
-        factoryManager.create(factoryCode, { email, offerId: 2 }),
-        factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
-        factoryManager.create(factoryUserOffer, { email, offerId: 2 })
+        factoryManager.create(factoryCode, { email, offerId: 2 })
       ]).then(() => {
         chai
           .request(server)
           .get(`/offer-app/offers?page=0`)
           .set('authorization', generateToken())
           .then(response => {
-            response.should.have.status(200);
-            response.body.count.should.eqls(2);
-            response.body.offers.length.should.eqls(2);
+            expect(response.status).to.be.eql(200);
+            expect(response.body.count).to.be.eql(2);
+            expect(response.body.offers.length).to.be.eql(2);
             done();
           });
       });
@@ -154,18 +186,16 @@ describe('/offer-app/offers GET', () => {
     Promise.all([factoryManager.create('ExpiredOffer'), factoryManager.create('ExpiredOffer')]).then(() => {
       Promise.all([
         factoryManager.create(factoryCode, { email, offerId: 1 }),
-        factoryManager.create(factoryCode, { email, offerId: 2 }),
-        factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
-        factoryManager.create(factoryUserOffer, { email, offerId: 2 })
+        factoryManager.create(factoryCode, { email, offerId: 2 })
       ]).then(() => {
         chai
           .request(server)
           .get(`/offer-app/offers?page=0`)
           .set('authorization', generateToken())
           .then(response => {
-            response.should.have.status(200);
-            response.body.count.should.eqls(0);
-            response.body.offers.length.should.eqls(0);
+            expect(response.status).to.be.eql(200);
+            expect(response.body.count).to.be.eql(0);
+            expect(response.body.offers.length).to.be.eql(0);
             done();
           });
       });
@@ -176,18 +206,16 @@ describe('/offer-app/offers GET', () => {
     Promise.all([factoryManager.create('NotBeganOffer'), factoryManager.create('NotBeganOffer')]).then(() => {
       Promise.all([
         factoryManager.create(factoryCode, { email, offerId: 1 }),
-        factoryManager.create(factoryCode, { email, offerId: 2 }),
-        factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
-        factoryManager.create(factoryUserOffer, { email, offerId: 2 })
+        factoryManager.create(factoryCode, { email, offerId: 2 })
       ]).then(() => {
         chai
           .request(server)
           .get(`/offer-app/offers?page=0`)
           .set('authorization', generateToken())
           .then(response => {
-            response.should.have.status(200);
-            response.body.count.should.eqls(0);
-            response.body.offers.length.should.eqls(0);
+            expect(response.status).to.be.eql(200);
+            expect(response.body.count).to.be.eql(0);
+            expect(response.body.offers.length).to.be.eql(0);
             done();
           });
       });
@@ -201,18 +229,16 @@ describe('/offer-app/offers GET', () => {
     ]).then(() => {
       Promise.all([
         factoryManager.create(factoryCode, { email, offerId: 1 }),
-        factoryManager.create(factoryCode, { email, offerId: 2 }),
-        factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
-        factoryManager.create(factoryUserOffer, { email, offerId: 2 })
+        factoryManager.create(factoryCode, { email, offerId: 2 })
       ]).then(() => {
         chai
           .request(server)
           .get(`/offer-app/offers?page=0`)
           .set('authorization', generateToken())
           .then(response => {
-            response.should.have.status(200);
-            response.body.count.should.eqls(0);
-            response.body.offers.length.should.eqls(0);
+            expect(response.status).to.be.eql(200);
+            expect(response.body.count).to.be.eql(0);
+            expect(response.body.offers.length).to.be.eql(0);
             done();
           });
       });
@@ -225,117 +251,148 @@ describe('/offer-app/offers GET', () => {
         .get(`/offer-app/offers?page=0`)
         .set('authorization', generateToken())
         .then(response => {
-          response.should.have.status(200);
-          response.body.count.should.eqls(0);
-          response.body.offers.length.should.eqls(0);
+          expect(response.status).to.be.eql(200);
+          expect(response.body.count).to.be.eql(0);
+          expect(response.body.offers.length).to.be.eql(0);
           done();
         });
     });
   });
 
-  it.skip('should be success get one offer', done => {
-    const otherEmail = 'julian.molina+false@wolox.com.ar';
-    Promise.all([factoryManager.create(factoryOffer), factoryManager.create(factoryOffer)]).then(() => {
+  it('should be success get one offer', done => {
+    Promise.all([
+      factoryManager.create(factoryOffer, { posId: 14776264 }),
+      factoryManager.create(factoryOffer)
+    ]).then(() =>
       Promise.all([
         factoryManager.create(factoryCode, { email, offerId: 1 }),
-        factoryManager.create(factoryCode, { email, offerId: 2 }),
-        factoryManager.create(factoryUserOffer, { email, offerId: 1 }),
-        factoryManager.create(factoryUserOffer, { email: otherEmail, offerId: 2 })
+        factoryManager.create(factoryCode, { email, offerId: 2 })
       ]).then(() => {
         chai
           .request(server)
           .get(`/offer-app/offers?page=0`)
           .set('authorization', generateToken())
           .then(response => {
-            response.should.have.status(200);
-            response.body.count.should.eqls(1);
-            response.body.offers.length.should.eqls(1);
+            expect(response.status).to.be.eql(200);
+            expect(response.body.count).to.be.eql(1);
+            expect(response.body.offers.length).to.be.eql(1);
             done();
           });
-      });
-    });
+      })
+    );
   });
   it('should be success but the page was not sent', done => {
     chai
       .request(server)
-      .get(`/offer-app/offers?`)
+      .get(`/offer-app/offers`)
       .set('authorization', generateToken())
       .then(response => {
-        response.should.have.status(200);
-        response.body.offers.length.should.eqls(0);
+        expect(response.status).to.be.eql(200);
+        expect(response.body.count).to.be.eql(0);
+        expect(response.body.offers.length).to.be.eql(0);
         done();
       });
   });
   it('should be fail because getPoints does not work', done => {
     simple.restore();
-    Promise.all([factoryManager.create(factoryOffer, { retail: 4635 })]).then(() =>
-      Promise.all([factoryManager.create(factoryUserOffer, { email, offerId: 1 })]).then(() =>
-        chai
-          .request(server)
-          .get(`/offer-app/offers`)
-          .set('authorization', generateToken())
-          .then(response => {
-            response.should.have.status(500);
-            response.body.should.have.property('message');
-            expect(response.body.message).to.equal('Error when tried to obtain data from commerce');
-            response.body.should.have.property('internal_code');
-            expect(response.body.internal_code).to.equal('default_error');
-            done();
-          })
-      )
+    Promise.all([factoryManager.create(factoryOffer, { retail: 4635, posId: 14776264 })]).then(() =>
+      chai
+        .request(server)
+        .get(`/offer-app/offers`)
+        .set('authorization', generateToken())
+        .then(response => {
+          expect(response.status).to.be.eql(500);
+          expect(response.body).to.have.all.keys(expectedErrorKeys);
+          expect(response.body.message).to.equal('Error when tried to obtain data from commerce');
+          expect(response.body.internal_code).to.equal('default_error');
+          done();
+        })
     );
   });
   it('should be success get offers with specials offers', done => {
-    simple.mock(requestService, 'getPoints').resolveWith({
-      address: 'Cochabamba 3254',
-      reference: 'Next to McDonalds',
-      commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
-      posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
-    });
     factoryManager.create(factoryCategory, { special: true }).then(({ id }) =>
-      factoryManager.create('ActiveOffer').then(() =>
-        factoryManager.createMany('SpecialOffer', 4, { categoryId: id }).then(() =>
-          factoryManager.create(factoryUserOffer, { email, offerId: 1 }).then(() => {
-            chai
-              .request(server)
-              .get(`/offer-app/offers?`)
-              .set('authorization', generateToken())
-              .then(response => {
-                response.should.have.status(200);
-                response.body.pages.should.be.eql(1);
-                response.body.count.should.eqls(5);
-                response.body.offers.length.should.eqls(5);
-                done();
-              });
-          })
-        )
-      )
-    );
-  });
-  it('should be success get special offers ', done => {
-    simple.mock(requestService, 'getPoints').resolveWith({
-      address: 'Cochabamba 3254',
-      reference: 'Next to McDonalds',
-      commerce: { description: 'McDonalds', nit: '112233', imageUrl: '' },
-      posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
-    });
-    factoryManager.create(factoryCategory, { special: true }).then(({ id }) =>
-      factoryManager.createMany('SpecialOffer', 4, { categoryId: id }).then(() =>
-        factoryManager.create(factoryUserOffer, { email, offerId: 1 }).then(() => {
+      factoryManager.create('ActiveOffer', { posId: 14776264 }).then(() =>
+        factoryManager.createMany('SpecialOffer', 4, { categoryId: id, posId: 14776264 }).then(() =>
           chai
             .request(server)
             .get(`/offer-app/offers`)
             .set('authorization', generateToken())
             .then(response => {
-              response.should.have.status(200);
-              response.body.pages.should.be.eql(1);
-              response.body.count.should.eqls(4);
-              response.body.offers.length.should.eqls(4);
+              expect(response.status).to.be.eql(200);
+              expect(response.body.pages).to.be.eql(1);
+              expect(response.body.count).to.be.eql(5);
+              expect(response.body.offers.length).to.be.eql(5);
               done();
-            });
-        })
+            })
+        )
       )
     );
+  });
+  it('should be success get special offers ', done => {
+    factoryManager.create(factoryCategory, { special: true }).then(({ id }) =>
+      factoryManager.createMany('SpecialOffer', 4, { categoryId: id, posId: 14776264 }).then(() =>
+        chai
+          .request(server)
+          .get(`/offer-app/offers`)
+          .set('authorization', generateToken())
+          .then(response => {
+            expect(response.status).to.be.eql(200);
+            expect(response.body.pages).to.be.eql(1);
+            expect(response.body.count).to.be.eql(4);
+            expect(response.body.offers.length).to.be.eql(4);
+            done();
+          })
+      )
+    );
+  });
+  it('should be success with empty recommendations for the document number ', done => {
+    nock.cleanAll();
+    const responseMock = { ...responseMockPosId };
+    responseMock.Items = [];
+    mockPosId(39832486, 200, responseMock);
+    chai
+      .request(server)
+      .get(`/offer-app/offers`)
+      .set('authorization', generateToken())
+      .then(response => {
+        expect(response.status).to.be.eql(200);
+        expect(response.body.pages).to.be.eql(0);
+        expect(response.body.count).to.be.eql(0);
+        expect(response.body.offers.length).to.be.eql(0);
+        done();
+      });
+  });
+  it('should be success with empty recommendations for the document number', done => {
+    nock.cleanAll();
+    const responseMock = { ...responseMockPosId };
+    delete responseMock.Items[0].commerce_ids;
+    mockPosId(39832486, 200, responseMock);
+    chai
+      .request(server)
+      .get(`/offer-app/offers`)
+      .set('authorization', generateToken())
+      .then(response => {
+        expect(response.status).to.be.eql(200);
+        expect(response.body.pages).to.be.eql(0);
+        expect(response.body.count).to.be.eql(0);
+        expect(response.body.offers.length).to.be.eql(0);
+        nock.cleanAll();
+        done();
+      });
+  });
+  it('should be fail because getPosIds doesnt work ', done => {
+    nock.cleanAll();
+    chai
+      .request(server)
+      .get(`/offer-app/offers`)
+      .set('authorization', generateToken())
+      .then(response => {
+        expect(response.status).to.be.eql(500);
+        expect(response.body).to.have.all.keys(expectedErrorKeys);
+        expect(response.body.message).includes('Error when tried to obtain data from document number');
+        expect(response.body.internal_code).to.equal('default_error');
+        done();
+      });
   });
 });
 
@@ -346,14 +403,14 @@ describe('/offer-app/codes GET', () => {
       .get(`/offer-app/codes`)
       .set('authorization', generateToken())
       .then(response => {
-        response.should.have.status(200);
-        response.body.codes.length.should.eqls(0);
+        expect(response.status).to.be.eql(200);
+        expect(response.body.codes.length).to.be.eql(0);
         done();
       });
   });
   it('should be success get two codes', done => {
-    factoryManager.create(factoryOffer).then(off1 => {
-      factoryManager.create(factoryOffer).then(off2 => {
+    factoryManager.create('ActiveOffer').then(off1 => {
+      factoryManager.create('ActiveOffer').then(off2 => {
         factoryManager.create(factoryCode, { email, offerId: off1.dataValues.id }).then(() => {
           factoryManager
             .create(factoryCode, {
@@ -366,9 +423,9 @@ describe('/offer-app/codes GET', () => {
                 .get(`/offer-app/codes?page=0`)
                 .set('authorization', generateToken())
                 .then(response => {
-                  response.should.have.status(200);
-                  response.body.count.should.eqls(2);
-                  response.body.codes.length.should.eqls(2);
+                  expect(response.status).to.be.eql(200);
+                  expect(response.body.count).to.be.eql(2);
+                  expect(response.body.codes.length).to.be.eql(2);
                   dictum.chai(response);
                   done();
                 });
@@ -392,9 +449,9 @@ describe('/offer-app/codes GET', () => {
                 .get(`/offer-app/codes?page=0`)
                 .set('authorization', generateToken())
                 .then(response => {
-                  response.should.have.status(200);
-                  response.body.count.should.eqls(1);
-                  response.body.codes.length.should.eqls(1);
+                  expect(response.status).to.be.eql(200);
+                  expect(response.body.count).to.be.eql(1);
+                  expect(response.body.codes.length).to.be.eql(1);
                   done();
                 });
             });
@@ -418,9 +475,9 @@ describe('/offer-app/codes GET', () => {
                 .get(`/offer-app/codes?page=0`)
                 .set('authorization', generateToken())
                 .then(response => {
-                  response.should.have.status(200);
-                  response.body.count.should.eqls(1);
-                  response.body.codes.length.should.eqls(1);
+                  expect(response.status).to.be.eql(200);
+                  expect(response.body.count).to.be.eql(1);
+                  expect(response.body.codes.length).to.be.eql(1);
                   done();
                 });
             });
@@ -450,43 +507,37 @@ describe('/offer-app/codes GET', () => {
         .get(`/offer-app/codes?page=0`)
         .set('authorization', generateToken())
         .then(response => {
-          response.should.have.status(200);
-          response.body.count.should.eqls(4);
-          response.body.codes[0].status.should.eqls('active');
-          response.body.codes[1].status.should.eqls('active');
-          response.body.codes[1].dateRedemption.should.eqls(moment().format('YYYY-MM-DD'));
-          response.body.codes[2].status.should.eqls('finished');
-          response.body.codes[3].status.should.eqls('disabled');
-          response.body.pages.should.eqls(1);
-          response.body.count.should.eqls(4);
+          expect(response.status).to.be.eql(200);
+          expect(response.body.count).to.be.eql(4);
+          expect(response.body.pages).to.be.eql(1);
+          expect(response.body.codes[0].status).to.be.eql(OFFER_ACTIVE);
+          expect(response.body.codes[1].status).to.be.eql(OFFER_ACTIVE);
+          expect(response.body.codes[1].dateRedemption).to.be.eql(moment().format('YYYY-MM-DD'));
+          expect(response.body.codes[2].status).to.be.eql(OFFER_FINISHED);
+          expect(response.body.codes[3].status).to.be.eql(OFFER_DISABLED);
           done();
         })
     );
   });
   it('should be success to get codes with offer out of stock', done => {
-    factoryManager.create(factoryOffer, { redemptions: 1, maxRedemptions: 1 }).then(off =>
-      Promise.all([
-        factoryManager.create(factoryUserOffer, { email: 'julian.molina@wolox.com.ar', offerId: off.id }),
-        factoryManager.create(factoryUserOffer, { email: 'julian.molina14@wolox.com.ar', offerId: off.id })
-      ]).then(() =>
-        factoryManager.create(factoryCode, { email: 'julian.molina@wolox.com.ar', offerId: 1 }).then(code =>
-          factoryManager.create(factoryCode, { email: 'julian.molina14@wolox.com.ar', offerId: 1 }).then(() =>
-            chai
-              .request(server)
-              .post(`/retail/11/code/${code.code}/redeem`)
-              .set('authorization', generateToken())
-              .then(() =>
-                chai
-                  .request(server)
-                  .get(`/offer-app/codes?page=0`)
-                  .set('authorization', generateToken('julian.molina14@wolox.com.ar'))
-                  .then(res => {
-                    expect(res.status).to.be.eql(200);
-                    expect(res.body.codes[0].status).to.be.eql(OFFER_OUT_OF_STOCK);
-                    done();
-                  })
-              )
-          )
+    factoryManager.create(factoryOffer, { redemptions: 1, maxRedemptions: 1 }).then(() =>
+      factoryManager.create(factoryCode, { email: 'julian.molina@wolox.com.ar', offerId: 1 }).then(code =>
+        factoryManager.create(factoryCode, { email: 'julian.molina14@wolox.com.ar', offerId: 1 }).then(() =>
+          chai
+            .request(server)
+            .post(`/retail/11/code/${code.code}/redeem`)
+            .set('authorization', generateToken())
+            .then(() =>
+              chai
+                .request(server)
+                .get(`/offer-app/codes?page=0`)
+                .set('authorization', generateToken('julian.molina14@wolox.com.ar'))
+                .then(res => {
+                  expect(res.status).to.be.eql(200);
+                  expect(res.body.codes[0].status).to.be.eql(OFFER_OUT_OF_STOCK);
+                  done();
+                })
+            )
         )
       )
     );
@@ -505,9 +556,7 @@ describe('/offer-app/offers/:id_offer GET', () => {
       .create('ActiveOffer')
       .then(off => {
         idOffer = off.id;
-        return factoryManager
-          .create(factoryCode, { email, offerId: off.id })
-          .then(() => factoryManager.create(factoryUserOffer, { email, offerId: off.id }));
+        return factoryManager.create(factoryCode, { email, offerId: off.id });
       })
       .then(() =>
         chai
@@ -515,7 +564,6 @@ describe('/offer-app/offers/:id_offer GET', () => {
           .get(`/offer-app/offers/${idOffer}`)
           .set('authorization', generateToken())
           .then(response => {
-            response.should.have.status(200);
             expect(response.body.code).to.not.be.undefined;
             dictum.chai(response);
             done();
@@ -531,17 +579,15 @@ describe('/offer-app/offers/:id_offer GET', () => {
       posTerminals: [{ posId: '123' }, { posId: '456' }, { posId: '789' }, { posId: '152' }]
     });
     factoryManager.create('ActiveOffer').then(off =>
-      factoryManager.create(factoryUserOffer, { email, offerId: 1 }).then(() =>
-        chai
-          .request(server)
-          .get(`/offer-app/offers/${off.id}`)
-          .set('authorization', generateToken())
-          .then(response => {
-            response.should.have.status(200);
-            expect(response.body.code).to.be.undefined;
-            done();
-          })
-      )
+      chai
+        .request(server)
+        .get(`/offer-app/offers/${off.id}`)
+        .set('authorization', generateToken())
+        .then(response => {
+          expect(response.status).to.be.eql(200);
+          expect(response.body.code).to.be.undefined;
+          done();
+        })
     );
   });
   it('Should be fail because the offer does not exist', done => {
@@ -551,9 +597,8 @@ describe('/offer-app/offers/:id_offer GET', () => {
         .get(`/offer-app/offers/1236784`)
         .set('authorization', generateToken())
         .then(err => {
-          err.body.should.have.property('message');
+          expect(err.body).to.have.all.keys(expectedErrorKeys);
           expect(err.body.message).to.equal('Offer Not Found');
-          err.body.should.have.property('internal_code');
           expect(err.body.internal_code).to.equal('offer_not_found');
           done();
         })
@@ -571,7 +616,7 @@ describe('/offers-public/users POST', () => {
       .send({ email })
       .set('authorization', generateToken())
       .then(response => {
-        response.should.have.status(200);
+        expect(response.status).to.be.eql(200);
         expect(response.body.exist).to.be.true;
         dictum.chai(response);
         simple.restore(cognitoService.cognito, 'adminGetUser');
@@ -588,7 +633,7 @@ describe('/offers-public/users POST', () => {
       .send({ email })
       .set('authorization', generateToken())
       .then(response => {
-        response.should.have.status(200);
+        expect(response.status).to.be.eql(200);
         expect(response.body.exist).to.be.false;
         simple.restore(cognitoService.cognito, 'adminGetUser');
         done();
@@ -603,11 +648,10 @@ describe('/offers-public/users POST', () => {
       .post(`/offers-public/users`)
       .send({ email })
       .set('authorization', generateToken())
-      .then(response => {
-        response.body.should.have.property('message');
-        expect(response.body.message).to.equal('InternalErrorException');
-        response.body.should.have.property('internal_code');
-        expect(response.body.internal_code).to.equal('bad_request');
+      .then(err => {
+        expect(err.body).to.have.all.keys(expectedErrorKeys);
+        expect(err.body.message).to.equal('InternalErrorException');
+        expect(err.body.internal_code).to.equal('bad_request');
         done();
       });
   });
@@ -616,11 +660,10 @@ describe('/offers-public/users POST', () => {
       .request(server)
       .post(`/offers-public/users`)
       .set('authorization', generateToken())
-      .then(response => {
-        response.body.should.have.property('message');
-        expect(response.body.message).to.include('The email is required');
-        response.body.should.have.property('internal_code');
-        expect(response.body.internal_code).to.equal('bad_request');
+      .then(err => {
+        expect(err.body).to.have.all.keys(expectedErrorKeys);
+        expect(err.body.message).to.include('The email is required');
+        expect(err.body.internal_code).to.equal('bad_request');
         done();
       });
   });
@@ -634,7 +677,7 @@ describe('/offers-public/users POST', () => {
         .put(`/offer-app/login`)
         .set('authorization', generateToken())
         .then(response => {
-          response.should.have.status(200);
+          expect(response.status).to.be.eql(200);
           dictum.chai(response);
           done();
         });
@@ -648,7 +691,7 @@ describe('/offers-public/users POST', () => {
         .put(`/offer-app/login`)
         .set('authorization', generateToken())
         .then(err => {
-          err.should.have.status(400);
+          expect(err.status).to.be.eql(400);
           expect(err.body.message).to.be.eqls('AliasExistsException');
           expect(err.body.internal_code).to.be.eqls('bad_request');
           done();

@@ -35,7 +35,8 @@ exports.checkAll = [
   verifyString(verifyExist('purpose'), 'purpose'),
   verifyString(verifyExist('url'), 'url'),
   verifyArray(verifyExist('ranges'), 'ranges'),
-  verifyArray(verifyExist('genders'), 'genders')
+  verifyArray(verifyExist('genders'), 'genders'),
+  verifyInteger(verifyExist('posId'), 'posId')
 ];
 exports.checkQuery = [verifyInteger(verifyExistQuery('page'), 'page')];
 exports.checkEmail = [verifyEmail(verifyExist('email'), 'email')];

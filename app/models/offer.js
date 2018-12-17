@@ -74,6 +74,10 @@ module.exports = (sequelize, DataTypes) => {
       linkTerms: {
         type: DataTypes.STRING,
         field: 'link'
+      },
+      posId: {
+        type: DataTypes.INTEGER,
+        field: 'pos_id'
       }
     },
     {
@@ -154,7 +158,6 @@ module.exports = (sequelize, DataTypes) => {
     Offer.belongsTo(models.category, { as: 'category' });
     Offer.belongsTo(models.type_offer, { as: 'type', foreignKey: 'strategy' });
     Offer.hasMany(models.code, { as: 'code' });
-    Offer.hasMany(models.user_offer, { as: 'user_offer', foreignKey: 'offer_id' });
   };
   return Offer;
 };

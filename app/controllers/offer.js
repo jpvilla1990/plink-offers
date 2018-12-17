@@ -8,7 +8,7 @@ const Offer = require('../models').offer,
   serviceRollbar = require('../services/rollbar'),
   serviceS3 = require('../services/s3'),
   config = require('../../config'),
-  requestService = require('../services/request'),
+  requestService = require('../services/points'),
   ZendeskService = require('../services/zendesk'),
   targetService = require('../services/target'),
   urlParse = require('url').parse,
@@ -37,6 +37,7 @@ exports.create = (req, res, next) => {
     purpose: req.body.purpose,
     valueStrategy: req.body.valueStrategy,
     imageUrl: req.body.url,
+    posId: req.body.posId,
     ranges: req.body.ranges.join(','),
     genders: req.body.genders.join(',')
   };

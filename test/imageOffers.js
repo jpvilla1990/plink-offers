@@ -1,5 +1,6 @@
 const chai = require('chai'),
   dictum = require('dictum.js'),
+  expect = chai.expect,
   server = require('./../app');
 
 describe('/image-offers GET', () => {
@@ -8,9 +9,9 @@ describe('/image-offers GET', () => {
       .request(server)
       .get('/image-offer')
       .then(response => {
-        response.should.have.status(200);
-        response.body.should.have.property('url');
-        response.body.should.have.property('cdn');
+        expect(response.status).to.be.eql(200);
+        expect(response.body).to.have.property('url');
+        expect(response.body).to.have.property('cdn');
         dictum.chai(response);
         done();
       });

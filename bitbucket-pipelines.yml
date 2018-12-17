@@ -11,16 +11,15 @@ pipelines:
           - export DB_HOST_TEST=127.0.0.1 DB_PORT_TEST=3306
           - export DB_USERNAME_TEST=root DB_PASSWORD_TEST=plink
           - export KEY_AWS=11112 SECRET_AWS=21333 BUCKET_AWS=bucket-test REGION_AWS=us-east-1
-          - export KEY_AWS=11112 SECRET_AWS=21333 BUCKET_AWS=bucket-test REGION_AWS=us-east-1
-          - export URL_LAND=http://plink-landing-development.s3-website-us-east-1.amazonaws.com/
-          - export GROUP_ID=1 SENDING_RATE=1 QUEUE_URL=https://sqs.us-east-1.amazonaws.com/082149138148/plink-offers-development.fifo
+          - export GROUP_ID=1 SENDING_RATE=1
           - export EMAIL_OFFER=julian.molina@wolox.com.ar URL_INFO_RETAIL=http://localhost:8080 BUCKET_EMAIL=plink-email-assets
           - export URL_S3_EMAIL=https://s3.amazonaws.com FOLDER_BUCKET_EMAIL=plink_offers TIME_MSG=60
-          - export URL_SERVER_API=http://localhost:8080/offers CODE_ACCESS=1234 EMAIL_PLINK=ofertas@plink.com.co
+          - export URL_SERVER_API=http://localhost:8080/offers EMAIL_PLINK=ofertas@plink.com.co
           - export TIME_NODECRON='10 * * * * *'
           - export ZENDESK_GROUP_NAME='Plink Ofertas'
           - export ZENDESK_API_HOST=https://zendesk.com/api/v2
           - export ZENDESK_API_TOKEN=sarlanga
+          - export URL_INFO_POS_ID=https://apigateway.com
           - npm install
           - npm run migrations
           - npm test

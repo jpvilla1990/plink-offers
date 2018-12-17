@@ -1,6 +1,7 @@
 const chai = require('chai'),
   dictum = require('dictum.js'),
   server = require('./../app'),
+  expect = chai.expect,
   factoryManager = require('../test/factories/factoryManager'),
   factoryCategory = require('../test/factories/category').nameFactory;
 
@@ -12,9 +13,9 @@ describe('/categories GET', () => {
           .request(server)
           .get('/categories')
           .then(response => {
-            response.should.have.status(200);
-            response.body.should.have.property('result');
-            response.body.result.length.should.be.equal(22);
+            expect(response.status).to.be.eql(200);
+            expect(response.body).to.have.property('result');
+            expect(response.body.result.length).to.be.eql(22);
             dictum.chai(response);
             done();
           })
@@ -27,9 +28,9 @@ describe('/categories GET', () => {
         .request(server)
         .get('/categories')
         .then(response => {
-          response.should.have.status(200);
-          response.body.should.have.property('result');
-          response.body.result.length.should.be.equal(0);
+          expect(response.status).to.be.eql(200);
+          expect(response.body).to.have.property('result');
+          expect(response.body.result.length).to.be.eql(0);
           done();
         })
     );
@@ -41,9 +42,9 @@ describe('/categories GET', () => {
           .request(server)
           .get('/offer-app/categories')
           .then(response => {
-            response.should.have.status(200);
-            response.body.should.have.property('result');
-            response.body.result[0].special.should.be.equal(true);
+            expect(response.status).to.be.eql(200);
+            expect(response.body).to.have.property('result');
+            expect(response.body.result[0].special).to.be.true;
             done();
           })
       )

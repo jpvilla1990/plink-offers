@@ -9,16 +9,14 @@ const chai = require('chai'),
   factoryTypeOffer = require('../test/factories/typeOffer').nameFactory,
   factoryOffer = require('../test/factories/offer').nameFactory,
   factoryCode = require('../test/factories/code').nameFactory,
-  factoryUserOffer = require('./factories/userOffer').nameFactory,
-  requestService = require('../app/services/request'),
+  requestService = require('../app/services/points'),
   rollbarService = require('../app/services/rollbar'),
   simple = require('simple-mock'),
   token = require('./factories/token'),
-  JobCreator = require('../app/jobs/creatorUserOffer'),
   mailer = require('../app/services/mailer'),
   headerName = config.common.session.header_name,
   Offer = require('../app/models').offer,
-  UserOffer = require('../app/models').user_offer,
+  expectedErrorKeys = ['message', 'internal_code'],
   {
     OFFER_ACTIVE,
     OFFER_INACTIVE,
@@ -40,7 +38,8 @@ const chai = require('chai'),
     purpose: 'Atraer clientes',
     url: 'https://s3.amazonaws.com/plink-email-assets/plink_offers/bg_general.png',
     genders: ['Male', 'Female'],
-    ranges: ['smaller than 17 years', '18 to 23']
+    ranges: ['smaller than 17 years', '18 to 23'],
+    posId: 122
   },
   offerWithoutProduct = {
     begin: '2017-02-13',
@@ -52,7 +51,8 @@ const chai = require('chai'),
     purpose: 'Atraer clientes',
     url: 'https://s3.amazonaws.com/plink-email-assets/plink_offers/bg_general.png',
     genders: ['Male', 'Female'],
-    ranges: ['smaller than 17 years', '18 to 23']
+    ranges: ['smaller than 17 years', '18 to 23'],
+    posId: 122
   },
   offerWithCategoryWrong = {
     product: '2x1 en McDuo',
@@ -65,7 +65,8 @@ const chai = require('chai'),
     purpose: 'Atraer clientes',
     url: 'https://s3.amazonaws.com/plink-email-assets/plink_offers/bg_general.png',
     genders: ['Male', 'Female'],
-    ranges: ['smaller than 17 years', '18 to 23']
+    ranges: ['smaller than 17 years', '18 to 23'],
+    posId: 122
   },
   tokenExample = `test ${token.generate({ points: '1222,1444,1333' })}`;
 
@@ -94,10 +95,9 @@ describe('/retail/:id/offers POST', () => {
           .set(headerName, tokenExample)
           .send(offerExample)
           .then(res => {
-            res.should.have.status(201);
+            expect(res.status).to.be.eql(201);
             Offer.getBy({ retail: 1222 }).then(exist => {
-              const off = !!exist;
-              off.should.eql(true);
+              expect(!!exist).to.be.true;
               dictum.chai(res);
               done();
             });
@@ -112,9 +112,8 @@ describe('/retail/:id/offers POST', () => {
       .set(headerName, tokenExample)
       .send(offerWithCategoryWrong)
       .then(res => {
-        res.should.have.status(400);
-        res.body.should.have.property('message');
-        res.body.should.have.property('internal_code');
+        expect(res.status).to.be.eql(400);
+        expect(res.body).to.have.all.keys(expectedErrorKeys);
         done();
       });
   });
@@ -125,9 +124,8 @@ describe('/retail/:id/offers POST', () => {
       .set(headerName, tokenExample)
       .send(offerWithoutProduct)
       .then(err => {
-        err.should.have.status(400);
-        err.body.should.have.property('message');
-        err.body.should.have.property('internal_code');
+        expect(err.status).to.be.eql(400);
+        expect(err.body).to.have.all.keys(expectedErrorKeys);
         done();
       });
   });
@@ -146,11 +144,10 @@ describe('/retail/:id/offers POST', () => {
           .set(headerName, tokenExample)
           .send(offerExample)
           .then(res => {
-            res.should.have.status(201);
+            expect(res.status).to.be.eql(201);
             Offer.getBy({ id: 1 }).then(exist => {
-              const off = !!exist;
-              off.should.eql(true);
-              rollbarService.error.callCount.should.eqls(1);
+              expect(!!exist).to.be.true;
+              expect(rollbarService.error.callCount).to.be.eql(1);
               done();
             });
           });
@@ -169,10 +166,10 @@ describe('/retail/:id/offers GET', () => {
             .get('/retail/1222/offers?page=0')
             .set(headerName, tokenExample)
             .then(res => {
-              res.should.have.status(200);
-              res.body.should.have.property('count');
-              res.body.should.have.property('offers');
-              res.body.offers.length.should.eql(1);
+              expect(res.status).to.be.eql(200);
+              expect(res.body).to.have.property('count');
+              expect(res.body).to.have.property('offers');
+              expect(res.body.offers.length).to.be.eql(1);
               dictum.chai(res);
               done();
             });
@@ -189,12 +186,11 @@ describe('/retail/:id/offers GET', () => {
             .get('/retail/1222/offers?page=0')
             .set(headerName, tokenExample)
             .then(res => {
-              res.should.have.status(200);
-              res.body.should.have.property('count');
-              res.body.should.have.property('offers');
-              res.body.offers.length.should.eql(1);
-              res.body.offers[0].status.should.eqls(OFFER_OUT_OF_STOCK);
-              dictum.chai(res);
+              expect(res.status).to.be.eql(200);
+              expect(res.body).to.have.property('count');
+              expect(res.body).to.have.property('offers');
+              expect(res.body.offers.length).to.be.eql(1);
+              expect(res.body.offers[0].status).to.be.eql(OFFER_OUT_OF_STOCK);
               done();
             });
         });
@@ -211,10 +207,10 @@ describe('/retail/:id/offers GET', () => {
             .get('/retail/1222/offers?page=0')
             .set(headerName, tokenExample)
             .then(res => {
-              res.should.have.status(200);
-              res.body.should.have.property('count');
-              res.body.should.have.property('offers');
-              res.body.offers.length.should.eql(1);
+              expect(res.status).to.be.eql(200);
+              expect(res.body).to.have.property('count');
+              expect(res.body).to.have.property('offers');
+              expect(res.body.offers.length).to.be.eql(1);
               done();
             });
         });
@@ -236,10 +232,10 @@ describe('/retail/:id/offers GET', () => {
               .get('/retail/1222/offers?page=0')
               .set(headerName, tokenExample)
               .then(res => {
-                res.should.have.status(200);
-                res.body.should.have.property('count');
-                res.body.should.have.property('offers');
-                res.body.offers[0].product.should.eql('second');
+                expect(res.status).to.be.eql(200);
+                expect(res.body).to.have.property('count');
+                expect(res.body).to.have.property('offers');
+                expect(res.body.offers[0].product).to.be.eql('second');
                 done();
               });
           }),
@@ -253,8 +249,8 @@ describe('/retail/:id/offers GET', () => {
       .get('/retail/1222/offers?')
       .set(headerName, tokenExample)
       .then(res => {
-        res.should.have.status(200);
-        res.body.offers.length.should.eqls(0);
+        expect(res.status).to.be.eql(200);
+        expect(res.body.offers.length).to.be.eql(0);
         done();
       });
   });
@@ -268,13 +264,13 @@ describe('/retail/:id/offers GET', () => {
             .get('/retail/1222/offers?page=0')
             .set(headerName, tokenExample)
             .then(res => {
-              res.should.have.status(200);
-              res.body.should.have.property('count');
-              res.body.should.have.property('offers');
-              res.body.offers.length.should.eql(1);
-              res.body.offers[0].should.have.property('status');
-              res.body.offers[0].status.should.equal(OFFER_INACTIVE);
-              dictum.chai(res);
+              expect(res.status).to.be.eql(200);
+              expect(res.body).to.have.property('count');
+              expect(res.body).to.have.property('offers');
+              expect(res.body.offers.length).to.be.eql(1);
+              expect(res.body.offers[0]).to.have.property('status');
+              expect(res.body.offers[0].status).to.be.eql(OFFER_INACTIVE);
+              expect(res.body.offers.length).to.be.eql(1);
               done();
             });
         });
@@ -291,13 +287,13 @@ describe('/retail/:id/offers GET', () => {
             .get('/retail/1222/offers?page=0')
             .set(headerName, tokenExample)
             .then(res => {
-              res.should.have.status(200);
-              res.body.should.have.property('count');
-              res.body.should.have.property('offers');
-              res.body.offers.length.should.eql(1);
-              res.body.offers[0].should.have.property('status');
-              res.body.offers[0].status.should.equal(OFFER_ACTIVE);
-              dictum.chai(res);
+              expect(res.status).to.be.eql(200);
+              expect(res.body).to.have.property('count');
+              expect(res.body).to.have.property('offers');
+              expect(res.body.offers.length).to.be.eql(1);
+              expect(res.body.offers[0]).to.have.property('status');
+              expect(res.body.offers[0].status).to.be.eql(OFFER_ACTIVE);
+              expect(res.body.offers.length).to.be.eql(1);
               done();
             });
         });
@@ -314,13 +310,13 @@ describe('/retail/:id/offers GET', () => {
             .get('/retail/1222/offers?page=0')
             .set(headerName, tokenExample)
             .then(res => {
-              res.should.have.status(200);
-              res.body.should.have.property('count');
-              res.body.should.have.property('offers');
-              res.body.offers.length.should.eql(1);
-              res.body.offers[0].should.have.property('status');
-              res.body.offers[0].status.should.equal(OFFER_FINISHED);
-              dictum.chai(res);
+              expect(res.status).to.be.eql(200);
+              expect(res.body).to.have.property('count');
+              expect(res.body).to.have.property('offers');
+              expect(res.body.offers.length).to.be.eql(1);
+              expect(res.body.offers[0]).to.have.property('status');
+              expect(res.body.offers[0].status).to.be.eql(OFFER_FINISHED);
+              expect(res.body.offers.length).to.be.eql(1);
               done();
             });
         });
@@ -352,58 +348,6 @@ it('should be successful with one disabled offer (disabled)', done => {
   });
 });
 
-describe('job creator', () => {
-  let offerId;
-  beforeEach(() =>
-    factoryManager.create(factoryCategory, { name: 'travel' }).then(rv =>
-      factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r =>
-        factoryManager.create(factoryOffer, { category: rv.id, strategy: r.id }).then(off => {
-          offerId = off.id;
-          simple.mock(JobCreator.sqs, 'receiveMessage').returnWith({
-            promise: () =>
-              Promise.resolve({
-                Messages: [
-                  {
-                    Attributes: { MessageDeduplicationId: off.id },
-                    Body: '{"mails":[{"mail":"julian.molina@wolox.com.ar","name":"julian"}]}'
-                  }
-                ]
-              })
-          });
-          simple.mock(JobCreator.sqs, 'deleteMessage').returnWith({
-            promise: () => Promise.resolve({})
-          });
-        })
-      )
-    ));
-  it('should be fail because the user offer already exist ', done => {
-    factoryManager
-      .create(factoryUserOffer, {
-        offerId,
-        email: 'julian.molina@wolox.com.ar'
-      })
-      .then(() =>
-        JobCreator.creatorUserOffer().then(() =>
-          UserOffer.findAll({ where: { email: 'julian.molina@wolox.com.ar' } }).then(exist => {
-            expect(exist.length).to.be.eqls(1);
-            done();
-          })
-        )
-      );
-  });
-
-  it('Should be successful for create a new user offer ', done => {
-    factoryManager.create('DisabledOffer').then(off => {
-      JobCreator.creatorUserOffer().then(() =>
-        UserOffer.findOne({ where: { email: 'julian.molina@wolox.com.ar' } }).then(exist => {
-          expect(exist).not.be.null;
-          done();
-        })
-      );
-    });
-  });
-});
-
 describe('/retail/:id/offers/:id_offer GET', () => {
   const generateToken = (points = '11') => `bearer ${token.generate({ points })}`;
   it('should success get of offer', done => {
@@ -415,7 +359,7 @@ describe('/retail/:id/offers/:id_offer GET', () => {
             .get(`/retail/11/offers/${off.dataValues.id}`)
             .set('authorization', generateToken())
             .then(response => {
-              response.should.have.status(200);
+              expect(response.status).to.be.eql(200);
               expect(response.body).to.have.all.keys([
                 'image',
                 'product',
@@ -442,11 +386,10 @@ describe('/retail/:id/offers/:id_offer GET', () => {
       .request(server)
       .get(`/retail/11/offers/15`)
       .set('authorization', generateToken())
-      .then(response => {
-        response.body.should.have.property('internal_code');
-        response.body.should.have.property('message');
-        response.body.internal_code.should.be.equal('offer_not_found');
-        response.should.have.status(404);
+      .then(err => {
+        expect(err.status).to.be.eql(404);
+        expect(err.body).to.have.all.keys(expectedErrorKeys);
+        expect(err.body.internal_code).to.be.eql('offer_not_found');
         done();
       });
   });
@@ -455,11 +398,10 @@ describe('/retail/:id/offers/:id_offer GET', () => {
       .request(server)
       .get(`/retail/15/offers/15`)
       .set('authorization', generateToken())
-      .then(response => {
-        response.body.should.have.property('internal_code');
-        response.body.should.have.property('message');
-        response.body.internal_code.should.be.equal('user_unauthorized');
-        response.should.have.status(401);
+      .then(err => {
+        expect(err.status).to.be.eql(401);
+        expect(err.body).to.have.all.keys(expectedErrorKeys);
+        expect(err.body.internal_code).to.be.eql('user_unauthorized');
         done();
       });
   });
@@ -476,9 +418,8 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
             .get(`/retail/1333/offers/${off.dataValues.id}/redemptions?`)
             .set(headerName, tokenExample)
             .then(res => {
-              res.should.have.status(400);
-              res.body.should.have.property('message');
-              res.body.should.have.property('internal_code');
+              expect(res.status).to.be.eql(400);
+              expect(res.body).to.have.all.keys(expectedErrorKeys);
               done();
             });
         })
@@ -506,10 +447,11 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
                     .get(`/retail/11/offers/${off.dataValues.id}/redemptions?page=0`)
                     .set('authorization', generateToken())
                     .then(res => {
-                      res.body.pages.should.eqls(1);
-                      res.body.redemptions.length.should.eqls(2);
-                      done();
+                      expect(res.body.pages).to.be.eql(1);
+                      expect(res.status).to.be.eql(200);
+                      expect(res.body.redemptions.length).to.be.eql(2);
                       dictum.chai(res);
+                      done();
                     });
                 })
             )
@@ -568,9 +510,10 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
         .request(server)
         .get(`/back/offers?filter=34`)
         .then(res => {
-          res.should.have.status(200);
-          res.body.pages.should.eqls(1);
-          res.body.offers.length.should.eqls(2);
+          expect(res.status).to.be.eql(200);
+          expect(res.body.pages).to.be.eql(1);
+          expect(res.body.offers.length).to.be.eql(2);
+          dictum.chai(res);
           done();
         });
     });
@@ -579,9 +522,9 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
         .request(server)
         .get(`/back/offers?page=1&limit=2`)
         .then(res => {
-          res.should.have.status(200);
-          res.body.pages.should.eqls(3);
-          res.body.offers.length.should.eqls(2);
+          expect(res.status).to.be.eql(200);
+          expect(res.body.pages).to.be.eql(3);
+          expect(res.body.offers.length).to.be.eql(2);
           done();
         });
     });
@@ -590,9 +533,9 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
         .request(server)
         .get(`/back/offers?page=1&limit=1&filter=12`)
         .then(res => {
-          res.should.have.status(200);
-          res.body.pages.should.eqls(2);
-          res.body.offers.length.should.eqls(1);
+          expect(res.status).to.be.eql(200);
+          expect(res.body.pages).to.be.eql(2);
+          expect(res.body.offers.length).to.be.eql(1);
           done();
         });
     });
@@ -601,9 +544,9 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
         .request(server)
         .get(`/back/offers?page=0&limit=5&filter=20% en hamburguer`)
         .then(res => {
-          res.should.have.status(200);
-          res.body.pages.should.eqls(0);
-          res.body.offers.length.should.eqls(0);
+          expect(res.status).to.be.eql(200);
+          expect(res.body.pages).to.be.eql(0);
+          expect(res.body.offers.length).to.be.eql(0);
           done();
         });
     });
@@ -612,9 +555,9 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
         .request(server)
         .get(`/back/offers?filter=hamburguer`)
         .then(res => {
-          res.should.have.status(200);
-          res.body.pages.should.eqls(1);
-          res.body.offers.length.should.eqls(2);
+          expect(res.status).to.be.eql(200);
+          expect(res.body.pages).to.be.eql(1);
+          expect(res.body.offers.length).to.be.eql(2);
           done();
         });
     });
@@ -623,10 +566,10 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
         .request(server)
         .get(`/back/offers?filter=banco`)
         .then(res => {
-          res.should.have.status(200);
-          res.body.pages.should.eqls(1);
-          res.body.offers.length.should.eqls(1);
-          res.body.offers[0].special.should.eqls(true);
+          expect(res.status).to.be.eql(200);
+          expect(res.body.pages).to.be.eql(1);
+          expect(res.body.offers.length).to.be.eql(1);
+          expect(res.body.offers[0].special).to.be.true;
           done();
         });
     });
@@ -642,9 +585,10 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
         .patch(`/retail/11/offers/1`)
         .set('authorization', generateToken())
         .then(res => {
-          res.should.have.status(200);
+          expect(res.status).to.be.eql(200);
           Offer.getBy({ retail: 11 }).then(exist => {
-            exist.dataValues.active.should.eqls(false);
+            expect(exist.dataValues.active).to.be.false;
+            dictum.chai(res);
             done();
           });
         });
@@ -655,10 +599,9 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
         .patch(`/retail/11/offers/1254`)
         .set('authorization', generateToken())
         .then(res => {
-          res.should.have.status(404);
-          res.body.should.have.property('message');
+          expect(res.status).to.be.eql(404);
+          expect(res.body).to.have.all.keys(expectedErrorKeys);
           expect(res.body.message).to.equal('Offer Not Found');
-          res.body.should.have.property('internal_code');
           expect(res.body.internal_code).to.equal('offer_not_found');
           done();
         });
@@ -668,7 +611,6 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
       simple.mock(mailer.transporter, 'sendMail').callFn((obj, callback) => {
         callback(undefined, true);
       });
-
       factoryManager.create(factoryCategory, { name: 'travel' }).then(rv => {
         factoryManager.create(factoryTypeOffer, { description: 'percentage' }).then(r => {
           factoryManager
@@ -685,8 +627,8 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
                   .patch(`/retail/11/offers/${off.id}`)
                   .set('authorization', generateToken())
                   .then(res => {
-                    res.should.have.status(200);
-                    mailer.transporter.sendMail.callCount.should.eqls(1);
+                    expect(res.status).to.be.eql(200);
+                    expect(mailer.transporter.sendMail.callCount).to.be.eql(1);
                     done();
                   });
               });
@@ -717,11 +659,11 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
               .patch(`/back/offers/${off.id}`)
               .set('authorization', generateToken())
               .then(res => {
-                res.should.have.status(200);
-                dictum.chai(res);
+                expect(res.status).to.be.eql(200);
                 Offer.getBy({ id: off.id }).then(exist => {
-                  exist.active.should.eqls(false);
-                  mailer.transporter.sendMail.callCount.should.eqls(1);
+                  expect(exist.active).to.be.false;
+                  expect(mailer.transporter.sendMail.callCount).to.be.eql(1);
+                  dictum.chai(res);
                   done();
                 });
               });
@@ -737,11 +679,10 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
             .patch(`/back/offers/${off.id}`)
             .set('authorization', generateToken())
             .then(res => {
-              res.should.have.status(200);
-              dictum.chai(res);
+              expect(res.status).to.be.eql(200);
               Offer.getBy({ id: off.id }).then(exist => {
-                exist.active.should.eqls(false);
-                mailer.transporter.sendMail.callCount.should.eqls(0);
+                expect(exist.active).to.be.false;
+                expect(mailer.transporter.sendMail.callCount).to.be.eql(0);
                 done();
               });
             })
@@ -762,8 +703,8 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
                   .patch(`/back/offers/${off.id}`)
                   .set('authorization', generateToken())
                   .then(res => {
-                    res.should.have.status(200);
-                    mailer.transporter.sendMail.callCount.should.eqls(2);
+                    expect(res.status).to.be.eql(200);
+                    expect(mailer.transporter.sendMail.callCount).to.be.eql(2);
                     done();
                   });
               });
@@ -781,10 +722,10 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
               .patch(`/back/offers/${off.id + 1}`)
               .set('authorization', generateToken())
               .then(res => {
-                res.should.have.status(404);
+                expect(res.status).to.be.eql(404);
                 Offer.getBy({ id: off.id }).then(exist => {
-                  exist.active.should.eqls(true);
-                  mailer.transporter.sendMail.callCount.should.eqls(0);
+                  expect(exist.active).to.be.true;
+                  expect(mailer.transporter.sendMail.callCount).to.be.eql(0);
                   done();
                 });
               });
@@ -803,8 +744,8 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
                 .patch(`/back/offers/${off.id}`)
                 .set('authorization', generateToken())
                 .then(res => {
-                  res.should.have.status(200);
-                  mailer.transporter.sendMail.callCount.should.eqls(2);
+                  expect(res.status).to.be.eql(200);
+                  expect(mailer.transporter.sendMail.callCount).to.be.eql(2);
                   done();
                 });
             });
@@ -829,7 +770,7 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
           .get(`/back/offers/${off.id}`)
           .set('authorization', generateToken())
           .then(res => {
-            res.should.have.status(200);
+            expect(res.status).to.be.eql(200);
             dictum.chai(res);
             done();
           })
@@ -857,9 +798,8 @@ describe('/retail/:id/offers/:id_offer/redemptions GET', () => {
           .get(`/back/offers/4541`)
           .set('authorization', generateToken())
           .then(res => {
-            res.body.should.have.property('message');
+            expect(res.body).to.have.all.keys(expectedErrorKeys);
             expect(res.body.message).to.equal('Offer Not Found');
-            res.body.should.have.property('internal_code');
             expect(res.body.internal_code).to.equal('offer_not_found');
             done();
           })

@@ -1,7 +1,5 @@
-const EmailUser = require('../models').email_user,
-  Offer = require('../models').offer,
-  Category = require('../models').category,
-  serviceUserOffer = require('../services/userOffer'),
+const { getPosIdsByDocumentNumber } = require('../services/posId'),
+  serviceUserOffer = require('../services/userApp'),
   serviceOffer = require('../services/offer'),
   serviceCognito = require('../services/cognito'),
   errors = require('../errors'),
@@ -11,25 +9,29 @@ exports.getAll = (req, res, next) => {
   const limit = req.query.limit ? parseInt(req.query.limit) : 10,
     offset = req.query.page ? req.query.page * limit : 0,
     category = req.query.category ? parseInt(req.query.category) : null,
+    documentNumber = req.user['custom:document_number'],
     name = req.query.name ? req.query.name : '';
-  return serviceOffer
-    .getAllApp({ offset, limit, email: req.email, category, name })
-    .then(userOffers =>
-      Promise.all(serviceOffer.getDataFromOffers(userOffers.rows)).then(offersWithDataRetail => {
-        res.status(200);
-        res.send({
-          pages: Math.ceil(userOffers.count / limit),
-          count: userOffers.count,
-          offers: offersWithDataRetail
-        });
-        res.end();
-      })
+  return getPosIdsByDocumentNumber(documentNumber)
+    .then(posIds =>
+      serviceOffer
+        .getAllApp({ offset, limit, email: req.user.email, category, name, posIds })
+        .then(userOffers =>
+          Promise.all(serviceOffer.getDataFromOffers(userOffers.rows)).then(offersWithDataRetail => {
+            res.status(200);
+            res.send({
+              pages: Math.ceil(userOffers.count / limit),
+              count: userOffers.count,
+              offers: offersWithDataRetail
+            });
+            res.end();
+          })
+        )
     )
     .catch(next);
 };
 exports.getOffer = (req, res, next) =>
   serviceOffer
-    .getByApp({ id: req.params.id, email: req.email })
+    .getByApp({ id: req.params.id, email: req.user.email })
     .then(offer => {
       if (offer) {
         return Promise.all(serviceOffer.getDataFromOffers([offer])).then(offerWithDataFromRetail =>
@@ -47,7 +49,7 @@ exports.getOffer = (req, res, next) =>
 exports.getCodes = (req, res, next) => {
   const limitQuery = req.query.limit ? parseInt(req.query.limit) : 10;
   const offsetQuery = req.query.page ? req.query.page * limitQuery : 0;
-  return Code.getAllBy({ offset: offsetQuery, email: req.email, limit: limitQuery })
+  return Code.getAllBy({ offset: offsetQuery, email: req.user.email, limit: limitQuery })
     .then(codes => {
       const offersWithCodes = serviceUserOffer.getDataFromCodes(codes.rows);
       res.status(200);
