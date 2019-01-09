@@ -1,4 +1,6 @@
 const uuid = require('uuid'),
+  config = require('../../config'),
+  offerCodeLength = config.common.code_offer_length,
   Sequelize = require('sequelize'),
   sequelize = require('../models').sequelize,
   errors = require('../errors'),
@@ -13,7 +15,7 @@ exports.verify = offer =>
           throw errors.existingMail;
         } else {
           if (err instanceof Sequelize.UniqueConstraintError && err.fields.code) {
-            offer.code = uuid().slice(0, 8);
+            offer.code = uuid().slice(0, offerCodeLength);
             return exports.verify(offer);
           }
           throw errors.databaseError(err.message);
