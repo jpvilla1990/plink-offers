@@ -2,6 +2,8 @@ const codeService = require('../services/code'),
   utils = require('../utils'),
   errors = require('../errors'),
   Offer = require('../models').offer,
+  config = require('../../config'),
+  offerCodeLength = config.common.code_offer_length,
   uniqueCode = require('../services/uniqueCode'),
   { sendNewCode, sendOfferExpired } = require('../services/mailer'),
   {
@@ -56,7 +58,7 @@ exports.createCodeApp = (req, res, next) => {
       if (off) {
         const status = getOfferStatus(off.dataValues);
         if (OFFER_ACTIVE === status) {
-          code.code = uuid().slice(0, 8);
+          code.code = uuid().slice(0, offerCodeLength);
           return uniqueCode.verify(code).then(newCode => {
             res.status(201);
             res.send({
